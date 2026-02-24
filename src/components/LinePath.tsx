@@ -59,7 +59,7 @@ function LinePathComponent({ line, trainsPerLine = 2, dimmed = false, reducedMot
         strokeLinecap="round"
         strokeLinejoin="round"
         style={{
-          filter: dark ? `drop-shadow(0 0 4px ${line.color}40)` : 'none',
+          filter: dark ? `drop-shadow(0 0 6px ${line.color}90) drop-shadow(0 0 14px ${line.color}30)` : 'none',
           transition: 'filter 0.3s ease',
         }}
       />

@@ -20,6 +20,7 @@ import CurrentlyBar from './CurrentlyBar';
 import KeyboardHelp from './KeyboardHelp';
 import { useSound } from '../hooks/useSound';
 import StationTooltip from './StationTooltip';
+import StarField from './StarField';
 
 const MAP_W = metroMap.width;
 const MAP_H = metroMap.height;
@@ -636,6 +637,13 @@ export default function MetroMap() {
             height={MAP_H + GRID_PAD * 2}
             style={{ fill: 'var(--map-bg)', transition: 'fill 0.3s ease' }}
           />
+          <StarField
+            width={MAP_W + GRID_PAD * 2}
+            height={MAP_H + GRID_PAD * 2}
+            offsetX={-GRID_PAD}
+            offsetY={-GRID_PAD}
+            visible={dark}
+          />
           <rect
             ref={gridRef}
             x={-GRID_PAD}
@@ -716,6 +724,7 @@ export default function MetroMap() {
                   highlighted={isSearchActive && isMatch}
                   reducedMotion={reducedMotion}
                   onHover={handleStationHover}
+                  dark={dark}
                 />
               );
             })}

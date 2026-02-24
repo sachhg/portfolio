@@ -10,6 +10,7 @@ type Props = {
   highlighted?: boolean;
   reducedMotion?: boolean;
   onHover?: (station: StationT | null) => void;
+  dark?: boolean;
 };
 
 const STATION_RADIUS = 4.5;
@@ -25,6 +26,7 @@ function StationComponent({
   highlighted = false,
   reducedMotion = false,
   onHover,
+  dark = false,
 }: Props) {
   const [hovered, setHovered] = useState(false);
   const [x, y] = station.position;
@@ -155,6 +157,20 @@ function StationComponent({
             </>
           )}
         </circle>
+      )}
+
+      {/* Dark mode selected glow ring */}
+      {isSelected && dark && (
+        <circle
+          cx={x}
+          cy={y}
+          r={r + 4}
+          fill="none"
+          stroke={lines[0]?.color ?? 'var(--map-interchange-stroke)'}
+          strokeWidth={1.5}
+          opacity={0.8}
+          style={{ filter: `drop-shadow(0 0 5px ${lines[0]?.color ?? '#d4d0c8'})` }}
+        />
       )}
 
       {isInterchange ? (
