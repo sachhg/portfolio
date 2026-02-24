@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SN Metropolitan Transit Authority</title>
+    <meta name="description" content="Interactive portfolio of Sachit N., presented as an SVG metro transit map. Explore projects, experience, education, and skills as subway stations." />
+    <meta name="theme-color" content="#f5f1eb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SN Metropolitan Transit Authority — Portfolio" />
+    <meta property="og:description" content="Interactive portfolio presented as an SVG metro transit map. Explore projects, experience, education, and skills." />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SN Metropolitan Transit Authority — Portfolio" />
+    <meta name="twitter:description" content="Interactive portfolio presented as an SVG metro transit map." />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Self-hosted font preload -->
+    <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- Inline skeleton styles — renders before any external CSS loads -->
+    <style>
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body, #root { width: 100%; height: 100%; overflow: hidden; }
+      .skeleton {
+        width: 100%; height: 100%;
+        background-color: #f5f1eb;
+        position: relative;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      .skeleton-header {
+        position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+        padding: 16px; display: flex; align-items: center; gap: 12px;
+      }
+      .skeleton-logo {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: #1a1a1a; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;
+      }
+      .skeleton-title { font-size: 11px; font-weight: 700; color: #1a1a1a; letter-spacing: 2px; text-transform: uppercase; line-height: 1.3; }
+      .skeleton-subtitle { font-size: 9px; font-weight: 600; color: #9ca3af; letter-spacing: 2.5px; text-transform: uppercase; }
+      .skeleton-map { width: 100%; height: 100%; }
+      .skeleton-line { stroke: #ccc5b9; stroke-width: 4; stroke-linecap: round; fill: none; opacity: 0.4; }
+      .skeleton-station { fill: #ffffff; stroke: #ccc5b9; stroke-width: 1.5; opacity: 0.5; }
+      .skeleton-pulse { animation: skeleton-fade 2s ease-in-out infinite; }
+      @keyframes skeleton-fade {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 0.7; }
+      }
+      @media (prefers-color-scheme: dark) {
+        .skeleton { background-color: #0d1117; }
+        .skeleton-logo { background: #e5e1db; color: #0d1117; }
+        .skeleton-title { color: #e5e1db; }
+        .skeleton-subtitle { color: #6b7280; }
+        .skeleton-line { stroke: #2a3040; }
+        .skeleton-station { fill: #0d1117; stroke: #2a3040; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .skeleton-pulse { animation: none; opacity: 0.5; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Inline loading skeleton — replaced by React on mount -->
+      <div class="skeleton">
+        <div class="skeleton-header">
+          <div class="skeleton-logo">SN</div>
+          <div>
+            <div class="skeleton-title">SN Metropolitan</div>
+            <div class="skeleton-subtitle">Transit Authority</div>
+          </div>
+        </div>
+        <svg class="skeleton-map" viewBox="0 0 1100 600" preserveAspectRatio="xMidYMid meet">
+          <!-- Grid hint -->
+          <rect width="1100" height="600" fill="none" />
+          <!-- Placeholder lines — approximate the 4 metro areas -->
+          <g class="skeleton-pulse">
+            <!-- Projects area (top-left) -->
+            <polyline class="skeleton-line" points="180,120 260,120 340,120 420,120 500,120" />
+            <polyline class="skeleton-line" points="200,60 260,120 320,180 380,240" />
+            <polyline class="skeleton-line" points="140,180 200,180 260,120 340,40" />
+            <!-- Experience area (top-right) -->
+            <polyline class="skeleton-line" points="700,100 780,100 860,100 940,100" />
+            <polyline class="skeleton-line" points="720,40 780,100 840,160 900,220" />
+            <!-- Education area (bottom-left) -->
+            <polyline class="skeleton-line" points="180,420 260,420 340,420 420,420 500,420" />
+            <polyline class="skeleton-line" points="200,360 260,420 320,480 380,480" />
+            <!-- Skills area (bottom-right) -->
+            <polyline class="skeleton-line" points="680,400 760,400 840,400 920,400" />
+            <polyline class="skeleton-line" points="700,340 760,400 820,460 880,460" />
+            <!-- Blog area (center) -->
+            <polyline class="skeleton-line" points="480,300 560,300 640,300" />
+            <polyline class="skeleton-line" points="500,240 560,300 620,360" />
+            <!-- Connectors -->
+            <polyline class="skeleton-line" points="500,120 600,120 680,120 700,100" style="opacity:0.25" />
+            <polyline class="skeleton-line" points="500,420 580,420 660,420 680,400" style="opacity:0.25" />
+          </g>
+          <!-- Placeholder stations -->
+          <g class="skeleton-pulse">
+            <!-- Projects -->
+            <circle class="skeleton-station" cx="260" cy="120" r="5" />
+            <circle class="skeleton-station" cx="420" cy="120" r="5" />
+            <circle class="skeleton-station" cx="500" cy="120" r="5" />
+            <!-- Experience -->
+            <circle class="skeleton-station" cx="780" cy="100" r="5" />
+            <circle class="skeleton-station" cx="860" cy="100" r="5" />
+            <!-- Education -->
+            <circle class="skeleton-station" cx="260" cy="420" r="5" />
+            <circle class="skeleton-station" cx="340" cy="420" r="5" />
+            <circle class="skeleton-station" cx="500" cy="420" r="5" />
+            <!-- Skills -->
+            <circle class="skeleton-station" cx="760" cy="400" r="5" />
+            <circle class="skeleton-station" cx="840" cy="400" r="5" />
+            <!-- Blog -->
+            <circle class="skeleton-station" cx="560" cy="300" r="5" />
+          </g>
+        </svg>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
