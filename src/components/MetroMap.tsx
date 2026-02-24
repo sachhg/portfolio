@@ -539,14 +539,16 @@ export default function MetroMap() {
         </g>
       </svg>
 
-      {selectedStation && (
-        <div
-          className="fixed inset-0 z-40 bg-black/5 dark:bg-black/20"
-          onClick={() => setSelectedStation(null)}
-          role="presentation"
-          aria-hidden="true"
-        />
-      )}
+      <div
+        className={`fixed inset-0 z-40 transition-opacity duration-300 ${
+          selectedStation
+            ? 'opacity-100 bg-black/5 dark:bg-black/20'
+            : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setSelectedStation(null)}
+        role="presentation"
+        aria-hidden="true"
+      />
 
       <StationDetail
         station={selectedStation}

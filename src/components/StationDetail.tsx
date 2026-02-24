@@ -82,23 +82,34 @@ export default function StationDetail({ station, lines, onClose }: Props) {
       aria-labelledby={station ? 'station-detail-title' : undefined}
       aria-hidden={!station}
       onKeyDown={handleKeyDown}
-      className={`fixed top-0 right-0 h-full w-full max-w-md shadow-2xl z-50 transition-all duration-300 ease-in-out ${
+      className={`fixed top-0 right-0 h-full w-full max-w-md shadow-2xl z-50 transition-transform duration-500 ${
         station ? 'translate-x-0' : 'translate-x-full'
       }`}
       style={{
         fontFamily: "'Inter', sans-serif",
         backgroundColor: 'var(--panel-bg)',
+        transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
       }}
     >
       {station && (
-        <div className="h-full flex flex-col">
+        <div key={station.id} className="h-full flex flex-col">
+          {/* Line accent bar */}
+          <div
+            className="h-[3px]"
+            style={{
+              background: lines.length > 1
+                ? `linear-gradient(to right, ${lines.map((l) => l.color).join(', ')})`
+                : lines[0]?.color ?? 'var(--panel-border)',
+            }}
+          />
+
           {/* Header */}
           <div
             className="p-6 transition-colors duration-300"
             style={{ borderBottom: '1px solid var(--panel-border)' }}
           >
             <div className="flex items-start justify-between">
-              <div className="flex-1">
+              <div className="flex-1 panel-stagger-1">
                 <h2
                   id="station-detail-title"
                   className="text-xl font-bold mb-1 transition-colors duration-300"
@@ -132,7 +143,7 @@ export default function StationDetail({ station, lines, onClose }: Props) {
             </div>
 
             {/* Line badges */}
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap gap-2 mt-3 panel-stagger-2">
               {lines.map((line) => (
                 <span
                   key={line.id}
@@ -151,32 +162,38 @@ export default function StationDetail({ station, lines, onClose }: Props) {
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
-            {station.markdown ? (
-              <Suspense
-                fallback={
-                  <p
-                    className="text-sm leading-relaxed transition-colors duration-300"
-                    style={{ color: 'var(--panel-text)' }}
-                  >
-                    {station.details.replace(/[#*`>|\-[\]]/g, '').slice(0, 200)}...
-                  </p>
-                }
-              >
-                <MarkdownContent content={station.details} />
-              </Suspense>
-            ) : (
-              <p
-                className="text-sm leading-relaxed transition-colors duration-300"
-                style={{ color: 'var(--panel-text)' }}
-              >
-                {station.details}
-              </p>
+            <div className="panel-stagger-3">
+              {station.markdown ? (
+                <Suspense
+                  fallback={
+                    <p
+                      className="text-sm leading-relaxed transition-colors duration-300"
+                      style={{ color: 'var(--panel-text)' }}
+                    >
+                      {station.details.replace(/[#*`>|\-[\]]/g, '').slice(0, 200)}...
+                    </p>
+                  }
+                >
+                  <MarkdownContent content={station.details} />
+                </Suspense>
+              ) : (
+                <p
+                  className="text-sm leading-relaxed transition-colors duration-300"
+                  style={{ color: 'var(--panel-text)' }}
+                >
+                  {station.details}
+                </p>
+              )}
+            </div>
+
+            {station.media && (
+              <div className="panel-stagger-4">
+                <StationMediaPanel media={station.media} />
+              </div>
             )}
 
-            {station.media && <StationMediaPanel media={station.media} />}
-
             {station.tags && station.tags.length > 0 && (
-              <div className="mt-6">
+              <div className="mt-6 panel-stagger-4">
                 <h3
                   className="text-xs font-semibold uppercase tracking-wider mb-2 transition-colors duration-300"
                   style={{ color: 'var(--panel-text-secondary)' }}
@@ -201,7 +218,7 @@ export default function StationDetail({ station, lines, onClose }: Props) {
             )}
 
             {station.link && (
-              <div className="mt-6">
+              <div className="mt-6 panel-stagger-5">
                 <a
                   href={station.link}
                   target="_blank"
@@ -225,7 +242,7 @@ export default function StationDetail({ station, lines, onClose }: Props) {
 
           {/* Footer */}
           <div
-            className="p-4 transition-colors duration-300"
+            className="p-4 transition-colors duration-300 panel-stagger-5"
             style={{ borderTop: '1px solid var(--panel-border-light)' }}
           >
             <p

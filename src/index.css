@@ -260,3 +260,16 @@ g[role="button"]:focus-visible {
 .animate-tour-progress {
   animation: tour-progress 4s linear;
 }
+
+/* ── Station detail panel stagger ── */
+
+@keyframes panel-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.panel-stagger-1 { animation: panel-fade-up 0.35s ease-out 0.05s both; }
+.panel-stagger-2 { animation: panel-fade-up 0.35s ease-out 0.10s both; }
+.panel-stagger-3 { animation: panel-fade-up 0.35s ease-out 0.15s both; }
+.panel-stagger-4 { animation: panel-fade-up 0.35s ease-out 0.20s both; }
+.panel-stagger-5 { animation: panel-fade-up 0.35s ease-out 0.25s both; }
