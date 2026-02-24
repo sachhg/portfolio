@@ -87,32 +87,28 @@ function StationComponent({
     >
       <circle cx={x} cy={y} r={r + 10} fill="transparent" />
 
-      {/* Hover pulse ripple — single outward sonar on mouseenter */}
+      {/* Hover pulse ripple — gentle continuous sonar while hovering */}
       {hovered && !highlighted && !reducedMotion && (
         <circle
           cx={x}
           cy={y}
-          r={r + 2}
+          r={r + 3}
           fill="none"
           stroke={lines[0]?.color ?? 'var(--map-interchange-stroke)'}
-          strokeWidth={1.5}
-          opacity={0.5}
+          strokeWidth={2}
+          opacity={0.4}
         >
           <animate
             attributeName="r"
-            from={String(r + 2)}
-            to={String(r + 14)}
-            dur="0.6s"
-            repeatCount="1"
-            fill="freeze"
+            values={`${r + 3};${r + 12};${r + 3}`}
+            dur="1.5s"
+            repeatCount="indefinite"
           />
           <animate
             attributeName="opacity"
-            from="0.5"
-            to="0"
-            dur="0.6s"
-            repeatCount="1"
-            fill="freeze"
+            values="0.4;0.05;0.4"
+            dur="1.5s"
+            repeatCount="indefinite"
           />
         </circle>
       )}

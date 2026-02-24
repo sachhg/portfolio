@@ -17,11 +17,11 @@ type Props = {
   reducedMotion: boolean;
 };
 
-const COUNT = 18;
-const MIN_R = 0.8;
-const MAX_R = 1.8;
-const MIN_SPEED = 2; // px/s
-const MAX_SPEED = 6;
+const COUNT = 24;
+const MIN_R = 1.2;
+const MAX_R = 2.8;
+const MIN_SPEED = 3; // px/s
+const MAX_SPEED = 8;
 
 function rand(min: number, max: number) {
   return min + Math.random() * (max - min);
@@ -120,7 +120,7 @@ export default function AmbientParticles({
     };
   }, [reducedMotion, width, height, offsetX, offsetY]);
 
-  const fill = dark ? 'rgba(201,197,190,0.12)' : 'rgba(64,61,57,0.08)';
+  const fill = dark ? 'rgba(201,197,190,0.22)' : 'rgba(64,61,57,0.15)';
 
   return (
     <g aria-hidden="true" style={{ pointerEvents: 'none' }}>
