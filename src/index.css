@@ -273,3 +273,13 @@ g[role="button"]:focus-visible {
 .panel-stagger-3 { animation: panel-fade-up 0.35s ease-out 0.15s both; }
 .panel-stagger-4 { animation: panel-fade-up 0.35s ease-out 0.20s both; }
 .panel-stagger-5 { animation: panel-fade-up 0.35s ease-out 0.25s both; }
+
+/* ── Interactive line tracing ── */
+
+@keyframes line-trace-flow {
+  to { stroke-dashoffset: -40; }
+}
+
+.line-trace-glow {
+  animation: line-trace-flow 0.8s linear infinite;
+}

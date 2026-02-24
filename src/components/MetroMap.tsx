@@ -36,6 +36,8 @@ export default function MetroMap() {
   const [currentArea, setCurrentArea] = useState<string | null>(() => initialUrl.current.area);
   const [dark, setDark] = useState(() => initialUrl.current.theme === 'dark');
   const [searchQuery, setSearchQuery] = useState('');
+  const [hoveredLineId, setHoveredLineId] = useState<string | null>(null);
+  const [focusedLineId, setFocusedLineId] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const reducedMotion = useReducedMotion();
 
@@ -233,6 +235,7 @@ export default function MetroMap() {
 
     setCurrentArea(null);
     setSelectedStation(null);
+    setFocusedLineId(null);
 
     select(svg).transition().duration(reducedMotion ? 0 : 750).call(zb.transform, getInitialTransform());
   }, [getInitialTransform, reducedMotion]);
@@ -244,10 +247,9 @@ export default function MetroMap() {
 
   const handleBackgroundClick = useCallback(() => {
     if (tourActiveRef.current) return;
-    if (selectedStation) {
-      setSelectedStation(null);
-    }
-  }, [selectedStation]);
+    if (selectedStation) setSelectedStation(null);
+    if (focusedLineId) setFocusedLineId(null);
+  }, [selectedStation, focusedLineId]);
 
   const allStationsDeduped = useMemo(() => {
     const seen = new Map<string, { station: Station; lines: Line[] }>();
@@ -304,6 +306,48 @@ export default function MetroMap() {
   }, [searchQuery]);
 
   const isSearchActive = searchResults !== null && searchResults.matchingPositions.size > 0;
+  const activeLineId = focusedLineId ?? hoveredLineId;
+
+  // Zoom to focused line (or zoom back when cleared)
+  const prevFocusedLine = useRef<string | null>(null);
+  useEffect(() => {
+    const svg = svgRef.current;
+    const zb = zoomRef.current;
+    if (!svg || !zb) return;
+
+    if (focusedLineId) {
+      const allLines = [
+        ...metroMap.areas.flatMap((a) => a.lines),
+        ...metroMap.connectorLines,
+      ];
+      const line = allLines.find((l) => l.id === focusedLineId);
+      if (!line) return;
+
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const station of line.stations) {
+        const [x, y] = station.position;
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      }
+
+      const padding = 120;
+      const w = maxX - minX + padding * 2;
+      const h = maxY - minY + padding * 2;
+      const cx = (minX + maxX) / 2;
+      const cy = (minY + maxY) / 2;
+      const scale = Math.min(dimensions.width / w, dimensions.height / h, 3.5);
+      const tx = dimensions.width / 2 - cx * scale;
+      const ty = dimensions.height / 2 - cy * scale;
+
+      const transform = zoomIdentity.translate(tx, ty).scale(scale);
+      select(svg).transition().duration(reducedMotion ? 0 : 750).call(zb.transform, transform);
+    } else if (prevFocusedLine.current) {
+      select(svg).transition().duration(reducedMotion ? 0 : 750).call(zb.transform, getInitialTransform());
+    }
+    prevFocusedLine.current = focusedLineId;
+  }, [focusedLineId, dimensions, reducedMotion, getInitialTransform]);
 
   // Zoom to search results
   useEffect(() => {
@@ -407,7 +451,11 @@ export default function MetroMap() {
           totalCount={allStationsDeduped.length}
         />
       )}
-      <Legend visible={!currentArea && !isSearchActive && !tour.active} />
+      <Legend
+        visible={!currentArea && !isSearchActive && !tour.active}
+        onLineHover={setHoveredLineId}
+        onLineClick={(lineId) => setFocusedLineId((prev) => prev === lineId ? null : lineId)}
+      />
 
       {/* Screen reader announcements */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
@@ -485,7 +533,11 @@ export default function MetroMap() {
               key={line.id}
               line={line}
               trainsPerLine={1}
-              dimmed={isSearchActive && !searchResults!.relevantLineIds.has(line.id)}
+              dimmed={
+                (isSearchActive && !searchResults!.relevantLineIds.has(line.id)) ||
+                (!!activeLineId && activeLineId !== line.id)
+              }
+              traced={hoveredLineId === line.id || focusedLineId === line.id}
               reducedMotion={reducedMotion}
               dark={dark}
             />
@@ -497,7 +549,11 @@ export default function MetroMap() {
                 key={line.id}
                 line={line}
                 trainsPerLine={2}
-                dimmed={isSearchActive && !searchResults!.relevantLineIds.has(line.id)}
+                dimmed={
+                  (isSearchActive && !searchResults!.relevantLineIds.has(line.id)) ||
+                  (!!activeLineId && activeLineId !== line.id)
+                }
+                traced={hoveredLineId === line.id || focusedLineId === line.id}
                 reducedMotion={reducedMotion}
                 dark={dark}
               />
@@ -505,20 +561,24 @@ export default function MetroMap() {
           )}
 
           <g role="group" aria-label="Metro stations">
-            {allStationsDeduped.map(({ station, lines }) => {
+            {allStationsDeduped.map(({ station, lines: stLines }) => {
               const posKey = `${station.position[0]},${station.position[1]}`;
               const isMatch = searchResults?.matchingPositions.has(posKey) ?? false;
+              const onActiveLine = activeLineId ? stLines.some((l) => l.id === activeLineId) : false;
               return (
                 <StationComponent
                   key={`st-${station.position[0]}-${station.position[1]}`}
                   station={station}
-                  lines={lines}
+                  lines={stLines}
                   onSelect={handleStationSelect}
                   isSelected={
                     selectedStation?.position[0] === station.position[0] &&
                     selectedStation?.position[1] === station.position[1]
                   }
-                  dimmed={isSearchActive && !isMatch}
+                  dimmed={
+                    (isSearchActive && !isMatch) ||
+                    (!!activeLineId && !onActiveLine)
+                  }
                   highlighted={isSearchActive && isMatch}
                   reducedMotion={reducedMotion}
                 />

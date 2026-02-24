@@ -8,6 +8,7 @@ type Props = {
   dimmed?: boolean;
   reducedMotion?: boolean;
   dark?: boolean;
+  traced?: boolean;
 };
 
 function buildPathD(positions: [number, number][]): string {
@@ -19,7 +20,7 @@ function buildPathD(positions: [number, number][]): string {
   return d;
 }
 
-function LinePathComponent({ line, trainsPerLine = 2, dimmed = false, reducedMotion = false, dark = false }: Props) {
+function LinePathComponent({ line, trainsPerLine = 2, dimmed = false, reducedMotion = false, dark = false, traced = false }: Props) {
   const positions = line.stations.map((s) => s.position);
 
   if (positions.length < 2) return null;
@@ -39,7 +40,7 @@ function LinePathComponent({ line, trainsPerLine = 2, dimmed = false, reducedMot
   ));
 
   return (
-    <g style={{ opacity: dimmed ? 0.15 : 1, transition: 'opacity 0.4s ease' }}>
+    <g style={{ opacity: traced ? 1 : (dimmed ? 0.15 : 1), transition: 'opacity 0.4s ease' }}>
       {/* Outline for contrast against grid */}
       <path
         d={pathD}
@@ -62,6 +63,20 @@ function LinePathComponent({ line, trainsPerLine = 2, dimmed = false, reducedMot
           transition: 'filter 0.3s ease',
         }}
       />
+      {/* Trace glow overlay — flowing electricity effect */}
+      {traced && (
+        <path
+          d={pathD}
+          fill="none"
+          stroke={line.color}
+          strokeWidth={4.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="12 8"
+          className="line-trace-glow"
+          style={{ filter: `drop-shadow(0 0 6px ${line.color})` }}
+        />
+      )}
       {trains}
     </g>
   );

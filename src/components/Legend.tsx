@@ -2,9 +2,11 @@ import { metroMap } from '../data/mapData';
 
 type Props = {
   visible: boolean;
+  onLineHover: (lineId: string | null) => void;
+  onLineClick: (lineId: string) => void;
 };
 
-export default function Legend({ visible }: Props) {
+export default function Legend({ visible, onLineHover, onLineClick }: Props) {
   if (!visible) return null;
 
   const areaGroups = metroMap.areas.map((area) => ({
@@ -46,7 +48,14 @@ export default function Legend({ visible }: Props) {
             </p>
             <div className="space-y-1">
               {group.lines.map((line) => (
-                <div key={line.id} className="flex items-center gap-2">
+                <div
+                  key={line.id}
+                  className="flex items-center gap-2"
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={() => onLineHover(line.id)}
+                  onMouseLeave={() => onLineHover(null)}
+                  onClick={() => onLineClick(line.id)}
+                >
                   <div
                     className="w-4 h-0.75 rounded-full shrink-0"
                     style={{ backgroundColor: line.color }}
@@ -72,7 +81,14 @@ export default function Legend({ visible }: Props) {
             </p>
             <div className="space-y-1">
               {metroMap.connectorLines.map((line) => (
-                <div key={line.id} className="flex items-center gap-2">
+                <div
+                  key={line.id}
+                  className="flex items-center gap-2"
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={() => onLineHover(line.id)}
+                  onMouseLeave={() => onLineHover(null)}
+                  onClick={() => onLineClick(line.id)}
+                >
                   <div
                     className="w-4 h-0.75 rounded-full shrink-0"
                     style={{ backgroundColor: line.color }}
