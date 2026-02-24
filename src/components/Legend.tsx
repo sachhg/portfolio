@@ -16,7 +16,7 @@ export default function Legend({ visible, onLineHover, onLineClick }: Props) {
 
   return (
     <div
-      className="absolute bottom-4 left-4 rounded-lg shadow-lg z-30 overflow-hidden backdrop-blur-sm transition-colors duration-300"
+      className="absolute bottom-12 left-4 rounded-lg shadow-lg z-30 overflow-hidden backdrop-blur-sm transition-colors duration-300"
       role="complementary"
       aria-label="Line directory"
       style={{

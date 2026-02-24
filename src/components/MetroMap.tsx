@@ -16,6 +16,7 @@ import { useTourMode } from '../hooks/useTourMode';
 import TourOverlay from './TourOverlay';
 import AmbientParticles from './AmbientParticles';
 import MobileTimeline from './mobile/MobileTimeline';
+import CurrentlyBar from './CurrentlyBar';
 
 const MAP_W = metroMap.width;
 const MAP_H = metroMap.height;
@@ -456,6 +457,7 @@ export default function MetroMap() {
         onLineHover={setHoveredLineId}
         onLineClick={(lineId) => setFocusedLineId((prev) => prev === lineId ? null : lineId)}
       />
+      <CurrentlyBar visible={!currentArea && !tour.active} />
 
       {/* Screen reader announcements */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
