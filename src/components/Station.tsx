@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import type { Station as StationT, Line } from '../data/mapData';
 
 type Props = {
@@ -24,6 +24,7 @@ function StationComponent({
   highlighted = false,
   reducedMotion = false,
 }: Props) {
+  const [hovered, setHovered] = useState(false);
   const [x, y] = station.position;
   const isInterchange = station.isInterchange || lines.length > 1;
   const r = isInterchange ? INTERCHANGE_RADIUS : STATION_RADIUS;
@@ -81,8 +82,40 @@ function StationComponent({
           onSelect(station);
         }
       }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <circle cx={x} cy={y} r={r + 10} fill="transparent" />
+
+      {/* Hover pulse ripple — single outward sonar on mouseenter */}
+      {hovered && !highlighted && !reducedMotion && (
+        <circle
+          cx={x}
+          cy={y}
+          r={r + 2}
+          fill="none"
+          stroke={lines[0]?.color ?? 'var(--map-interchange-stroke)'}
+          strokeWidth={1.5}
+          opacity={0.5}
+        >
+          <animate
+            attributeName="r"
+            from={String(r + 2)}
+            to={String(r + 14)}
+            dur="0.6s"
+            repeatCount="1"
+            fill="freeze"
+          />
+          <animate
+            attributeName="opacity"
+            from="0.5"
+            to="0"
+            dur="0.6s"
+            repeatCount="1"
+            fill="freeze"
+          />
+        </circle>
+      )}
 
       {/* Focus ring — shown via CSS :focus-visible */}
       <circle

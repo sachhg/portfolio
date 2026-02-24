@@ -14,6 +14,7 @@ import SearchBar from './SearchBar';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useTourMode } from '../hooks/useTourMode';
 import TourOverlay from './TourOverlay';
+import AmbientParticles from './AmbientParticles';
 import MobileTimeline from './mobile/MobileTimeline';
 
 const MAP_W = metroMap.width;
@@ -24,6 +25,7 @@ const GRID_PAD = 200;
 export default function MetroMap() {
   const svgRef = useRef<SVGSVGElement>(null);
   const gRef = useRef<SVGGElement>(null);
+  const gridRef = useRef<SVGRectElement>(null);
   const zoomRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   // Read URL params once on mount for initial state
   const initialUrl = useRef(readUrlState());
@@ -104,6 +106,31 @@ export default function MetroMap() {
       sel.on('.zoom', null);
     };
   }, [getInitialTransform]);
+
+  // Parallax grid offset on mouse move
+  useEffect(() => {
+    const svg = svgRef.current;
+    const gridEl = gridRef.current;
+    if (!svg || !gridEl || reducedMotion) return;
+
+    const MAX_OFFSET = 5;
+    const FACTOR = 0.02;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = svg.getBoundingClientRect();
+      const dx = (e.clientX - rect.left - rect.width / 2) * FACTOR;
+      const dy = (e.clientY - rect.top - rect.height / 2) * FACTOR;
+      const cx = Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, dx));
+      const cy = Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, dy));
+      gridEl.setAttribute('transform', `translate(${cx}, ${cy})`);
+    };
+
+    svg.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      svg.removeEventListener('mousemove', handleMouseMove);
+      gridEl.setAttribute('transform', '');
+    };
+  }, [reducedMotion]);
 
   // On mount: zoom to area/station from URL params
   const didRestoreUrl = useRef(false);
@@ -428,11 +455,21 @@ export default function MetroMap() {
             style={{ fill: 'var(--map-bg)', transition: 'fill 0.3s ease' }}
           />
           <rect
+            ref={gridRef}
             x={-GRID_PAD}
             y={-GRID_PAD}
             width={MAP_W + GRID_PAD * 2}
             height={MAP_H + GRID_PAD * 2}
             fill="url(#grid)"
+          />
+
+          <AmbientParticles
+            width={MAP_W + GRID_PAD * 2}
+            height={MAP_H + GRID_PAD * 2}
+            offsetX={-GRID_PAD}
+            offsetY={-GRID_PAD}
+            dark={dark}
+            reducedMotion={reducedMotion}
           />
 
           {metroMap.areas.map((area) => (
@@ -450,6 +487,7 @@ export default function MetroMap() {
               trainsPerLine={1}
               dimmed={isSearchActive && !searchResults!.relevantLineIds.has(line.id)}
               reducedMotion={reducedMotion}
+              dark={dark}
             />
           ))}
 
@@ -461,6 +499,7 @@ export default function MetroMap() {
                 trainsPerLine={2}
                 dimmed={isSearchActive && !searchResults!.relevantLineIds.has(line.id)}
                 reducedMotion={reducedMotion}
+                dark={dark}
               />
             ))
           )}

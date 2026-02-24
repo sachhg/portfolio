@@ -7,6 +7,7 @@ type Props = {
   trainsPerLine?: number;
   dimmed?: boolean;
   reducedMotion?: boolean;
+  dark?: boolean;
 };
 
 function buildPathD(positions: [number, number][]): string {
@@ -18,7 +19,7 @@ function buildPathD(positions: [number, number][]): string {
   return d;
 }
 
-function LinePathComponent({ line, trainsPerLine = 2, dimmed = false, reducedMotion = false }: Props) {
+function LinePathComponent({ line, trainsPerLine = 2, dimmed = false, reducedMotion = false, dark = false }: Props) {
   const positions = line.stations.map((s) => s.position);
 
   if (positions.length < 2) return null;
@@ -56,6 +57,10 @@ function LinePathComponent({ line, trainsPerLine = 2, dimmed = false, reducedMot
         strokeWidth={4.5}
         strokeLinecap="round"
         strokeLinejoin="round"
+        style={{
+          filter: dark ? `drop-shadow(0 0 4px ${line.color}40)` : 'none',
+          transition: 'filter 0.3s ease',
+        }}
       />
       {trains}
     </g>
