@@ -9,6 +9,7 @@ type Props = {
   dimmed?: boolean;
   highlighted?: boolean;
   reducedMotion?: boolean;
+  onHover?: (station: StationT | null) => void;
 };
 
 const STATION_RADIUS = 4.5;
@@ -23,6 +24,7 @@ function StationComponent({
   dimmed = false,
   highlighted = false,
   reducedMotion = false,
+  onHover,
 }: Props) {
   const [hovered, setHovered] = useState(false);
   const [x, y] = station.position;
@@ -82,8 +84,8 @@ function StationComponent({
           onSelect(station);
         }
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => { setHovered(true); onHover?.(station); }}
+      onMouseLeave={() => { setHovered(false); onHover?.(null); }}
     >
       <circle cx={x} cy={y} r={r + 10} fill="transparent" />
 

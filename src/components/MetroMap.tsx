@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useState, useMemo } from 'react';
-import { zoom as d3Zoom, zoomIdentity, type ZoomBehavior } from 'd3-zoom';
+import { zoom as d3Zoom, zoomIdentity, zoomTransform, type ZoomBehavior } from 'd3-zoom';
 import { select } from 'd3-selection';
 import 'd3-transition';
 import { metroMap, getLinesAtPosition, getStationById, getAreaForStation } from '../data/mapData';
@@ -19,6 +19,7 @@ import MobileTimeline from './mobile/MobileTimeline';
 import CurrentlyBar from './CurrentlyBar';
 import KeyboardHelp from './KeyboardHelp';
 import { useSound } from '../hooks/useSound';
+import StationTooltip from './StationTooltip';
 
 const MAP_W = metroMap.width;
 const MAP_H = metroMap.height;
@@ -43,6 +44,7 @@ export default function MetroMap() {
   const [focusedLineId, setFocusedLineId] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
+  const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
   const navLineRef = useRef<string | null>(null);
   const reducedMotion = useReducedMotion();
   const { soundEnabled, toggleSound, playStationSelect, playTourAmbient, stopTourAmbient } = useSound();
@@ -262,8 +264,13 @@ export default function MetroMap() {
     if (tourActiveRef.current) return;
     navLineRef.current = null;
     setSelectedStation(station);
+    setHoveredStation(null);
     playStationSelect();
   }, [playStationSelect]);
+
+  const handleStationHover = useCallback((station: Station | null) => {
+    setHoveredStation(station);
+  }, []);
 
   const handleBackgroundClick = useCallback(() => {
     if (tourActiveRef.current) return;
@@ -708,6 +715,7 @@ export default function MetroMap() {
                   }
                   highlighted={isSearchActive && isMatch}
                   reducedMotion={reducedMotion}
+                  onHover={handleStationHover}
                 />
               );
             })}
@@ -725,6 +733,17 @@ export default function MetroMap() {
           )}
         </g>
       </svg>
+
+      {hoveredStation && !selectedStation && !tour.active && svgRef.current && (() => {
+        const t = zoomTransform(svgRef.current!);
+        return (
+          <StationTooltip
+            station={hoveredStation}
+            x={hoveredStation.position[0] * t.k + t.x}
+            y={hoveredStation.position[1] * t.k + t.y}
+          />
+        );
+      })()}
 
       <div
         className={`fixed inset-0 z-40 transition-opacity duration-300 ${
