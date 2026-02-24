@@ -18,6 +18,7 @@ import AmbientParticles from './AmbientParticles';
 import MobileTimeline from './mobile/MobileTimeline';
 import CurrentlyBar from './CurrentlyBar';
 import KeyboardHelp from './KeyboardHelp';
+import { useSound } from '../hooks/useSound';
 
 const MAP_W = metroMap.width;
 const MAP_H = metroMap.height;
@@ -44,6 +45,7 @@ export default function MetroMap() {
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
   const navLineRef = useRef<string | null>(null);
   const reducedMotion = useReducedMotion();
+  const { soundEnabled, toggleSound, playStationSelect, playTourAmbient, stopTourAmbient } = useSound();
 
   const tour = useTourMode({ svgRef, zoomRef, dimensions, reducedMotion });
   const tourActiveRef = useRef(false);
@@ -260,7 +262,8 @@ export default function MetroMap() {
     if (tourActiveRef.current) return;
     navLineRef.current = null;
     setSelectedStation(station);
-  }, []);
+    playStationSelect();
+  }, [playStationSelect]);
 
   const handleBackgroundClick = useCallback(() => {
     if (tourActiveRef.current) return;
@@ -313,7 +316,8 @@ export default function MetroMap() {
     const nextStation = currentLine.stations[nextIdx];
     setSelectedStation(nextStation);
     zoomToStation(nextStation);
-  }, [selectedStation, zoomToStation]);
+    playStationSelect();
+  }, [selectedStation, zoomToStation, playStationSelect]);
 
   const allStationsDeduped = useMemo(() => {
     const seen = new Map<string, { station: Station; lines: Line[] }>();
@@ -467,6 +471,15 @@ export default function MetroMap() {
     prevSearchActive.current = isSearchActive;
   }, [isSearchActive, searchQuery, getInitialTransform, reducedMotion]);
 
+  // Tour ambient hum
+  useEffect(() => {
+    if (tour.active) {
+      playTourAmbient();
+    } else {
+      stopTourAmbient();
+    }
+  }, [tour.active, playTourAmbient, stopTourAmbient]);
+
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
   }, []);
@@ -554,6 +567,8 @@ export default function MetroMap() {
         onStartTour={tour.start}
         tourActive={tour.active}
         isSearchActive={isSearchActive}
+        soundEnabled={soundEnabled}
+        onToggleSound={toggleSound}
       />
       {!tour.active && (
         <SearchBar

@@ -6,9 +6,11 @@ type Props = {
   onStartTour?: () => void;
   tourActive?: boolean;
   isSearchActive?: boolean;
+  soundEnabled?: boolean;
+  onToggleSound?: () => void;
 };
 
-export default function Header({ onZoomOut, currentArea, dark, onToggleTheme, onStartTour, tourActive, isSearchActive }: Props) {
+export default function Header({ onZoomOut, currentArea, dark, onToggleTheme, onStartTour, tourActive, isSearchActive, soundEnabled, onToggleSound }: Props) {
   return (
     <div
       className="absolute top-0 left-0 right-0 z-30 pointer-events-none"
@@ -65,6 +67,32 @@ export default function Header({ onZoomOut, currentArea, dark, onToggleTheme, on
               </>
             )}
           </button>
+
+          {/* Sound toggle */}
+          {onToggleSound && (
+            <button
+              className="pointer-events-auto flex items-center justify-center w-8 h-8 rounded-full shadow-sm hover:shadow transition-all duration-300"
+              style={{
+                backgroundColor: 'var(--map-area-label-bg)',
+                color: 'var(--map-text)',
+                border: '1px solid var(--map-area-label-border)',
+              }}
+              onClick={onToggleSound}
+              aria-label={soundEnabled ? 'Mute sounds' : 'Unmute sounds'}
+            >
+              {soundEnabled ? (
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 2L4 5.5H1.5V10.5H4L8 14V2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M11 5.5C11.8 6.3 12.25 7.4 12.25 8.5C12.25 9.6 11.8 10.7 11 11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 2L4 5.5H1.5V10.5H4L8 14V2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M14 6L10 10M10 6L14 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              )}
+            </button>
+          )}
 
           {/* Take a Tour button — visible when at the overview level */}
           {!tourActive && !currentArea && !isSearchActive && onStartTour && (
