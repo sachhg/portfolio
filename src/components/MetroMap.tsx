@@ -17,6 +17,7 @@ import TourOverlay from './TourOverlay';
 import AmbientParticles from './AmbientParticles';
 import MobileTimeline from './mobile/MobileTimeline';
 import CurrentlyBar from './CurrentlyBar';
+import KeyboardHelp from './KeyboardHelp';
 
 const MAP_W = metroMap.width;
 const MAP_H = metroMap.height;
@@ -40,6 +41,8 @@ export default function MetroMap() {
   const [hoveredLineId, setHoveredLineId] = useState<string | null>(null);
   const [focusedLineId, setFocusedLineId] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
+  const navLineRef = useRef<string | null>(null);
   const reducedMotion = useReducedMotion();
 
   const tour = useTourMode({ svgRef, zoomRef, dimensions, reducedMotion });
@@ -241,8 +244,21 @@ export default function MetroMap() {
     select(svg).transition().duration(reducedMotion ? 0 : 750).call(zb.transform, getInitialTransform());
   }, [getInitialTransform, reducedMotion]);
 
+  const zoomToStation = useCallback((station: Station) => {
+    const svg = svgRef.current;
+    const zb = zoomRef.current;
+    if (!svg || !zb) return;
+    const [cx, cy] = station.position;
+    const scale = 3.0;
+    const tx = dimensions.width / 2 - cx * scale;
+    const ty = dimensions.height / 2 - cy * scale;
+    const transform = zoomIdentity.translate(tx, ty).scale(scale);
+    select(svg).transition().duration(reducedMotion ? 0 : 500).call(zb.transform, transform);
+  }, [dimensions, reducedMotion]);
+
   const handleStationSelect = useCallback((station: Station) => {
     if (tourActiveRef.current) return;
+    navLineRef.current = null;
     setSelectedStation(station);
   }, []);
 
@@ -251,6 +267,53 @@ export default function MetroMap() {
     if (selectedStation) setSelectedStation(null);
     if (focusedLineId) setFocusedLineId(null);
   }, [selectedStation, focusedLineId]);
+
+  const handleArrowNav = useCallback((key: string) => {
+    if (!selectedStation) {
+      // No station selected — select first station of first line
+      const firstLine = metroMap.areas[0].lines[0];
+      if (firstLine.stations.length > 0) {
+        const station = firstLine.stations[0];
+        navLineRef.current = firstLine.id;
+        setSelectedStation(station);
+        zoomToStation(station);
+      }
+      return;
+    }
+
+    const [sx, sy] = selectedStation.position;
+    const linesHere = getLinesAtPosition(sx, sy);
+
+    // Up/Down: switch line at interchange
+    if (key === 'ArrowUp' || key === 'ArrowDown') {
+      if (linesHere.length <= 1) return;
+      const currentIdx = linesHere.findIndex((l) => l.id === navLineRef.current);
+      const dir = key === 'ArrowDown' ? 1 : -1;
+      const nextIdx = (currentIdx + dir + linesHere.length) % linesHere.length;
+      navLineRef.current = linesHere[nextIdx].id;
+      // Re-select the same station to trigger a re-render (line badges update)
+      setSelectedStation({ ...selectedStation });
+      return;
+    }
+
+    // Left/Right: move along current line
+    const currentLine = linesHere.find((l) => l.id === navLineRef.current) ?? linesHere[0];
+    if (!currentLine) return;
+    navLineRef.current = currentLine.id;
+
+    const stationIdx = currentLine.stations.findIndex(
+      (s) => s.position[0] === sx && s.position[1] === sy
+    );
+    if (stationIdx === -1) return;
+
+    const dir = key === 'ArrowRight' ? 1 : -1;
+    const nextIdx = stationIdx + dir;
+    if (nextIdx < 0 || nextIdx >= currentLine.stations.length) return;
+
+    const nextStation = currentLine.stations[nextIdx];
+    setSelectedStation(nextStation);
+    zoomToStation(nextStation);
+  }, [selectedStation, zoomToStation]);
 
   const allStationsDeduped = useMemo(() => {
     const seen = new Map<string, { station: Station; lines: Line[] }>();
@@ -407,6 +470,53 @@ export default function MetroMap() {
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
   }, []);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleGlobalKeys = (e: KeyboardEvent) => {
+      if (tourActiveRef.current) return;
+
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+      // ? — toggle keyboard help
+      if (e.key === '?') {
+        e.preventDefault();
+        setShowKeyboardHelp((prev) => !prev);
+        return;
+      }
+
+      // Skip remaining shortcuts if keyboard help is open
+      if (showKeyboardHelp) return;
+
+      // 1-5 — jump to area
+      const areaIndex = parseInt(e.key) - 1;
+      if (areaIndex >= 0 && areaIndex < metroMap.areas.length) {
+        e.preventDefault();
+        setSelectedStation(null);
+        setFocusedLineId(null);
+        zoomToArea(metroMap.areas[areaIndex]);
+        return;
+      }
+
+      // Escape — zoom out when no station detail is open
+      if (e.key === 'Escape' && !selectedStation) {
+        e.preventDefault();
+        zoomOut();
+        return;
+      }
+
+      // Arrow keys — station traversal
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        e.preventDefault();
+        handleArrowNav(e.key);
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeys);
+    return () => window.removeEventListener('keydown', handleGlobalKeys);
+  }, [selectedStation, showKeyboardHelp, zoomToArea, zoomOut, handleArrowNav]);
 
   const selectedStationLines = selectedStation
     ? getLinesAtPosition(selectedStation.position[0], selectedStation.position[1])
@@ -625,6 +735,10 @@ export default function MetroMap() {
           totalStops={tour.totalStops}
           onExit={tour.stop}
         />
+      )}
+
+      {showKeyboardHelp && (
+        <KeyboardHelp onClose={() => setShowKeyboardHelp(false)} />
       )}
     </div>
   );
