@@ -234,3 +234,29 @@ g[role="button"]:focus-visible {
   color: #3b82f6;
   text-decoration: underline;
 }
+
+/* ── Tour mode animations ── */
+
+@keyframes tour-card-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.animate-tour-card-in {
+  animation: tour-card-in 0.4s ease-out;
+}
+
+@keyframes tour-progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.animate-tour-progress {
+  animation: tour-progress 4s linear;
+}

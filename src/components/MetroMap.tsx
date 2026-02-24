@@ -12,6 +12,8 @@ import Legend from './Legend';
 import Header from './Header';
 import SearchBar from './SearchBar';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+import { useTourMode } from '../hooks/useTourMode';
+import TourOverlay from './TourOverlay';
 import MobileTimeline from './mobile/MobileTimeline';
 
 const MAP_W = metroMap.width;
@@ -34,6 +36,10 @@ export default function MetroMap() {
   const [searchQuery, setSearchQuery] = useState('');
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const reducedMotion = useReducedMotion();
+
+  const tour = useTourMode({ svgRef, zoomRef, dimensions, reducedMotion });
+  const tourActiveRef = useRef(false);
+  tourActiveRef.current = tour.active;
 
   // Apply dark mode from URL on mount
   useEffect(() => {
@@ -76,6 +82,12 @@ export default function MetroMap() {
 
     const zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.5, 8])
+      .filter((event) => {
+        // Block user gestures during tour (programmatic transforms still work)
+        if (tourActiveRef.current) return false;
+        // Default d3-zoom filter: ignore secondary buttons, allow wheel/touch
+        return (!event.ctrlKey || event.type === 'wheel') && !event.button;
+      })
       .on('zoom', (event) => {
         if (gRef.current) {
           const { x, y, k } = event.transform;
@@ -199,10 +211,12 @@ export default function MetroMap() {
   }, [getInitialTransform, reducedMotion]);
 
   const handleStationSelect = useCallback((station: Station) => {
+    if (tourActiveRef.current) return;
     setSelectedStation(station);
   }, []);
 
   const handleBackgroundClick = useCallback(() => {
+    if (tourActiveRef.current) return;
     if (selectedStation) {
       setSelectedStation(null);
     }
@@ -355,13 +369,18 @@ export default function MetroMap() {
         currentArea={currentArea}
         dark={dark}
         onToggleTheme={toggleTheme}
+        onStartTour={tour.start}
+        tourActive={tour.active}
+        isSearchActive={isSearchActive}
       />
-      <SearchBar
-        onSearch={handleSearch}
-        matchCount={searchResults?.matchingPositions.size ?? 0}
-        totalCount={allStationsDeduped.length}
-      />
-      <Legend visible={!currentArea && !isSearchActive} />
+      {!tour.active && (
+        <SearchBar
+          onSearch={handleSearch}
+          matchCount={searchResults?.matchingPositions.size ?? 0}
+          totalCount={allStationsDeduped.length}
+        />
+      )}
+      <Legend visible={!currentArea && !isSearchActive && !tour.active} />
 
       {/* Screen reader announcements */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
@@ -420,7 +439,7 @@ export default function MetroMap() {
             <AreaLabel
               key={area.id}
               area={area}
-              onClick={() => zoomToArea(area)}
+              onClick={() => { if (!tourActiveRef.current) zoomToArea(area); }}
             />
           ))}
 
@@ -467,6 +486,17 @@ export default function MetroMap() {
               );
             })}
           </g>
+
+          {/* Tour train — rendered above all other map elements */}
+          {tour.active && (
+            <circle
+              ref={tour.trainRef}
+              r={5}
+              fill="#f59e0b"
+              opacity={0.95}
+              style={{ filter: 'drop-shadow(0 0 6px #f59e0b)' }}
+            />
+          )}
         </g>
       </svg>
 
@@ -484,6 +514,15 @@ export default function MetroMap() {
         lines={selectedStationLines}
         onClose={() => setSelectedStation(null)}
       />
+
+      {tour.active && (
+        <TourOverlay
+          narration={tour.narration}
+          progress={tour.progress}
+          totalStops={tour.totalStops}
+          onExit={tour.stop}
+        />
+      )}
     </div>
   );
 }

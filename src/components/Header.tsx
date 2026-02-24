@@ -3,9 +3,12 @@ type Props = {
   currentArea: string | null;
   dark: boolean;
   onToggleTheme: () => void;
+  onStartTour?: () => void;
+  tourActive?: boolean;
+  isSearchActive?: boolean;
 };
 
-export default function Header({ onZoomOut, currentArea, dark, onToggleTheme }: Props) {
+export default function Header({ onZoomOut, currentArea, dark, onToggleTheme, onStartTour, tourActive, isSearchActive }: Props) {
   return (
     <div
       className="absolute top-0 left-0 right-0 z-30 pointer-events-none"
@@ -63,8 +66,33 @@ export default function Header({ onZoomOut, currentArea, dark, onToggleTheme }: 
             )}
           </button>
 
+          {/* Take a Tour button — visible when at the overview level */}
+          {!tourActive && !currentArea && !isSearchActive && onStartTour && (
+            <button
+              className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-sm hover:shadow transition-all duration-300 text-[10px] font-semibold uppercase tracking-wider"
+              style={{
+                backgroundColor: 'var(--map-area-label-bg)',
+                color: 'var(--map-text)',
+                border: '1px solid var(--map-area-label-border)',
+              }}
+              onClick={onStartTour}
+              aria-label="Take a guided tour of the portfolio"
+            >
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M5 3L12 8L5 13V3Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Tour
+            </button>
+          )}
+
           {/* Back button */}
-          {currentArea && (
+          {currentArea && !tourActive && (
             <button
               className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-sm hover:shadow transition-all duration-300 text-xs font-medium"
               style={{
