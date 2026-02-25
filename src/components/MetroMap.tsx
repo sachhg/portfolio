@@ -644,7 +644,7 @@ export default function MetroMap() {
         ref={svgRef}
         width="100%"
         height="100%"
-        style={{ cursor: 'grab' }}
+        className="map-canvas"
         onClick={handleBackgroundClick}
         role="img"
         aria-label="Interactive metro map showing projects, experience, education, and skills as subway stations"

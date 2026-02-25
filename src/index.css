@@ -102,6 +102,24 @@ g[role="button"]:focus-visible {
   outline: none;
 }
 
+/* ── Map canvas cursor — transit crosshair ── */
+
+.map-canvas {
+  cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none'><circle cx='12' cy='12' r='3.5' stroke='%23333' stroke-width='1.5'/><path d='M12 1v6M12 17v6M1 12h6M17 12h6' stroke='%23333' stroke-width='1.5' stroke-linecap='round'/></svg>") 12 12, crosshair;
+}
+
+.map-canvas:active {
+  cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none'><circle cx='12' cy='12' r='3.5' fill='%2333333366' stroke='%23333' stroke-width='1.5'/><path d='M12 3v5M12 16v5M3 12h5M16 12h5' stroke='%23333' stroke-width='1.5' stroke-linecap='round'/></svg>") 12 12, grabbing;
+}
+
+:root.dark .map-canvas {
+  cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none'><circle cx='12' cy='12' r='3.5' stroke='%23d4d0c8' stroke-width='1.5'/><path d='M12 1v6M12 17v6M1 12h6M17 12h6' stroke='%23d4d0c8' stroke-width='1.5' stroke-linecap='round'/></svg>") 12 12, crosshair;
+}
+
+:root.dark .map-canvas:active {
+  cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none'><circle cx='12' cy='12' r='3.5' fill='%23d4d0c866' stroke='%23d4d0c8' stroke-width='1.5'/><path d='M12 3v5M12 16v5M3 12h5M16 12h5' stroke='%23d4d0c8' stroke-width='1.5' stroke-linecap='round'/></svg>") 12 12, grabbing;
+}
+
 /* ── Screen-reader only ── */
 
 .sr-only {
