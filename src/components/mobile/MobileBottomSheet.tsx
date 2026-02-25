@@ -250,7 +250,7 @@ export default function MobileBottomSheet({ station, lines, onClose, onTagClick 
               )}
 
               {station.link && (
-                <div className="mt-4">
+                <div className="mt-4 relative inline-flex flex-col group/link">
                   <a
                     href={station.link}
                     target="_blank"
@@ -268,6 +268,15 @@ export default function MobileBottomSheet({ station, lines, onClose, onTagClick 
                       />
                     </svg>
                   </a>
+                  <span
+                    className="absolute top-full left-0 mt-1.5 px-2 py-0.5 rounded text-[10px] font-medium opacity-0 group-hover/link:opacity-100 transition-opacity duration-150 group-hover/link:delay-200 pointer-events-none whitespace-nowrap"
+                    style={{
+                      backgroundColor: 'var(--panel-tag-bg)',
+                      color: 'var(--panel-text-secondary)',
+                    }}
+                  >
+                    {(() => { try { return new URL(station.link).hostname; } catch { return station.link; } })()}
+                  </span>
                 </div>
               )}
             </div>
