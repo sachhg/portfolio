@@ -5,9 +5,12 @@ type Props = {
   matchCount: number;
   totalCount: number;
   externalQuery?: string;
+  onTagClick?: (tag: string) => void;
 };
 
-export default function SearchBar({ onSearch, matchCount, totalCount, externalQuery }: Props) {
+const SUGGESTED_TAGS = ['React', 'Python', 'TypeScript', 'Go', 'AWS'];
+
+export default function SearchBar({ onSearch, matchCount, totalCount, externalQuery, onTagClick }: Props) {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -142,6 +145,57 @@ export default function SearchBar({ onSearch, matchCount, totalCount, externalQu
           </span>
         )}
       </div>
+
+      {/* Empty search state */}
+      {hasQuery && matchCount === 0 && (
+        <div
+          className="mt-2 rounded-lg shadow-sm px-3.5 py-3 transition-colors duration-300"
+          style={{
+            backgroundColor: 'var(--panel-bg)',
+            border: '1px solid var(--panel-border)',
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            {/* End-of-line station marker */}
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+              <circle cx="7" cy="7" r="5" stroke="var(--panel-text-secondary)" strokeWidth="1.5" opacity={0.5} />
+              <circle cx="7" cy="7" r="2" fill="var(--panel-text-secondary)" opacity={0.5} />
+            </svg>
+            <p
+              className="text-[11px] font-medium transition-colors duration-300"
+              style={{ color: 'var(--panel-text-secondary)' }}
+            >
+              No stations on this line
+            </p>
+          </div>
+          <p
+            className="text-[10px] mb-2 transition-colors duration-300"
+            style={{ color: 'var(--panel-text-secondary)', opacity: 0.7 }}
+          >
+            Try a different route:
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {SUGGESTED_TAGS.map((tag) => (
+              <button
+                key={tag}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleChange(tag);
+                  onTagClick?.(tag);
+                }}
+                className="text-[10px] font-medium px-2 py-0.5 rounded transition-all duration-200 hover:brightness-90 active:scale-95"
+                style={{
+                  backgroundColor: 'var(--panel-tag-bg)',
+                  color: 'var(--panel-tag-text)',
+                  cursor: 'pointer',
+                }}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
