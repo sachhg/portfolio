@@ -269,10 +269,17 @@ export default function MetroMap() {
   const handleStationSelect = useCallback((station: Station) => {
     if (tourActiveRef.current) return;
     navLineRef.current = null;
-    setSelectedStation(station);
     setHoveredStation(null);
     playStationSelect();
-  }, [playStationSelect]);
+    zoomToStation(station);
+    // Open detail panel after zoom transition completes
+    const delay = reducedMotion ? 0 : 550;
+    if (delay === 0) {
+      setSelectedStation(station);
+    } else {
+      setTimeout(() => setSelectedStation(station), delay);
+    }
+  }, [playStationSelect, zoomToStation, reducedMotion]);
 
   const handleStationHover = useCallback((station: Station | null) => {
     setHoveredStation(station);
