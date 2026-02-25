@@ -404,6 +404,8 @@ export default function MetroMap() {
 
   const isSearchActive = searchResults !== null && searchResults.matchingPositions.size > 0;
   const activeLineId = focusedLineId ?? hoveredLineId;
+  const initialScale = getInitialTransform().k;
+  const isZoomedIn = miniMapTransform.k > initialScale * 1.3;
 
   // Zoom to focused line (or zoom back when cleared)
   const prevFocusedLine = useRef<string | null>(null);
@@ -611,7 +613,7 @@ export default function MetroMap() {
         onLineHover={setHoveredLineId}
         onLineClick={(lineId) => setFocusedLineId((prev) => prev === lineId ? null : lineId)}
       />
-      {currentArea && !tour.active && (
+      {isZoomedIn && !tour.active && (
         <MiniMap
           lines={allLines}
           areas={metroMap.areas}
