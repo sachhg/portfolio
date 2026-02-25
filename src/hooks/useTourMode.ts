@@ -356,6 +356,35 @@ export function useTourMode({ svgRef, zoomRef, dimensions, reducedMotion }: UseT
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [state.active, stop]);
 
+  // Favicon animation during tour
+  useEffect(() => {
+    if (!state.active) return;
+
+    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (!link) return;
+
+    const originalHref = link.href;
+
+    const tourFavicon = `data:image/svg+xml,${encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36">' +
+        '<circle cx="18" cy="18" r="18" fill="#2563eb"/>' +
+        '<text x="18" y="18" text-anchor="middle" dominant-baseline="central" ' +
+        'font-family="system-ui, sans-serif" font-weight="700" font-size="13" ' +
+        'fill="#ffffff" letter-spacing="0.5">SN</text></svg>'
+    )}`;
+
+    let alt = false;
+    const interval = setInterval(() => {
+      alt = !alt;
+      link.href = alt ? tourFavicon : originalHref;
+    }, 500);
+
+    return () => {
+      clearInterval(interval);
+      link.href = originalHref;
+    };
+  }, [state.active]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
