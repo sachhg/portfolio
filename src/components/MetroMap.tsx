@@ -21,6 +21,7 @@ import KeyboardHelp from './KeyboardHelp';
 import { useSound } from '../hooks/useSound';
 import StationTooltip from './StationTooltip';
 import StarField from './StarField';
+import MiniMap from './MiniMap';
 
 const MAP_W = metroMap.width;
 const MAP_H = metroMap.height;
@@ -46,6 +47,8 @@ export default function MetroMap() {
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
   const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
+  const [miniMapTransform, setMiniMapTransform] = useState({ x: 0, y: 0, k: 1 });
+  const transformRef = useRef({ x: 0, y: 0, k: 1 });
   const navLineRef = useRef<string | null>(null);
   const reducedMotion = useReducedMotion();
   const { soundEnabled, toggleSound, playStationSelect, playTourAmbient, stopTourAmbient } = useSound();
@@ -105,6 +108,8 @@ export default function MetroMap() {
         if (gRef.current) {
           const { x, y, k } = event.transform;
           gRef.current.setAttribute('transform', `translate(${x},${y}) scale(${k})`);
+          transformRef.current = { x, y, k };
+          setMiniMapTransform({ x, y, k });
         }
       });
 
@@ -326,6 +331,22 @@ export default function MetroMap() {
     zoomToStation(nextStation);
     playStationSelect();
   }, [selectedStation, zoomToStation, playStationSelect]);
+
+  const allLines = useMemo(() => [
+    ...metroMap.areas.flatMap((a) => a.lines),
+    ...metroMap.connectorLines,
+  ], []);
+
+  const handleMiniMapNavigate = useCallback((mapX: number, mapY: number) => {
+    const svg = svgRef.current;
+    const zb = zoomRef.current;
+    if (!svg || !zb) return;
+    const k = transformRef.current.k;
+    const tx = dimensions.width / 2 - mapX * k;
+    const ty = dimensions.height / 2 - mapY * k;
+    const transform = zoomIdentity.translate(tx, ty).scale(k);
+    select(svg).transition().duration(reducedMotion ? 0 : 400).call(zb.transform, transform);
+  }, [dimensions, reducedMotion]);
 
   const allStationsDeduped = useMemo(() => {
     const seen = new Map<string, { station: Station; lines: Line[] }>();
@@ -590,6 +611,19 @@ export default function MetroMap() {
         onLineHover={setHoveredLineId}
         onLineClick={(lineId) => setFocusedLineId((prev) => prev === lineId ? null : lineId)}
       />
+      {currentArea && !tour.active && (
+        <MiniMap
+          lines={allLines}
+          areas={metroMap.areas}
+          mapWidth={MAP_W}
+          mapHeight={MAP_H}
+          transform={miniMapTransform}
+          viewportWidth={dimensions.width}
+          viewportHeight={dimensions.height}
+          onNavigate={handleMiniMapNavigate}
+          dark={dark}
+        />
+      )}
       <CurrentlyBar visible={!currentArea && !tour.active} />
 
       {/* Screen reader announcements */}
