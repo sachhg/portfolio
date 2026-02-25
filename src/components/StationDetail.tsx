@@ -8,9 +8,10 @@ type Props = {
   station: Station | null;
   lines: Line[];
   onClose: () => void;
+  onTagClick?: (tag: string) => void;
 };
 
-export default function StationDetail({ station, lines, onClose }: Props) {
+export default function StationDetail({ station, lines, onClose, onTagClick }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<Element | null>(null);
@@ -202,16 +203,19 @@ export default function StationDetail({ station, lines, onClose }: Props) {
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {station.tags.map((tag) => (
-                    <span
+                    <button
                       key={tag}
-                      className="text-xs font-medium px-2.5 py-1 rounded transition-colors duration-300"
+                      onClick={() => onTagClick?.(tag)}
+                      className="text-xs font-medium px-2.5 py-1 rounded transition-all duration-200 hover:brightness-90 active:scale-95"
                       style={{
                         backgroundColor: 'var(--panel-tag-bg)',
                         color: 'var(--panel-tag-text)',
+                        cursor: onTagClick ? 'pointer' : 'default',
                       }}
+                      aria-label={`Search for stations tagged "${tag}"`}
                     >
                       {tag}
-                    </span>
+                    </button>
                   ))}
                 </div>
               </div>

@@ -24,6 +24,7 @@ type Props = {
 export default function MobileTimeline({
   dark,
   onToggleTheme,
+  searchQuery,
   onSearch,
   selectedStation,
   onSelectStation,
@@ -129,6 +130,7 @@ export default function MobileTimeline({
           onSearch={onSearch}
           matchCount={searchResults?.matchingPositions.size ?? 0}
           totalCount={allStationsDeduped.length}
+          externalQuery={searchQuery}
         />
       </div>
 
@@ -162,6 +164,10 @@ export default function MobileTimeline({
         station={selectedStation}
         lines={selectedStationLines}
         onClose={onCloseStation}
+        onTagClick={(tag) => {
+          onCloseStation();
+          onSearch(tag);
+        }}
       />
     </div>
   );

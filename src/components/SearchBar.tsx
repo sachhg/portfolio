@@ -4,12 +4,20 @@ type Props = {
   onSearch: (query: string) => void;
   matchCount: number;
   totalCount: number;
+  externalQuery?: string;
 };
 
-export default function SearchBar({ onSearch, matchCount, totalCount }: Props) {
+export default function SearchBar({ onSearch, matchCount, totalCount, externalQuery }: Props) {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync with externally-set query (e.g. tag click)
+  useEffect(() => {
+    if (externalQuery !== undefined && externalQuery !== query) {
+      setQuery(externalQuery);
+    }
+  }, [externalQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

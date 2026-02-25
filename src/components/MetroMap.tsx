@@ -606,6 +606,7 @@ export default function MetroMap() {
           onSearch={handleSearch}
           matchCount={searchResults?.matchingPositions.size ?? 0}
           totalCount={allStationsDeduped.length}
+          externalQuery={searchQuery}
         />
       )}
       <Legend
@@ -805,6 +806,10 @@ export default function MetroMap() {
         station={selectedStation}
         lines={selectedStationLines}
         onClose={() => setSelectedStation(null)}
+        onTagClick={(tag) => {
+          setSelectedStation(null);
+          setSearchQuery(tag);
+        }}
       />
 
       {tour.active && (
