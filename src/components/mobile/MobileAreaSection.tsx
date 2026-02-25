@@ -1,7 +1,8 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import type { Station, Line, MetroArea } from '../../data/mapData';
 import { getLinesAtPosition } from '../../data/mapData';
 import MobileStationCard from './MobileStationCard';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 type Props = {
   area: MetroArea;
@@ -26,6 +27,8 @@ export default function MobileAreaSection({
 }: Props) {
   const [expanded, setExpanded] = useState(true);
   const primaryColor = area.lines[0].color;
+  const cardRevealRef = useScrollReveal({ disabled: reducedMotion });
+  const headerRevealRef = useScrollReveal({ threshold: 0.5, disabled: reducedMotion });
 
   // Deduplicate stations by position within this area
   const stationsForArea = useMemo(() => {
@@ -65,9 +68,10 @@ export default function MobileAreaSection({
     <section aria-labelledby={`area-heading-${area.id}`}>
       {/* Area header */}
       <button
+        ref={headerRevealRef}
         id={`area-heading-${area.id}`}
         onClick={() => setExpanded((prev) => !prev)}
-        className="sticky top-0 z-10 w-full flex items-center justify-between px-4 py-2.5 backdrop-blur-sm transition-colors duration-300"
+        className="sticky top-0 z-10 w-full flex items-center justify-between px-4 py-2.5 backdrop-blur-sm transition-colors duration-300 mobile-area-header"
         style={{
           backgroundColor: 'var(--map-area-label-bg)',
           borderBottom: '1px solid var(--panel-border)',
@@ -144,6 +148,8 @@ export default function MobileAreaSection({
                   onSelect={onSelectStation}
                   isLast={index === visibleStations.length - 1}
                   primaryColor={primaryColor}
+                  revealRef={cardRevealRef}
+                  revealDirection={index % 2 === 0 ? 'left' : 'right'}
                 />
               );
             })}

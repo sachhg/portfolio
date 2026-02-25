@@ -8,17 +8,24 @@ type Props = {
   onSelect: (station: Station) => void;
   isLast: boolean;
   primaryColor: string;
+  revealRef?: (el: HTMLElement | null) => void;
+  revealDirection?: 'left' | 'right';
 };
 
 const MobileStationCard = forwardRef<HTMLButtonElement, Props>(
-  function MobileStationCard({ station, lines, isSelected, onSelect, isLast, primaryColor }, ref) {
+  function MobileStationCard({ station, lines, isSelected, onSelect, isLast, primaryColor, revealRef, revealDirection }, ref) {
     const isInterchange = lines.length > 1;
+    const revealClass = revealDirection === 'right' ? 'mobile-card-reveal-right' : 'mobile-card-reveal';
 
     return (
       <button
-        ref={ref}
+        ref={(el) => {
+          if (typeof ref === 'function') ref(el);
+          else if (ref) (ref as React.MutableRefObject<HTMLButtonElement | null>).current = el;
+          revealRef?.(el);
+        }}
         onClick={() => onSelect(station)}
-        className="flex items-stretch gap-3 w-full text-left min-h-[56px] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-blue-500"
+        className={`flex items-stretch gap-3 w-full text-left min-h-[56px] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-blue-500 ${revealClass}`}
         style={{
           backgroundColor: isSelected ? `${primaryColor}10` : 'transparent',
           fontFamily: "'Inter', sans-serif",
@@ -27,7 +34,7 @@ const MobileStationCard = forwardRef<HTMLButtonElement, Props>(
         {/* Timeline track */}
         <div className="relative flex flex-col items-center w-10 shrink-0">
           {/* Top segment of the vertical line */}
-          <div className="flex-1 w-0.5" style={{ backgroundColor: primaryColor }} />
+          <div className="flex-1 w-0.5 mobile-track-segment" style={{ backgroundColor: primaryColor }} />
           {/* Station dot */}
           <div className="relative shrink-0 my-0.5">
             {isInterchange ? (
@@ -59,7 +66,7 @@ const MobileStationCard = forwardRef<HTMLButtonElement, Props>(
           </div>
           {/* Bottom segment — hidden for last station */}
           <div
-            className="flex-1 w-0.5"
+            className="flex-1 w-0.5 mobile-track-segment"
             style={{ backgroundColor: isLast ? 'transparent' : primaryColor }}
           />
         </div>

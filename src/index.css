@@ -283,3 +283,60 @@ g[role="button"]:focus-visible {
 .line-trace-glow {
   animation: line-trace-flow 0.8s linear infinite;
 }
+
+/* ── Mobile scroll reveal ── */
+
+.mobile-card-reveal {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.mobile-card-reveal[data-revealed="true"] {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.mobile-card-reveal-right {
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.mobile-card-reveal-right[data-revealed="true"] {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Track segments grow as cards reveal */
+.mobile-card-reveal .mobile-track-segment,
+.mobile-card-reveal-right .mobile-track-segment {
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.4s ease-out 0.1s;
+}
+
+.mobile-card-reveal[data-revealed="true"] .mobile-track-segment,
+.mobile-card-reveal-right[data-revealed="true"] .mobile-track-segment {
+  transform: scaleY(1);
+}
+
+/* Area header entrance */
+.mobile-area-header {
+  opacity: 0;
+}
+
+.mobile-area-header[data-revealed="true"] {
+  animation: area-header-in 0.4s ease-out both;
+}
+
+@keyframes area-header-in {
+  from {
+    opacity: 0.6;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
