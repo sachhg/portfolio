@@ -28,23 +28,38 @@ export default function StationTooltip({ station, x, y }: Props) {
           padding: '10px 12px',
         }}
       >
-        <p
-          className="text-[12px] font-semibold leading-tight transition-colors duration-300"
-          style={{ color: 'var(--panel-text)' }}
-        >
-          {station.name}
-        </p>
-        <p
-          className="text-[10px] mt-0.5 leading-snug transition-colors duration-300"
-          style={{
-            color: 'var(--panel-text-secondary)',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {station.description}
-        </p>
+        <div className="flex items-center gap-2">
+          {station.logo && (
+            <img
+              src={`/${station.logo}`}
+              alt=""
+              className="w-7 h-7 rounded shrink-0 object-contain"
+              style={{
+                border: '1px solid var(--panel-border)',
+                backgroundColor: 'var(--panel-tag-bg)',
+              }}
+            />
+          )}
+          <div className="min-w-0">
+            <p
+              className="text-[12px] font-semibold leading-tight transition-colors duration-300"
+              style={{ color: 'var(--panel-text)' }}
+            >
+              {station.name}
+            </p>
+            <p
+              className="text-[10px] mt-0.5 leading-snug transition-colors duration-300"
+              style={{
+                color: 'var(--panel-text-secondary)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {station.description}
+            </p>
+          </div>
+        </div>
 
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">

@@ -73,12 +73,25 @@ const MobileStationCard = forwardRef<HTMLButtonElement, Props>(
 
         {/* Station content */}
         <div className="flex-1 py-3 pr-4">
-          <p
-            className="text-sm font-semibold leading-tight transition-colors duration-300"
-            style={{ color: 'var(--panel-text)' }}
-          >
-            {station.name}
-          </p>
+          <div className="flex items-center gap-2">
+            {station.logo && (
+              <img
+                src={`/${station.logo}`}
+                alt=""
+                className="w-6 h-6 rounded shrink-0 object-contain"
+                style={{
+                  border: '1px solid var(--panel-border)',
+                  backgroundColor: 'var(--panel-tag-bg)',
+                }}
+              />
+            )}
+            <p
+              className="text-sm font-semibold leading-tight transition-colors duration-300"
+              style={{ color: 'var(--panel-text)' }}
+            >
+              {station.name}
+            </p>
+          </div>
           <p
             className="text-xs mt-0.5 leading-snug transition-colors duration-300"
             style={{ color: 'var(--panel-text-secondary)' }}

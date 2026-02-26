@@ -26,6 +26,7 @@ export type Station = {
   labelDir?: 'above' | 'below' | 'left' | 'right';
   media?: StationMedia;
   markdown?: boolean;
+  logo?: string;
 };
 
 export type Line = {
@@ -68,6 +69,7 @@ const projectsLines: Line[] = [
         details: 'Built a distributed system for orchestrating cloud resources across multiple providers. Features auto-scaling, health monitoring, and cost optimization. Handles 10K+ deployments daily with 99.9% uptime.',
         tags: ['Go', 'Kubernetes', 'Terraform', 'AWS'],
         link: '#',
+        logo: 'logos/placeholder.svg',
         media: {
           mockup: 'dashboard',
           architecture: {

@@ -111,13 +111,26 @@ export default function StationDetail({ station, lines, onClose, onTagClick }: P
           >
             <div className="flex items-start justify-between">
               <div className="flex-1 panel-stagger-1">
-                <h2
-                  id="station-detail-title"
-                  className="text-xl font-bold mb-1 transition-colors duration-300"
-                  style={{ color: 'var(--panel-text)' }}
-                >
-                  {station.name}
-                </h2>
+                <div className="flex items-center gap-3">
+                  {station.logo && (
+                    <img
+                      src={`/${station.logo}`}
+                      alt=""
+                      className="w-8 h-8 rounded shrink-0 object-contain"
+                      style={{
+                        border: '1px solid var(--panel-border)',
+                        backgroundColor: 'var(--panel-tag-bg)',
+                      }}
+                    />
+                  )}
+                  <h2
+                    id="station-detail-title"
+                    className="text-xl font-bold mb-1 transition-colors duration-300"
+                    style={{ color: 'var(--panel-text)' }}
+                  >
+                    {station.name}
+                  </h2>
+                </div>
                 <p
                   className="text-sm transition-colors duration-300"
                   style={{ color: 'var(--panel-text-secondary)' }}
