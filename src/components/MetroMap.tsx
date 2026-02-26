@@ -22,6 +22,9 @@ import { useSound } from '../hooks/useSound';
 import StationTooltip from './StationTooltip';
 import StarField from './StarField';
 import MiniMap from './MiniMap';
+import { usePresence } from '../hooks/usePresence';
+import VisitorDots from './VisitorDots';
+import VisitorCounter from './VisitorCounter';
 
 const MAP_W = metroMap.width;
 const MAP_H = metroMap.height;
@@ -56,6 +59,12 @@ export default function MetroMap() {
   const tour = useTourMode({ svgRef, zoomRef, dimensions, reducedMotion });
   const tourActiveRef = useRef(false);
   tourActiveRef.current = tour.active;
+
+  const presence = usePresence();
+  const presenceRef = useRef(presence);
+  presenceRef.current = presence;
+  const dimensionsRef = useRef(dimensions);
+  dimensionsRef.current = dimensions;
 
   // Apply dark mode from URL on mount
   useEffect(() => {
@@ -110,6 +119,11 @@ export default function MetroMap() {
           gRef.current.setAttribute('transform', `translate(${x},${y}) scale(${k})`);
           transformRef.current = { x, y, k };
           setMiniMapTransform({ x, y, k });
+          // Report viewport center to presence server
+          const dims = dimensionsRef.current;
+          const mapCenterX = (dims.width / 2 - x) / k;
+          const mapCenterY = (dims.height / 2 - y) / k;
+          presenceRef.current.reportPosition(mapCenterX, mapCenterY);
         }
       });
 
@@ -272,6 +286,10 @@ export default function MetroMap() {
     setHoveredStation(null);
     playStationSelect();
     zoomToStation(station);
+    // Report position + ping to presence server
+    const [sx, sy] = station.position;
+    presenceRef.current.reportPosition(sx, sy);
+    presenceRef.current.sendPing(sx, sy);
     // Open detail panel after zoom transition completes
     const delay = reducedMotion ? 0 : 550;
     if (delay === 0) {
@@ -634,6 +652,9 @@ export default function MetroMap() {
           dark={dark}
         />
       )}
+      {!tour.active && (
+        <VisitorCounter count={presence.visitorCount} connected={presence.connected} />
+      )}
       <CurrentlyBar visible={!currentArea && !tour.active} />
 
       {/* Screen reader announcements */}
@@ -773,6 +794,11 @@ export default function MetroMap() {
               );
             })}
           </g>
+
+          {/* Visitor presence dots */}
+          {!tour.active && (
+            <VisitorDots visitors={presence.visitors} pings={presence.pings} reducedMotion={reducedMotion} />
+          )}
 
           {/* Tour train — rendered above all other map elements */}
           {tour.active && (

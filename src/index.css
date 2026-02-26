@@ -77,6 +77,22 @@ html, body, #root {
   transition: background-color 0.3s ease;
 }
 
+/* ── Visitor presence ── */
+
+@keyframes visitor-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.visitor-dot .visitor-label {
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+.visitor-dot:hover .visitor-label {
+  opacity: 1;
+}
+
 /* ── Reduced motion ── */
 
 @media (prefers-reduced-motion: reduce) {
