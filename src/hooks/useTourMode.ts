@@ -370,7 +370,7 @@ export function useTourMode({ svgRef, zoomRef, dimensions, reducedMotion }: UseT
         '<circle cx="18" cy="18" r="18" fill="#2563eb"/>' +
         '<text x="18" y="18" text-anchor="middle" dominant-baseline="central" ' +
         'font-family="system-ui, sans-serif" font-weight="700" font-size="13" ' +
-        'fill="#ffffff" letter-spacing="0.5">SN</text></svg>'
+        'fill="#ffffff" letter-spacing="0.5">SM</text></svg>'
     )}`;
 
     let alt = false;

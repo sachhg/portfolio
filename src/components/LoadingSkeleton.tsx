@@ -39,7 +39,7 @@ export default function LoadingSkeleton() {
             letterSpacing: 0.5,
           }}
         >
-          SN
+          SM
         </div>
         <div>
           <div
@@ -52,7 +52,7 @@ export default function LoadingSkeleton() {
               lineHeight: 1.3,
             }}
           >
-            SN Metropolitan
+            Sachit Madaan
           </div>
           <div
             style={{
@@ -63,7 +63,7 @@ export default function LoadingSkeleton() {
               textTransform: 'uppercase' as const,
             }}
           >
-            Transit Authority
+            Software Engineer
           </div>
         </div>
       </div>

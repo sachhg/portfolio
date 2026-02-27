@@ -290,7 +290,7 @@ export default function MobileBottomSheet({ station, lines, onClose, onTagClick 
                 className="text-[10px] text-center transition-colors duration-300"
                 style={{ color: 'var(--panel-text-secondary)' }}
               >
-                SN Metropolitan Transit Authority
+                SM Metropolitan Transit Authority
               </p>
             </div>
           </div>

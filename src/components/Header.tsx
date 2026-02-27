@@ -1,3 +1,5 @@
+import { SOCIAL_LINKS } from '../data/socialLinks';
+
 type Props = {
   onZoomOut: () => void;
   currentArea: string | null;
@@ -10,6 +12,30 @@ type Props = {
   onToggleSound?: () => void;
 };
 
+const socialButtonClass =
+  'pointer-events-auto relative group/social flex items-center justify-center w-8 h-8 rounded-full shadow-sm hover:shadow transition-all duration-300';
+
+const socialButtonStyle = {
+  backgroundColor: 'var(--map-area-label-bg)',
+  color: 'var(--map-text)',
+  border: '1px solid var(--map-area-label-border)',
+};
+
+function SocialTooltip({ label }: { label: string }) {
+  return (
+    <span
+      className="absolute top-full mt-2 px-2 py-0.5 rounded text-[9px] font-medium opacity-0 group-hover/social:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap"
+      style={{
+        backgroundColor: 'var(--map-area-label-bg)',
+        color: 'var(--map-text)',
+        border: '1px solid var(--map-area-label-border)',
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
 export default function Header({ onZoomOut, currentArea, dark, onToggleTheme, onStartTour, tourActive, isSearchActive, soundEnabled, onToggleSound }: Props) {
   return (
     <div
@@ -17,28 +43,91 @@ export default function Header({ onZoomOut, currentArea, dark, onToggleTheme, on
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
       <div className="flex items-center justify-between p-4">
-        {/* Transit Authority Branding */}
+        {/* Identity */}
         <button
           className="pointer-events-auto flex items-center gap-3 cursor-pointer select-none bg-transparent border-none p-0"
           onClick={onZoomOut}
-          aria-label="SN Metropolitan Transit Authority — return to full map"
+          aria-label="Sachit Madaan — return to full map"
         >
           <div className="w-9 h-9 rounded-full bg-[#1a1a1a] dark:bg-[#e5e1db] flex items-center justify-center shrink-0 shadow-sm transition-colors duration-300">
             <span className="text-white dark:text-[#0d1117] font-bold text-xs tracking-tight transition-colors duration-300">
-              SN
+              SM
             </span>
           </div>
           <div className="text-left">
             <h1 className="text-xs font-bold text-[#1a1a1a] dark:text-[#e5e1db] leading-tight tracking-[0.15em] uppercase transition-colors duration-300">
-              SN Metropolitan
+              Sachit Madaan
             </h1>
             <p className="text-[9px] text-gray-400 dark:text-gray-500 font-semibold tracking-[0.2em] uppercase transition-colors duration-300">
-              Transit Authority
+              Software Engineer
             </p>
           </div>
         </button>
 
         <div className="flex items-center gap-2">
+          {/* Social Links */}
+          <a
+            href={SOCIAL_LINKS.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={socialButtonClass}
+            style={socialButtonStyle}
+            aria-label="GitHub"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M6 15c0-1 0-2.5 0-3.2 0-.6.2-1.1.6-1.5-2.2-.2-4.1-1.1-4.1-4.8 0-1 .4-2 1-2.7-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.8-1.3 2.6-1 2.6-1 .5 1.3.2 2.3.1 2.6.6.7 1 1.6 1 2.7 0 3.7-2 4.6-4.1 4.8.3.3.5.9.5 1.8V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <SocialTooltip label="GitHub" />
+          </a>
+
+          <a
+            href={SOCIAL_LINKS.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={socialButtonClass}
+            style={socialButtonStyle}
+            aria-label="LinkedIn"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M5.5 7v3.5M8 10.5V8.5a1.5 1.5 0 0 1 3 0v2M5.5 5v.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <SocialTooltip label="LinkedIn" />
+          </a>
+
+          <a
+            href={SOCIAL_LINKS.email}
+            className={socialButtonClass}
+            style={socialButtonStyle}
+            aria-label="Email"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M2 4.5l6 4.5 6-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <SocialTooltip label="Email" />
+          </a>
+
+          <a
+            href={SOCIAL_LINKS.resume}
+            download
+            className={socialButtonClass}
+            style={socialButtonStyle}
+            aria-label="Download Resume"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2v8M4.5 7.5 8 11l3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M3 13.5h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            <SocialTooltip label="Resume" />
+          </a>
+
+          {/* Divider */}
+          <div
+            className="w-px h-4 pointer-events-none"
+            style={{ backgroundColor: 'var(--map-area-label-border)' }}
+          />
+
           {/* Day/Night Service Toggle */}
           <button
             className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-sm hover:shadow transition-all duration-300 text-[10px] font-semibold uppercase tracking-wider"
