@@ -6,7 +6,7 @@ export type StatusItem = {
 };
 
 export const currentlyItems: StatusItem[] = [
-  { label: 'Building at', value: 'Company', link: 'https://example.com', emoji: '🔨' },
-  { label: 'Listening to', value: 'Album — Artist', emoji: '🎵' },
-  { label: 'Reading', value: 'Book Title', link: 'https://example.com', emoji: '📖' },
+  { label: 'Building at', value: 'Conmitto Inc.', link: 'https://conmitto.io/dock-optimizer', emoji: '🔨' },
+  { label: 'Listening to', value: 'Starboy - The Weeknd', emoji: '🎵' },
+  { label: 'Reading', value: 'Atomic Habits by James Clear', link: 'https://jamesclear.com/atomic-habits', emoji: '📖' },
 ];
