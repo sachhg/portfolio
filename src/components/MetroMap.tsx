@@ -36,6 +36,7 @@ export default function MetroMap() {
   const gRef = useRef<SVGGElement>(null);
   const gridRef = useRef<SVGRectElement>(null);
   const zoomRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
+  const preStationTransformRef = useRef<import('d3-zoom').ZoomTransform | null>(null);
   // Read URL params once on mount for initial state
   const initialUrl = useRef(readUrlState());
   const [selectedStation, setSelectedStation] = useState<Station | null>(() => {
@@ -282,6 +283,10 @@ export default function MetroMap() {
 
   const handleStationSelect = useCallback((station: Station) => {
     if (tourActiveRef.current) return;
+    // Save current transform so we can restore it when the panel is closed
+    if (svgRef.current) {
+      preStationTransformRef.current = zoomTransform(svgRef.current);
+    }
     navLineRef.current = null;
     setHoveredStation(null);
     playStationSelect();
@@ -303,11 +308,23 @@ export default function MetroMap() {
     setHoveredStation(station);
   }, []);
 
+  const handleCloseStation = useCallback(() => {
+    setSelectedStation(null);
+    // Restore pre-station zoom/pan
+    const svg = svgRef.current;
+    const zb = zoomRef.current;
+    const saved = preStationTransformRef.current;
+    if (svg && zb && saved) {
+      select(svg).transition().duration(reducedMotion ? 0 : 500).call(zb.transform, saved);
+      preStationTransformRef.current = null;
+    }
+  }, [reducedMotion]);
+
   const handleBackgroundClick = useCallback(() => {
     if (tourActiveRef.current) return;
-    if (selectedStation) setSelectedStation(null);
+    if (selectedStation) handleCloseStation();
     if (focusedLineId) setFocusedLineId(null);
-  }, [selectedStation, focusedLineId]);
+  }, [selectedStation, focusedLineId, handleCloseStation]);
 
   const handleArrowNav = useCallback((key: string) => {
     if (!selectedStation) {
@@ -548,6 +565,9 @@ export default function MetroMap() {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
+      // Let browser handle Cmd/Ctrl shortcuts (e.g. Cmd+1 for tab switching)
+      if (e.metaKey || e.ctrlKey) return;
+
       // ? — toggle keyboard help
       if (e.key === '?') {
         e.preventDefault();
@@ -602,7 +622,7 @@ export default function MetroMap() {
         onSearch={handleSearch}
         selectedStation={selectedStation}
         onSelectStation={handleStationSelect}
-        onCloseStation={() => setSelectedStation(null)}
+        onCloseStation={handleCloseStation}
         searchResults={searchResults}
         allStationsDeduped={allStationsDeduped}
         reducedMotion={reducedMotion}
@@ -830,7 +850,7 @@ export default function MetroMap() {
             ? 'opacity-100 bg-black/5 dark:bg-black/20'
             : 'opacity-0 pointer-events-none'
         }`}
-        onClick={() => setSelectedStation(null)}
+        onClick={handleCloseStation}
         role="presentation"
         aria-hidden="true"
       />
@@ -838,7 +858,7 @@ export default function MetroMap() {
       <StationDetail
         station={selectedStation}
         lines={selectedStationLines}
-        onClose={() => setSelectedStation(null)}
+        onClose={handleCloseStation}
         onTagClick={(tag) => {
           setSelectedStation(null);
           setSearchQuery(tag);
