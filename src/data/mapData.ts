@@ -1001,12 +1001,28 @@ const connectorLines: Line[] = [
         isInterchange: true,
       },
       {
-        id: 'c-press-square',
-        name: 'Press Square',
+        id: 'about',
+        name: 'About Me',
         position: [580, 210],
-        description: 'Northern approach to the Blog district',
-        details: 'Connector station linking the north corridor to the Blog district center.',
-        tags: ['Connector', 'Blog Corridor'],
+        description: 'CS Student at UC Santa Barbara · Open to SWE Internships',
+        details: [
+          "Hi, I'm **Sachit Madaan** — a Computer Science student at **UC Santa Barbara**.",
+          '',
+          "I build distributed systems and interactive interfaces, and I'm always looking for the elegant solution hiding inside a complex problem. Currently seeking **Summer 2026 SWE internships** where I can contribute to real products and learn from great engineers.",
+          '',
+          'When I\'m not writing code, you\'ll probably find me exploring new music, tinkering with side projects, or going down rabbit holes on how things work under the hood.',
+          '',
+          '---',
+          '',
+          '**Get in touch**',
+          '',
+          '- [GitHub](https://github.com/sachhg)',
+          '- [LinkedIn](https://linkedin.com/in/madaan-sachit)',
+          '- [Email](mailto:sachhg21@gmail.com)',
+        ].join('\n'),
+        markdown: true,
+        tags: ['Open to Opportunities', 'SWE Intern', 'Summer 2026'],
+        labelDir: 'right' as const,
       },
       {
         id: 'c-blog-central',
@@ -1036,6 +1052,7 @@ const connectorLines: Line[] = [
       },
     ],
   },
+
 ];
 
 // ============================================================

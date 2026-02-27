@@ -15,7 +15,9 @@ type Props = {
 
 const STATION_RADIUS = 4.5;
 const INTERCHANGE_RADIUS = 6.5;
+const ABOUT_RADIUS = 8;
 const LABEL_GAP = 8;
+const ABOUT_COLOR = '#D4A017';
 
 function StationComponent({
   station,
@@ -30,8 +32,9 @@ function StationComponent({
 }: Props) {
   const [hovered, setHovered] = useState(false);
   const [x, y] = station.position;
+  const isAbout = station.id === 'about';
   const isInterchange = station.isInterchange || lines.length > 1;
-  const r = isInterchange ? INTERCHANGE_RADIUS : STATION_RADIUS;
+  const r = isAbout ? ABOUT_RADIUS : isInterchange ? INTERCHANGE_RADIUS : STATION_RADIUS;
   const dir = station.labelDir ?? 'above';
 
   let lx = x;
@@ -90,6 +93,43 @@ function StationComponent({
       onMouseLeave={() => { setHovered(false); onHover?.(null); }}
     >
       <circle cx={x} cy={y} r={r + 10} fill="transparent" />
+
+      {/* About station — persistent pulsing beacon */}
+      {isAbout && !reducedMotion && (
+        <circle
+          cx={x}
+          cy={y}
+          r={r + 4}
+          fill="none"
+          stroke={ABOUT_COLOR}
+          strokeWidth={1.5}
+          opacity={0.5}
+        >
+          <animate
+            attributeName="r"
+            values={`${r + 4};${r + 14};${r + 4}`}
+            dur="3s"
+            repeatCount="indefinite"
+          />
+          <animate
+            attributeName="opacity"
+            values="0.5;0;0.5"
+            dur="3s"
+            repeatCount="indefinite"
+          />
+        </circle>
+      )}
+      {isAbout && reducedMotion && (
+        <circle
+          cx={x}
+          cy={y}
+          r={r + 5}
+          fill="none"
+          stroke={ABOUT_COLOR}
+          strokeWidth={1.5}
+          opacity={0.25}
+        />
+      )}
 
       {/* Hover pulse ripple — gentle continuous sonar while hovering */}
       {hovered && !highlighted && !reducedMotion && (
@@ -173,7 +213,31 @@ function StationComponent({
         />
       )}
 
-      {isInterchange ? (
+      {isAbout ? (
+        <>
+          <circle
+            cx={x}
+            cy={y}
+            r={ABOUT_RADIUS}
+            style={{
+              fill: isSelected ? ABOUT_COLOR : 'var(--map-station-fill)',
+              stroke: ABOUT_COLOR,
+              transition: 'fill 0.3s ease, stroke 0.3s ease',
+              filter: `drop-shadow(0 0 4px ${ABOUT_COLOR})`,
+            }}
+            strokeWidth={2.5}
+          />
+          {!isSelected && (
+            <circle
+              cx={x}
+              cy={y}
+              r={3}
+              style={{ fill: ABOUT_COLOR }}
+              opacity={0.6}
+            />
+          )}
+        </>
+      ) : isInterchange ? (
         <>
           <circle
             cx={x}
@@ -216,11 +280,12 @@ function StationComponent({
         y={ly}
         textAnchor={anchor}
         dominantBaseline={baseline === 'hanging' ? 'hanging' : 'auto'}
-        fontSize={7}
+        fontSize={isAbout ? 9 : 7}
         fontFamily="'Inter', sans-serif"
-        fontWeight={isSelected ? 600 : 500}
+        fontWeight={isAbout ? 700 : isSelected ? 600 : 500}
+        letterSpacing={isAbout ? 0.5 : undefined}
         style={{
-          fill: 'var(--map-text)',
+          fill: isAbout ? ABOUT_COLOR : 'var(--map-text)',
           userSelect: 'none',
           pointerEvents: 'none',
           transition: 'fill 0.3s ease',

@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import type { Station, Line } from '../data/mapData';
+import { SOCIAL_LINKS } from '../data/socialLinks';
 import StationMediaPanel from './media/StationMediaPanel';
 
 const MarkdownContent = lazy(() => import('./MarkdownContent'));
@@ -265,6 +266,79 @@ export default function StationDetail({ station, lines, onClose, onTagClick }: P
               </div>
             )}
           </div>
+
+          {/* About station — social links row */}
+          {station.id === 'about' && (
+            <div
+              className="px-5 py-4 flex items-center gap-2 panel-stagger-5"
+              style={{ borderTop: '1px solid var(--panel-border-light)' }}
+            >
+              <a
+                href={SOCIAL_LINKS.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors duration-200"
+                style={{
+                  backgroundColor: 'var(--panel-tag-bg)',
+                  color: 'var(--panel-text)',
+                  border: '1px solid var(--panel-border)',
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 15c0-1 0-2.5 0-3.2 0-.6.2-1.1.6-1.5-2.2-.2-4.1-1.1-4.1-4.8 0-1 .4-2 1-2.7-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.8-1.3 2.6-1 2.6-1 .5 1.3.2 2.3.1 2.6.6.7 1 1.6 1 2.7 0 3.7-2 4.6-4.1 4.8.3.3.5.9.5 1.8V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                GitHub
+              </a>
+              <a
+                href={SOCIAL_LINKS.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors duration-200"
+                style={{
+                  backgroundColor: 'var(--panel-tag-bg)',
+                  color: 'var(--panel-text)',
+                  border: '1px solid var(--panel-border)',
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                  <rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M5.5 7v3.5M8 10.5V8.5a1.5 1.5 0 0 1 3 0v2M5.5 5v.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                LinkedIn
+              </a>
+              <a
+                href={SOCIAL_LINKS.email}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors duration-200"
+                style={{
+                  backgroundColor: 'var(--panel-tag-bg)',
+                  color: 'var(--panel-text)',
+                  border: '1px solid var(--panel-border)',
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                  <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M2 4.5l6 4.5 6-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Email
+              </a>
+              <a
+                href={SOCIAL_LINKS.resume}
+                download
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors duration-200"
+                style={{
+                  backgroundColor: 'var(--panel-tag-bg)',
+                  color: 'var(--panel-text)',
+                  border: '1px solid var(--panel-border)',
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 2v8M4.5 7.5 8 11l3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M3 13.5h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                Resume
+              </a>
+            </div>
+          )}
 
           {/* Footer */}
           <div
