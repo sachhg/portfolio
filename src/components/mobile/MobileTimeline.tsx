@@ -215,6 +215,45 @@ export default function MobileTimeline({
 
       {/* Scrollable timeline */}
       <div className="flex-1 overflow-y-auto mobile-timeline-scroll">
+        {/* Profile card — mobile business card */}
+        <div
+          className="px-4 py-3 transition-colors duration-300"
+          style={{
+            borderBottom: '1px solid var(--panel-border)',
+            fontFamily: "'Inter', sans-serif",
+          }}
+        >
+          <p
+            className="text-[12px] leading-relaxed transition-colors duration-300"
+            style={{ color: 'var(--panel-text-secondary)' }}
+          >
+            CS student at UC Santa Barbara seeking Summer 2026 SWE internships.
+            I build distributed systems and interactive interfaces.
+          </p>
+          {/* Quick-nav pills */}
+          <div className="flex gap-1.5 mt-2.5 overflow-x-auto">
+            {metroMap.areas.map((area) => (
+              <button
+                key={area.id}
+                onClick={() => {
+                  document.getElementById(`area-heading-${area.id}`)?.scrollIntoView({
+                    behavior: reducedMotion ? 'auto' : 'smooth',
+                    block: 'start',
+                  });
+                }}
+                className="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide transition-colors duration-200"
+                style={{
+                  backgroundColor: area.lines[0].color + '18',
+                  color: area.lines[0].color,
+                  border: `1px solid ${area.lines[0].color}40`,
+                }}
+              >
+                {area.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {metroMap.areas.map((area) => (
           <MobileAreaSection
             key={area.id}
