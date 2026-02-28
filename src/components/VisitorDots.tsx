@@ -1,23 +1,33 @@
 import type { Visitor, Ping } from '../hooks/usePresence';
+import type { Station } from '../data/mapData';
+
+const NEAR_RADIUS = 15;
 
 type Props = {
   visitors: Visitor[];
   pings: Ping[];
   reducedMotion: boolean;
+  hoveredStation?: Station | null;
 };
 
-export default function VisitorDots({ visitors, pings, reducedMotion }: Props) {
+export default function VisitorDots({ visitors, pings, reducedMotion, hoveredStation }: Props) {
   return (
     <g role="presentation" aria-hidden="true">
-      {visitors.map((v) => (
-        <g key={v.id} className="visitor-dot">
+      {visitors.map((v) => {
+        // Suppress this visitor's hover label when the station tooltip already shows it
+        const nearHovered = hoveredStation
+          && Math.abs(v.x - hoveredStation.position[0]) < NEAR_RADIUS
+          && Math.abs(v.y - hoveredStation.position[1]) < NEAR_RADIUS;
+
+        return (
+        <g key={v.id} className={nearHovered ? '' : 'visitor-dot'}>
           {/* Hover target — larger invisible circle for easier hover */}
           <circle
             cx={v.x}
             cy={v.y}
             r={12}
             fill="transparent"
-            style={{ cursor: 'default' }}
+            style={{ cursor: 'default', pointerEvents: nearHovered ? 'none' : undefined }}
           />
           {/* Outer glow ring */}
           <circle
@@ -79,7 +89,8 @@ export default function VisitorDots({ visitors, pings, reducedMotion }: Props) {
             </text>
           </g>
         </g>
-      ))}
+        );
+      })}
 
       {!reducedMotion && pings.map((p) => (
         <circle

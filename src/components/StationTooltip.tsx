@@ -1,12 +1,14 @@
 import type { Station } from '../data/mapData';
+import type { Visitor } from '../hooks/usePresence';
 
 type Props = {
   station: Station;
   x: number;
   y: number;
+  visitorsHere?: Visitor[];
 };
 
-export default function StationTooltip({ station, x, y }: Props) {
+export default function StationTooltip({ station, x, y, visitorsHere = [] }: Props) {
   const tags = station.tags?.slice(0, 3) ?? [];
 
   return (
@@ -75,6 +77,28 @@ export default function StationTooltip({ station, x, y }: Props) {
                 {tag}
               </span>
             ))}
+          </div>
+        )}
+
+        {visitorsHere.length > 0 && (
+          <div
+            className="flex items-center gap-1.5 mt-1.5 text-[9px] transition-colors duration-300"
+            style={{ color: 'var(--panel-text-secondary)' }}
+          >
+            <span className="flex gap-0.5">
+              {visitorsHere.slice(0, 3).map((v) => (
+                <span
+                  key={v.id}
+                  className="inline-block w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: v.color }}
+                />
+              ))}
+            </span>
+            <span style={{ opacity: 0.7 }}>
+              {visitorsHere.length === 1
+                ? `Visitor #${visitorsHere[0].number} is here`
+                : `${visitorsHere.length} visitors here`}
+            </span>
           </div>
         )}
 

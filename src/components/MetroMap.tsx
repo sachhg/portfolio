@@ -817,7 +817,7 @@ export default function MetroMap() {
 
           {/* Visitor presence dots */}
           {!tour.active && (
-            <VisitorDots visitors={presence.visitors} pings={presence.pings} reducedMotion={reducedMotion} />
+            <VisitorDots visitors={presence.visitors} pings={presence.pings} reducedMotion={reducedMotion} hoveredStation={hoveredStation} />
           )}
 
           {/* Tour train — rendered above all other map elements */}
@@ -835,11 +835,16 @@ export default function MetroMap() {
 
       {hoveredStation && !selectedStation && !tour.active && svgRef.current && (() => {
         const t = zoomTransform(svgRef.current!);
+        const [hx, hy] = hoveredStation.position;
+        const visitorsHere = presence.visitors.filter(
+          (v) => Math.abs(v.x - hx) < 15 && Math.abs(v.y - hy) < 15,
+        );
         return (
           <StationTooltip
             station={hoveredStation}
-            x={hoveredStation.position[0] * t.k + t.x}
-            y={hoveredStation.position[1] * t.k + t.y}
+            x={hx * t.k + t.x}
+            y={hy * t.k + t.y}
+            visitorsHere={visitorsHere}
           />
         );
       })()}
