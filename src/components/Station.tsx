@@ -15,6 +15,7 @@ type Props = {
 
 const STATION_RADIUS = 4.5;
 const INTERCHANGE_RADIUS = 6.5;
+const FEATURED_RADIUS = 5.5;
 const ABOUT_RADIUS = 8;
 const LABEL_GAP = 8;
 const ABOUT_COLOR = '#D4A017';
@@ -33,8 +34,9 @@ function StationComponent({
   const [hovered, setHovered] = useState(false);
   const [x, y] = station.position;
   const isAbout = station.id === 'about';
+  const isFeatured = !!station.featured;
   const isInterchange = station.isInterchange || lines.length > 1;
-  const r = isAbout ? ABOUT_RADIUS : isInterchange ? INTERCHANGE_RADIUS : STATION_RADIUS;
+  const r = isAbout ? ABOUT_RADIUS : isInterchange ? INTERCHANGE_RADIUS : isFeatured ? FEATURED_RADIUS : STATION_RADIUS;
   const dir = station.labelDir ?? 'above';
 
   let lx = x;
@@ -259,6 +261,21 @@ function StationComponent({
             />
           )}
         </>
+      ) : isFeatured ? (
+        <circle
+          cx={x}
+          cy={y}
+          r={FEATURED_RADIUS}
+          style={{
+            fill: isSelected
+              ? 'var(--map-station-selected)'
+              : 'var(--map-station-fill)',
+            transition: 'fill 0.3s ease',
+            filter: `drop-shadow(0 0 3px ${lines[0]?.color ?? '#888'})`,
+          }}
+          stroke={lines[0]?.color ?? 'var(--map-interchange-stroke)'}
+          strokeWidth={2.5}
+        />
       ) : (
         <circle
           cx={x}

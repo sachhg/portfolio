@@ -25,6 +25,7 @@ import MiniMap from './MiniMap';
 import { usePresence } from '../hooks/usePresence';
 import VisitorDots from './VisitorDots';
 import VisitorCounter from './VisitorCounter';
+import FeaturedCard from './FeaturedCard';
 
 const MAP_W = metroMap.width;
 const MAP_H = metroMap.height;
@@ -814,6 +815,30 @@ export default function MetroMap() {
               );
             })}
           </g>
+
+          {/* Featured station annotation cards */}
+          {allStationsDeduped
+            .filter(({ station }) => station.featured)
+            .map(({ station, lines: stLines }) => {
+              const posKey = `${station.position[0]},${station.position[1]}`;
+              const isMatch = searchResults?.matchingPositions.has(posKey) ?? false;
+              const onActiveLine = activeLineId ? stLines.some((l) => l.id === activeLineId) : false;
+              return (
+                <FeaturedCard
+                  key={`fc-${station.id}`}
+                  station={station}
+                  lines={stLines}
+                  dimmed={
+                    (isSearchActive && !isMatch) ||
+                    (!!activeLineId && !onActiveLine)
+                  }
+                  hidden={
+                    selectedStation?.position[0] === station.position[0] &&
+                    selectedStation?.position[1] === station.position[1]
+                  }
+                />
+              );
+            })}
 
           {/* Visitor presence dots */}
           {!tour.active && (

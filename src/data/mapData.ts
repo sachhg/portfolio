@@ -27,6 +27,8 @@ export type Station = {
   media?: StationMedia;
   markdown?: boolean;
   logo?: string;
+  /** Featured stations get a persistent annotation card on the map */
+  featured?: { metric: string };
 };
 
 export type Line = {
@@ -69,6 +71,7 @@ const projectsLines: Line[] = [
         details: 'Built a distributed system for orchestrating cloud resources across multiple providers. Features auto-scaling, health monitoring, and cost optimization. Handles 10K+ deployments daily with 99.9% uptime.',
         tags: ['Go', 'Kubernetes', 'Terraform', 'AWS'],
         logo: 'logos/project.svg',
+        featured: { metric: '10K+ deploys/day' },
         media: {
           mockup: 'dashboard',
           architecture: {
@@ -99,6 +102,7 @@ const projectsLines: Line[] = [
         details: 'Designed and implemented a streaming data pipeline processing 2M+ events/sec. Integrates with Kafka, Spark, and custom ML models for real-time anomaly detection and alerting.',
         tags: ['Python', 'Apache Kafka', 'Spark', 'Redis'],
         logo: 'logos/project.svg',
+        featured: { metric: '2M+ events/sec' },
         isInterchange: true,
         media: {
           mockup: 'pipeline-monitor',
@@ -169,6 +173,7 @@ const projectsLines: Line[] = [
         details: 'Feature-rich mobile app with offline support, push notifications, and biometric authentication. 50K+ downloads with 4.7 star rating across both platforms.',
         tags: ['React Native', 'TypeScript', 'Firebase'],
         logo: 'logos/project.svg',
+        featured: { metric: '50K+ downloads, 4.7★' },
         media: {
           mockup: 'mobile-app',
         },
@@ -372,6 +377,7 @@ const experienceLines: Line[] = [
         tags: ['2018–2022', 'Innovation', 'Rapid Prototyping'],
         logo: 'logos/experience.svg',
         labelDir: 'below',
+        featured: { metric: '3x winner — HackMIT, TreeHacks' },
       },
       {
         id: 'e-mid-dr',
@@ -390,6 +396,7 @@ const experienceLines: Line[] = [
         details: 'Research assistant in the HCI lab focused on novel interaction paradigms. Co-authored a paper on gesture-based interfaces published at CHI 2020.',
         tags: ['2018–2019', 'HCI', 'Research'],
         logo: 'logos/experience.svg',
+        featured: { metric: 'Published at CHI 2020' },
       },
     ],
   },
