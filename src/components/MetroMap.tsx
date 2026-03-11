@@ -836,6 +836,8 @@ export default function MetroMap() {
                     selectedStation?.position[0] === station.position[0] &&
                     selectedStation?.position[1] === station.position[1]
                   }
+                  onSelect={handleStationSelect}
+                  onHover={handleStationHover}
                 />
               );
             })}
