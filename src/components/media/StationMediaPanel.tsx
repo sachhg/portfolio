@@ -10,7 +10,7 @@ type Props = {
 
 export default function StationMediaPanel({ media, compact = false }: Props) {
   return (
-    <div className={`flex flex-col ${compact ? 'gap-3' : 'gap-4'} mt-4 mb-2`}>
+    <div className={`flex flex-col ${compact ? 'gap-3' : 'gap-4'}`}>
       {media.mockup && <MockupFrame type={media.mockup} compact={compact} />}
       {media.architecture && (
         <ArchitectureDiagram diagram={media.architecture} compact={compact} />
