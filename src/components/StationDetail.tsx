@@ -84,7 +84,7 @@ export default function StationDetail({ station, lines, onClose, onTagClick }: P
       aria-labelledby={station ? 'station-detail-title' : undefined}
       aria-hidden={!station}
       onKeyDown={handleKeyDown}
-      className={`fixed top-0 right-0 h-full w-full max-w-md shadow-2xl z-50 transition-transform duration-500 ${
+      className={`fixed top-3 right-3 h-[calc(100%-24px)] w-full max-w-md shadow-2xl z-50 rounded-xl overflow-hidden transition-transform duration-500 ${
         station ? 'translate-x-0' : 'translate-x-full'
       }`}
       style={{
