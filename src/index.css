@@ -118,6 +118,16 @@ g[role="button"]:focus-visible {
   outline: none;
 }
 
+/* ── Area label hover ── */
+
+.area-label .area-label-underline {
+  transition: opacity 0.25s ease;
+}
+
+.area-label:hover .area-label-underline {
+  opacity: 0.9 !important;
+}
+
 /* ── Map canvas cursor — transit crosshair ── */
 
 .map-canvas {

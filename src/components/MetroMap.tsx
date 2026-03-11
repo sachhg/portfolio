@@ -918,16 +918,52 @@ function AreaLabel({
   area: MetroArea;
   onClick: () => void;
 }) {
-  const [cx, cy] = area.center;
-  const [ox, oy] = area.labelOffset ?? [0, 0];
-  const lx = cx + ox;
-  const ly = cy + oy;
+  const color = area.lines[0]?.color ?? '#888';
+
+  // Compute bounding box of all stations in this area
+  let minX = Infinity;
+  let minY = Infinity;
+  let stationCount = 0;
+  const positionsSeen = new Set<string>();
+  for (const line of area.lines) {
+    for (const station of line.stations) {
+      const key = `${station.position[0]},${station.position[1]}`;
+      if (!positionsSeen.has(key)) {
+        positionsSeen.add(key);
+        stationCount++;
+      }
+      minX = Math.min(minX, station.position[0]);
+      minY = Math.min(minY, station.position[1]);
+    }
+  }
+
+  // Anchor to top-left corner of the area's bounding region
+  const lx = minX - 20;
+  const ly = minY - 28;
+  const lineCount = area.lines.length;
+
+  // Find the top featured metric for this area (if any)
+  let featuredMetric: string | null = null;
+  for (const line of area.lines) {
+    for (const station of line.stations) {
+      if (station.featured) {
+        featuredMetric = station.featured.metric;
+        break;
+      }
+    }
+    if (featuredMetric) break;
+  }
+
+  const subtitle = featuredMetric ?? `${lineCount} line${lineCount !== 1 ? 's' : ''} · ${stationCount} station${stationCount !== 1 ? 's' : ''}`;
+
+  // Estimate text width for underline
+  const textW = area.name.length * 8 + 10;
 
   return (
     <g
       tabIndex={0}
       role="button"
-      aria-label={`${area.name} area. Click to zoom in.`}
+      aria-label={`${area.name} area. ${subtitle}. Click to zoom in.`}
       onClick={(e) => {
         e.stopPropagation();
         onClick();
@@ -940,49 +976,71 @@ function AreaLabel({
         }
       }}
       style={{ cursor: 'pointer', outline: 'none' }}
+      className="area-label"
     >
       {/* Focus ring */}
       <rect
         className="focus-ring"
-        x={lx - 93}
-        y={ly - 17}
-        width={186}
-        height={34}
-        rx={17}
+        x={lx - 4}
+        y={ly - 12}
+        width={textW + 8}
+        height={30}
+        rx={3}
         fill="none"
         stroke="var(--map-interchange-stroke)"
         strokeWidth={2}
         strokeDasharray="4 2"
       />
-      <rect
-        x={lx - 90}
-        y={ly - 14}
-        width={180}
-        height={28}
-        rx={14}
-        style={{
-          fill: 'var(--map-area-label-bg)',
-          stroke: 'var(--map-area-label-border)',
-          transition: 'fill 0.3s ease, stroke 0.3s ease',
-        }}
-        strokeWidth={1}
-      />
+
+      {/* Area name — plain bold text, left-aligned */}
       <text
         x={lx}
         y={ly}
-        textAnchor="middle"
-        dominantBaseline="central"
+        textAnchor="start"
+        dominantBaseline="auto"
         fontSize={11}
-        fontWeight={700}
+        fontWeight={800}
         fontFamily="'Inter', sans-serif"
         style={{
-          fill: 'var(--map-area-label-text)',
+          fill: color,
           userSelect: 'none',
           transition: 'fill 0.3s ease',
         }}
-        letterSpacing="2.5"
+        letterSpacing="2"
       >
         {area.name}
+      </text>
+
+      {/* Colored underline */}
+      <line
+        x1={lx}
+        y1={ly + 3}
+        x2={lx + textW}
+        y2={ly + 3}
+        stroke={color}
+        strokeWidth={2}
+        opacity={0.5}
+        className="area-label-underline"
+      />
+
+      {/* Subtitle — featured metric or line/station count */}
+      <text
+        x={lx}
+        y={ly + 15}
+        textAnchor="start"
+        dominantBaseline="auto"
+        fontSize={7}
+        fontWeight={500}
+        fontFamily="'Inter', sans-serif"
+        style={{
+          fill: 'var(--map-text)',
+          userSelect: 'none',
+          opacity: 0.45,
+          transition: 'fill 0.3s ease',
+        }}
+        letterSpacing="0.3"
+      >
+        {subtitle}
       </text>
     </g>
   );
