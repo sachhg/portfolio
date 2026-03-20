@@ -17,13 +17,7 @@ function getSegmentLength(a: Point, b: Point): number {
   return Math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2);
 }
 
-function getTotalLength(path: Point[]): number {
-  let total = 0;
-  for (let i = 0; i < path.length - 1; i++) {
-    total += getSegmentLength(path[i], path[i + 1]);
-  }
-  return total;
-}
+
 
 function getPointAtDistance(path: Point[], distance: number): Point {
   let remaining = distance;
@@ -117,7 +111,6 @@ export function useTourMode({ svgRef, zoomRef, dimensions, reducedMotion }: UseT
 
   // Pre-computed
   const waypointDists = useRef(getCumulativeDistances(TOUR_WAYPOINTS));
-  const totalLength = useRef(getTotalLength(TOUR_WAYPOINTS));
 
   // ── Camera helpers ──
 

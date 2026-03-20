@@ -123,8 +123,10 @@ export default function Train({ path, color, speed = 40, delay = 0, pauseAtStati
       const point = getPointAtDistance(path, actualDist);
 
       // Direct DOM update — bypasses React reconciliation
-      el.setAttribute('cx', String(point[0]));
-      el.setAttribute('cy', String(point[1]));
+      if (el) {
+        el.setAttribute('cx', String(point[0]));
+        el.setAttribute('cy', String(point[1]));
+      }
 
       rafRef.current = requestAnimationFrame(animate);
     }
