@@ -10,6 +10,8 @@ type Props = {
   isSearchActive?: boolean;
   soundEnabled?: boolean;
   onToggleSound?: () => void;
+  isListView?: boolean;
+  onToggleListView?: () => void;
 };
 
 const socialButtonClass =
@@ -36,7 +38,7 @@ function SocialTooltip({ label }: { label: string }) {
   );
 }
 
-export default function Header({ onZoomOut, currentArea, dark, onToggleTheme, onStartTour, tourActive, isSearchActive, soundEnabled, onToggleSound }: Props) {
+export default function Header({ onZoomOut, currentArea, dark, onToggleTheme, onStartTour, tourActive, isSearchActive, soundEnabled, onToggleSound, isListView, onToggleListView }: Props) {
   return (
     <div
       className="absolute top-0 left-0 right-0 z-30 pointer-events-none"
@@ -156,6 +158,25 @@ export default function Header({ onZoomOut, currentArea, dark, onToggleTheme, on
               </>
             )}
           </button>
+
+          {/* Express Route Toggle */}
+          {onToggleListView && (
+            <button
+              className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-sm hover:shadow transition-all duration-300 text-[10px] font-semibold uppercase tracking-wider"
+              style={{
+                backgroundColor: isListView ? 'var(--map-station-selected)' : 'var(--map-area-label-bg)',
+                color: isListView ? 'var(--map-bg)' : 'var(--map-text)',
+                border: '1px solid var(--map-area-label-border)',
+              }}
+              onClick={onToggleListView}
+              aria-label={isListView ? 'Switch to Map view' : 'Switch to Express Route list view'}
+            >
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              {isListView ? 'Map' : 'Express'}
+            </button>
+          )}
 
           {/* Sound toggle */}
           {onToggleSound && (

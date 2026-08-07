@@ -9,6 +9,7 @@ import LinePath from './LinePath';
 import StationComponent from './Station';
 import StationDetail from './StationDetail';
 import Legend from './Legend';
+import ListView from './ListView';
 import Header from './Header';
 import SearchBar from './SearchBar';
 import { useReducedMotion } from '../hooks/useReducedMotion';
@@ -47,6 +48,7 @@ export default function MetroMap() {
   const [currentArea, setCurrentArea] = useState<string | null>(() => initialUrl.current.area);
   const [dark, setDark] = useState(() => initialUrl.current.theme === 'dark');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isListView, setIsListView] = useState(false);
   const [hoveredLineId, setHoveredLineId] = useState<string | null>(null);
   const [focusedLineId, setFocusedLineId] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -305,8 +307,21 @@ export default function MetroMap() {
     }
   }, [playStationSelect, zoomToStation, reducedMotion]);
 
+  const hoverTimeoutRef = useRef<number | null>(null);
+
   const handleStationHover = useCallback((station: Station | null) => {
-    setHoveredStation(station);
+    if (hoverTimeoutRef.current !== null) {
+      window.clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    
+    if (station) {
+      setHoveredStation(station);
+    } else {
+      hoverTimeoutRef.current = window.setTimeout(() => {
+        setHoveredStation(null);
+      }, 300); // 300ms delay before hiding tooltip to allow mouse movement
+    }
   }, []);
 
   const handleCloseStation = useCallback(() => {
@@ -646,8 +661,23 @@ export default function MetroMap() {
         isSearchActive={isSearchActive}
         soundEnabled={soundEnabled}
         onToggleSound={toggleSound}
+        isListView={isListView}
+        onToggleListView={() => setIsListView(!isListView)}
       />
-      {!tour.active && (
+
+      {isListView ? (
+        <ListView
+          searchQuery={searchQuery}
+          onSearch={handleSearch}
+          selectedStation={selectedStation}
+          onSelectStation={handleStationSelect}
+          searchResults={searchResults}
+          allStationsDeduped={allStationsDeduped}
+          reducedMotion={reducedMotion}
+        />
+      ) : (
+        <>
+          {!tour.active && (
         <SearchBar
           onSearch={handleSearch}
           matchCount={searchResults?.matchingPositions.size ?? 0}
@@ -860,8 +890,8 @@ export default function MetroMap() {
         </g>
       </svg>
 
-      {hoveredStation && !selectedStation && !tour.active && svgRef.current && (() => {
-        const t = zoomTransform(svgRef.current!);
+      {hoveredStation && !selectedStation && !tour.active && (() => {
+        const { x: tx, y: ty, k } = miniMapTransform;
         const [hx, hy] = hoveredStation.position;
         const visitorsHere = presence.visitors.filter(
           (v) => Math.abs(v.x - hx) < 15 && Math.abs(v.y - hy) < 15,
@@ -869,9 +899,11 @@ export default function MetroMap() {
         return (
           <StationTooltip
             station={hoveredStation}
-            x={hx * t.k + t.x}
-            y={hy * t.k + t.y}
+            x={hx * k + tx}
+            y={hy * k + ty}
             visitorsHere={visitorsHere}
+            onMouseEnter={() => handleStationHover(hoveredStation)}
+            onMouseLeave={() => handleStationHover(null)}
           />
         );
       })()}
@@ -908,6 +940,8 @@ export default function MetroMap() {
 
       {showKeyboardHelp && (
         <KeyboardHelp onClose={() => setShowKeyboardHelp(false)} />
+      )}
+        </>
       )}
     </div>
   );

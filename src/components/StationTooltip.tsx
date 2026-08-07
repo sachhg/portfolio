@@ -6,28 +6,32 @@ type Props = {
   x: number;
   y: number;
   visitorsHere?: Visitor[];
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 };
 
-export default function StationTooltip({ station, x, y, visitorsHere = [] }: Props) {
-  const tags = station.tags?.slice(0, 3) ?? [];
+export default function StationTooltip({ station, x, y, visitorsHere = [], onMouseEnter, onMouseLeave }: Props) {
+  const tags = station.tags?.slice(0, 4) ?? [];
 
   return (
     <div
-      className="fixed z-40 pointer-events-none"
+      className="fixed z-50 pointer-events-auto"
       style={{
         left: x,
-        top: y - 16,
+        top: y - 18,
         transform: 'translateX(-50%) translateY(-100%)',
         fontFamily: "'Inter', sans-serif",
       }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <div
-        className="rounded-lg shadow-lg overflow-hidden backdrop-blur-md transition-colors duration-300"
+        className="rounded-xl shadow-xl overflow-hidden backdrop-blur-xl transition-all duration-300"
         style={{
           backgroundColor: 'var(--panel-bg)',
           border: '1px solid var(--panel-border)',
-          maxWidth: 240,
-          padding: '10px 12px',
+          maxWidth: 280,
+          padding: '12px 16px',
         }}
       >
         <div className="flex items-center gap-2">
@@ -44,18 +48,19 @@ export default function StationTooltip({ station, x, y, visitorsHere = [] }: Pro
           )}
           <div className="min-w-0">
             <p
-              className="text-[12px] font-semibold leading-tight transition-colors duration-300"
+              className="text-[13px] font-bold leading-tight transition-colors duration-300"
               style={{ color: 'var(--panel-text)' }}
             >
               {station.name}
             </p>
             <p
-              className="text-[10px] mt-0.5 leading-snug transition-colors duration-300"
+              className="text-[11px] mt-1 leading-snug transition-colors duration-300"
               style={{
                 color: 'var(--panel-text-secondary)',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
                 overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
               }}
             >
               {station.description}
@@ -82,7 +87,7 @@ export default function StationTooltip({ station, x, y, visitorsHere = [] }: Pro
 
         {visitorsHere.length > 0 && (
           <div
-            className="flex items-center gap-1.5 mt-1.5 text-[9px] transition-colors duration-300"
+            className="flex items-center gap-1.5 mt-2.5 text-[10px] transition-colors duration-300"
             style={{ color: 'var(--panel-text-secondary)' }}
           >
             <span className="flex gap-0.5">
@@ -102,12 +107,29 @@ export default function StationTooltip({ station, x, y, visitorsHere = [] }: Pro
           </div>
         )}
 
-        <p
-          className="text-[9px] mt-1.5 transition-colors duration-300"
-          style={{ color: 'var(--panel-text-secondary)', opacity: 0.6 }}
-        >
-          Click to explore →
-        </p>
+        <div className="mt-3 flex items-center justify-between border-t transition-colors duration-300 pt-2" style={{ borderColor: 'var(--panel-border)' }}>
+          <p
+            className="text-[10px] font-medium transition-colors duration-300"
+            style={{ color: 'var(--panel-text-secondary)', opacity: 0.8 }}
+          >
+            {station.link ? 'Click map station for more' : 'Click to explore →'}
+          </p>
+          {station.link && (
+            <a
+              href={station.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-2.5 py-1 rounded-md text-[10px] font-semibold hover:-translate-y-0.5 transition-transform duration-200 shadow-sm"
+              style={{
+                backgroundColor: 'var(--map-station-selected)',
+                color: 'var(--map-bg)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              View Repo / Site
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
