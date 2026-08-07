@@ -1,0 +1,86 @@
+---
+title: Getting an agent to reproduce FFmpeg crashes
+date: 2026-08-05
+description: 'A year in the UCSB Verification Lab pointing PAGENT at FFmpeg. 33 working proof-of-concept inputs out of 69 vulnerabilities, and one bug that still reproduces today.'
+---
+
+A vulnerability report usually tells you a bug exists. It rarely gives you a
+file that triggers it. Somebody still has to sit down with the report, the
+source, and a debugger, and build an input that makes the crash happen. That
+takes days, and until it is done nobody can confirm the bug is real or check
+that a patch actually fixed it.
+
+PAGENT automates that step. We did not write it. My ERSP team at the UCSB
+Verification Lab spent the year taking it and making it work against FFmpeg,
+which is where almost all of our time went.
+
+## Why FFmpeg is the hard case
+
+FFmpeg parses deeply structured binary formats, and the function that crashes
+is usually several layers down a call chain that begins at a container parser.
+To reach it you need a file whose headers, indices, and offsets are all
+internally consistent. One wrong field and the parser rejects the input long
+before it touches the vulnerable code.
+
+That is also why fuzzing is a poor fit for this specific job. Fuzzing is good
+at finding bugs you did not know about. Here we already knew the bug and the
+line it lived on, and we wanted one input that reached it. A fuzzer spends most
+of a 24 hour window on inputs that die in the first few hundred bytes.
+
+## What the loop actually does
+
+The agent reads the vulnerability report, writes a candidate input, builds an
+instrumented target, runs it under AddressSanitizer, and reads what comes back.
+No crash means it looks at coverage to see how far the input got before it was
+rejected, then revises and tries again.
+
+Static analysis is what keeps that loop from being a guessing game. Before the
+agent starts it gets a vulnerability type, the vulnerable function, an
+entrypoint, a taint path through the call chain, and a line number. So the
+agent knows what it is aiming at, and coverage tells it how close it landed.
+
+Most of what we found were out of bounds accesses, use after free, and uses of
+uninitialized memory.
+
+## Numbers
+
+We ran it against 69 known FFmpeg vulnerabilities and got working PoCs for 33
+of them, a 47.8% success rate.
+
+For comparison we ran the same reports through unguided LLM prompting. The best
+of those was GPT-5-high at 18. Claude Sonnet 4 got 11, Claude Sonnet 3.7 got 7,
+GPT-4.1 got 3, DeepSeek-V3.1 got 1. Guided beat the strongest unguided baseline
+by 83%.
+
+Timing was lopsided in a useful way. A successful run averaged 39.4 minutes. A
+failed one averaged 123.18 minutes, because failure means burning the full
+iteration budget before giving up. Combined that is 84.5 minutes per report.
+Against a 24 hour fuzzing window, the runs that worked got there roughly 36
+times faster.
+
+## The one that still works
+
+We also took successful PoCs and replayed them against patched builds, which is
+the check that tells you whether a fix actually closed the hole. We ran 18 of
+them that way.
+
+One still reproduces on current FFmpeg and causes a denial of service. That
+result is the part I keep coming back to, because it came out of a pipeline
+whose whole purpose was to reproduce bugs that were already supposed to be
+fixed.
+
+## What I would tell the next team
+
+The agent was never the bottleneck. Getting FFmpeg to build reproducibly with
+sanitizers, wiring up the fuzzing harness, and making the environment
+consistent enough that a failed run meant something took far longer than any
+prompting work. When a run failed early on, the honest answer was usually that
+our setup was wrong, not that the model was.
+
+That is also the clearest direction for future work. Right now pointing PAGENT
+at a new project means a lot of manual environment and rule setup. Automating
+that is what would make it general.
+
+Work with Tim Fan, Katelyn Dang, and Aiden Hunter, mentored by Prof. Tevfik
+Bultan and Achintya Desai, in the
+[UCSB Verification Lab](https://verlab.cs.ucsb.edu).

@@ -53,19 +53,18 @@ const links = [
       </div>
     </div>
 
-    <Section label="Now" rule={false}>
-      <ul class="now">
-        {
-          now.map((line) => (
-            <li>
-              {segments(line).map((part, i) =>
-                i % 2 === 1 ? <strong>{part}</strong> : part
-              )}
-            </li>
-          ))
-        }
-      </ul>
-    </Section>
+    {/* No eyebrow here: that these are current is already implied. */}
+    <ul class="now">
+      {
+        now.map((line) => (
+          <li>
+            {segments(line).map((part, i) =>
+              i % 2 === 1 ? <strong>{part}</strong> : part
+            )}
+          </li>
+        ))
+      }
+    </ul>
 
     <Section label="Experience">
       <ul>
@@ -151,6 +150,11 @@ const links = [
     color: var(--muted);
     margin-top: 0.35rem;
     text-wrap: pretty;
+  }
+
+  .now {
+    /* Stands in for the Section wrapper this block no longer uses. */
+    margin-top: var(--space-section);
   }
 
   .now li {

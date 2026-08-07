@@ -45,7 +45,7 @@
     const ALPHA_MAJOR = 0.46 // every 4th line
     const WARP_RADIUS = 200
     const WARP_MAX = 16 // px of domain displacement, capped
-    const FPS = 30 // the motion is slow; 60 would be wasted work
+    const FPS = 60 // the well and the trace need the frames; the terrain does not
 
     // Click presses a well into the field. The contours are not moved
     // directly: lowering the scalar value pulls isolines into rings on their
@@ -150,10 +150,12 @@
     let ink = '#3A4760'
     let inkMajor = '#2F4A8A'
 
+    const MIN_FRAME_MS = 1000 / FPS
+
     let t = 0 // accumulated animation seconds
     let raf = 0
     let last = 0
-    let acc = 0
+    let lastDraw = 0
 
     let mx = -1e5, my = -1e5
     let warp = 0 // eased 0..1, relaxes when the pointer leaves
@@ -502,18 +504,25 @@
       raf = requestAnimationFrame(frame)
       const dt = Math.min((now - last) / 1000, 0.1)
       last = now
-      acc += dt
-      if (acc < 1 / FPS) return
-      acc = 0
 
+      // Time and easing advance every frame. Folding them into the throttled
+      // branch made the terrain morph at a fraction of real speed, and step
+      // unevenly whenever a frame was skipped.
       t += dt
       warp += (warpTarget - warp) * Math.min(1, dt * 3)
+
+      // Cap the redraw rate by wall clock, with a couple of ms of slack. A
+      // strict comparison misses on displays whose refresh does not divide
+      // evenly into the target, which silently halves the real frame rate.
+      if (now - lastDraw < MIN_FRAME_MS - 2) return
+      lastDraw = now
       draw()
     }
 
     function start() {
       if (raf || reduced.matches) return
       last = performance.now()
+      lastDraw = 0
       raf = requestAnimationFrame(frame)
     }
 

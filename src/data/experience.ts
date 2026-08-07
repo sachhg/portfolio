@@ -17,7 +17,7 @@ export const experience: Role[] = [
     role: 'Software Engineer Intern',
     dates: 'May – Aug 2026',
     impact:
-      'ML-driven autoscaling for a 500+ cluster DBaaS fleet, cutting compute cost 8% at flat latency',
+      'ML autoscaling for a 300+ VM DBaaS fleet, with LightGBM demand forecasting and a LangChain agent',
     url: 'https://www.americanexpress.com',
   },
   {
@@ -25,12 +25,12 @@ export const experience: Role[] = [
     role: 'Software Engineer Intern',
     dates: 'Jun 2025 – present',
     impact:
-      'self-serve integration platform whose 15 connectors anchored a $6M seed',
+      'self-serve integration platform with 11 production connectors for WMS/TMS/ERP systems like SAP and SphereWMS',
     url: 'https://www.conmitto.io',
   },
   {
     company: 'Turing',
-    role: 'Applied AI Intern',
+    role: 'AI Engineering Intern',
     dates: 'Feb – May 2026',
     impact:
       'LangGraph agent triaging live support calls from 10K+ property managers daily',
@@ -57,6 +57,6 @@ export const experience: Role[] = [
 /** The two or three lines under NOW. */
 export const now: string[] = [
   'Software engineer intern at **Conmitto**, building the integration platform for a multi-tenant logistics product.',
-  'Just wrapped **Global Infrastructure at American Express**, building ML autoscaling across a 500+ cluster DBaaS fleet.',
+  'Just wrapped **Global Infrastructure at American Express**, building ML autoscaling across a 300+ VM DBaaS fleet.',
   'President of **ACM.Industry**, the software consulting club at UCSB.',
 ]
