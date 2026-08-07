@@ -47,6 +47,22 @@
     const WARP_MAX = 16 // px of domain displacement, capped
     const FPS = 30 // the motion is slow; 60 would be wasted work
 
+    // Click presses a well into the field. The contours are not moved
+    // directly: lowering the scalar value pulls isolines into rings on their
+    // own, which is what contours do around a depression.
+    const WELL_LIFE = 5 // s, form fast then heal slowly
+    const WELL_RISE = 0.3 // s to reach full depth
+    const WELL_RADIUS = 230
+    const WELL_SIGMA = WELL_RADIUS / 2.6
+    const WELL_DEPTH = 0.55 // spans ~4 contour levels
+    const MAX_WELLS = 3
+
+    // The ring nearest the click draws itself in the accent, once.
+    const TRACE_LIFE = 1.5 // s
+    const TRACE_DRAW = 0.6 // s to complete the reveal
+    const TRACE_ALPHA = 0.85
+    const TRACE_RADIUS = 150 // only trace a ring genuinely near the click
+
     // --- 3D simplex noise ------------------------------------------------
     const F3 = 1 / 3
     const G3 = 1 / 6
@@ -142,6 +158,16 @@
     let mx = -1e5, my = -1e5
     let warp = 0 // eased 0..1, relaxes when the pointer leaves
     let warpTarget = 0
+
+    interface Well { x: number; y: number; born: number }
+    let wells: Well[] = []
+
+    // The single ring being traced, captured fresh each frame because the
+    // terrain underneath it keeps moving.
+    let trace: Well | null = null
+    let traceD2 = 0
+    let traceXs: number[] = []
+    let traceYs: number[] = []
 
     // Marching squares: case -> pairs of crossed edges (0 top, 1 right,
     // 2 bottom, 3 left). Saddles (5, 10) take the fixed resolution.
@@ -247,8 +273,24 @@
 
           const a = sx * NOISE_SCALE
           const b = sy * NOISE_SCALE
-          field[gy * stride + gx] =
-            noise3(a, b, z) * 0.68 + noise3(a * 2.1, b * 2.1, z2) * 0.32
+          let v = noise3(a, b, z) * 0.68 + noise3(a * 2.1, b * 2.1, z2) * 0.32
+
+          // Wells lower the field value rather than displacing geometry, so
+          // the isolines gather into rings by themselves.
+          for (let i = 0; i < wells.length; i++) {
+            const c = wells[i]!
+            const dx = px - c.x
+            const dy = py - c.y
+            const d2 = dx * dx + dy * dy
+            if (d2 > WELL_RADIUS * WELL_RADIUS) continue
+            const age = t - c.born
+            const rise = Math.min(1, age / WELL_RISE)
+            const heal = 1 - age / WELL_LIFE
+            v -= WELL_DEPTH * rise * heal * heal *
+                 Math.exp(-d2 / (2 * WELL_SIGMA * WELL_SIGMA))
+          }
+
+          field[gy * stride + gx] = v
         }
       }
     }
@@ -352,6 +394,22 @@
             cur = nxt
           }
 
+          // Keep the chain running closest to the click, across all levels.
+          if (trace) {
+            let best = Infinity
+            for (let i = 0; i < xs.length; i++) {
+              const dx = xs[i]! - trace.x
+              const dy = ys[i]! - trace.y
+              const d = dx * dx + dy * dy
+              if (d < best) best = d
+            }
+            if (best < traceD2) {
+              traceD2 = best
+              traceXs = xs.slice()
+              traceYs = ys.slice()
+            }
+          }
+
           // Quadratic through midpoints: each vertex becomes a control point.
           if (xs.length < 3) {
             if (xs.length === 2) ctx!.lineTo(xs[1]!, ys[1]!)
@@ -370,9 +428,54 @@
       ctx!.stroke()
     }
 
+    /** Draw the captured ring in the accent, revealing it along its length. */
+    function drawTrace() {
+      if (!trace || traceXs.length < 3) return
+      const age = t - trace.born
+      if (age > TRACE_LIFE || traceD2 > TRACE_RADIUS * TRACE_RADIUS) return
+
+      let len = 0
+      for (let i = 1; i < traceXs.length; i++) {
+        len += Math.hypot(traceXs[i]! - traceXs[i - 1]!, traceYs[i]! - traceYs[i - 1]!)
+      }
+      if (len < 8) return
+
+      const reveal = Math.min(1, age / TRACE_DRAW)
+      // Rise quickly, hold, then fade out over the tail.
+      const p = age / TRACE_LIFE
+      const alpha = Math.sin(Math.PI * Math.min(1, p)) ** 0.6 * TRACE_ALPHA
+
+      ctx!.save()
+      ctx!.strokeStyle = inkMajor
+      ctx!.globalAlpha = alpha * alphaScale
+      ctx!.lineWidth = 1.7
+      ctx!.setLineDash([len, len])
+      ctx!.lineDashOffset = len * (1 - reveal)
+
+      ctx!.beginPath()
+      ctx!.moveTo(traceXs[0]!, traceYs[0]!)
+      for (let i = 1; i < traceXs.length - 1; i++) {
+        ctx!.quadraticCurveTo(
+          traceXs[i]!, traceYs[i]!,
+          (traceXs[i]! + traceXs[i + 1]!) / 2, (traceYs[i]! + traceYs[i + 1]!) / 2
+        )
+      }
+      ctx!.lineTo(traceXs[traceXs.length - 1]!, traceYs[traceYs.length - 1]!)
+      ctx!.stroke()
+      ctx!.restore()
+    }
+
     function draw() {
+      // Expire finished wells here rather than in frame(), since reset()
+      // draws a standalone frame with no loop running.
+      if (wells.length) wells = wells.filter((c) => t - c.born < WELL_LIFE)
+      if (trace && t - trace.born > TRACE_LIFE) trace = null
+
       ctx!.clearRect(0, 0, w, h)
       sampleField()
+
+      traceD2 = Infinity
+      traceXs = []
 
       ctx!.lineWidth = 1.1
 
@@ -384,6 +487,7 @@
         strokeLevel(contour(level))
       }
 
+      drawTrace()
       ctx!.globalAlpha = 1
 
       if (maskGrad) {
@@ -441,6 +545,29 @@
       addEventListener('pointerleave', () => { warpTarget = 0 }, { passive: true })
       document.addEventListener('mouseleave', () => { warpTarget = 0 })
     }
+
+    /**
+     * Press a well on click. Bound on pointerdown rather than click so it
+     * lands under 100ms, and enabled on touch even though the hover warp is
+     * not: a tap is the only canvas interaction a phone has.
+     */
+    addEventListener('pointerdown', (e) => {
+      if (reduced.matches) return
+      // Links navigate and would cut the animation off mid-draw. Leave any
+      // interactive target alone.
+      const el = e.target as Element | null
+      if (el?.closest?.('a, button, input, textarea, select, summary, [role="button"]')) return
+      // Inside the masked column the effect would be invisible, so skip the work.
+      if (maskGrad && Math.abs(e.clientX - w / 2) < 336) return
+
+      const c: Well = { x: e.clientX, y: e.clientY, born: t }
+      wells.push(c)
+      if (wells.length > MAX_WELLS) wells.shift()
+      trace = c
+
+      // A click while the tab is idle should still resolve.
+      if (!raf && !document.hidden) start()
+    }, { passive: true })
 
     document.addEventListener('visibilitychange', () =>
       document.hidden ? stop() : start()

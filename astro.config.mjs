@@ -34,9 +34,9 @@ export default defineConfig({
   },
   vite: {
     build: {
-      // The two islands are tiny; inlining them avoids two extra requests
-      // and keeps the client JS budget honest.
-      assetsInlineLimit: 4096,
+      // The canvas is the only script on the site. Inlining it keeps the page
+      // to zero extra JS requests; it is ~3 KB over the wire once gzipped.
+      assetsInlineLimit: 8192,
     },
   },
 })
