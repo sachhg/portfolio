@@ -12,7 +12,7 @@ import satori from 'satori'
 import { Resvg } from '@resvg/resvg-js'
 import { site } from '../data/site'
 
-const PAPER = '#F2EFE7'
+const PAPER = '#F4F0E4'
 const INK = '#1C1B18'
 const MUTED = '#6E6A5E'
 const LINE = '#E3DED2'

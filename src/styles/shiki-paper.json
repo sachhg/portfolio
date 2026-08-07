@@ -2,13 +2,13 @@
   "name": "paper",
   "type": "light",
   "colors": {
-    "editor.background": "#EFEBE1",
+    "editor.background": "#F1ECDE",
     "editor.foreground": "#1C1B18"
   },
   "settings": [
     {
       "settings": {
-        "background": "#EFEBE1",
+        "background": "#F1ECDE",
         "foreground": "#1C1B18"
       }
     },

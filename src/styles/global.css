@@ -38,14 +38,18 @@
 /* --- Tokens -------------------------------------------------------------- */
 
 :root {
-  --paper: #f2efe7;
+  --paper: #f4f0e4;
   --ink: #1c1b18;
   --muted: #6e6a5e;
   --line: #e3ded2;
   --accent: #2f4a8a;
 
   /* Derived. Kept as tokens so the topography canvas can read them. */
-  --paper-sunk: #efebe1;
+  --paper-sunk: #f1ecde;
+  /* Canvas ink. Separate from --muted, which is constrained to stay legible
+     as metadata text and so cannot be tuned freely for the contours. */
+  --contour: #46536b;
+  --contour-major: #2f4a8a;
   --accent-faint: color-mix(in srgb, var(--accent) 28%, transparent);
 
   --serif: 'Newsreader', ui-serif, Georgia, 'Times New Roman', serif;

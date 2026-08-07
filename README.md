@@ -60,7 +60,7 @@ Tokens live at the top of `src/styles/global.css`.
 
 | Token      | Value     | Role                        |
 | ---------- | --------- | --------------------------- |
-| `--paper`  | `#F2EFE7` | background                  |
+| `--paper`  | `#F4F0E4` | background                  |
 | `--ink`    | `#1C1B18` | text                        |
 | `--muted`  | `#6E6A5E` | metadata, captions          |
 | `--line`   | `#E3DED2` | hairline rules              |

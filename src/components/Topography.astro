@@ -41,8 +41,8 @@
     const SPAN = 0.45 // contour levels run from -SPAN to +SPAN
     const NOISE_SCALE = 0.0034 // feature size, ~1/300px
     const TIME_SCALE = 0.0145 // one noise unit ≈ 69s
-    const ALPHA = 0.115
-    const ALPHA_MAJOR = 0.2 // every 4th line
+    const ALPHA = 0.125
+    const ALPHA_MAJOR = 0.21 // every 4th line
     const WARP_RADIUS = 200
     const WARP_MAX = 16 // px of domain displacement, capped
     const FPS = 30 // the motion is slow; 60 would be wasted work
@@ -132,6 +132,7 @@
     let maskGrad: CanvasGradient | null = null
     let alphaScale = 1
     let ink = '#6E6A5E'
+    let inkMajor = '#6E6A5E'
 
     let t = 0 // accumulated animation seconds
     let raf = 0
@@ -161,8 +162,9 @@
       ctx!.lineCap = 'round'
       ctx!.lineJoin = 'round'
 
-      ink = getComputedStyle(document.documentElement)
-        .getPropertyValue('--muted').trim() || '#6E6A5E'
+      const cs = getComputedStyle(document.documentElement)
+      ink = cs.getPropertyValue('--contour').trim() || '#6E6A5E'
+      inkMajor = cs.getPropertyValue('--contour-major').trim() || ink
 
       cols = Math.ceil(w / CELL) + 1
       rows = Math.ceil(h / CELL) + 1
@@ -372,12 +374,13 @@
       ctx!.clearRect(0, 0, w, h)
       sampleField()
 
-      ctx!.strokeStyle = ink
       ctx!.lineWidth = 1
 
       for (let i = 0; i < LEVELS; i++) {
         const level = -SPAN + (i / (LEVELS - 1)) * SPAN * 2
-        ctx!.globalAlpha = (i % 4 === 0 ? ALPHA_MAJOR : ALPHA) * alphaScale
+        const major = i % 4 === 0
+        ctx!.strokeStyle = major ? inkMajor : ink
+        ctx!.globalAlpha = (major ? ALPHA_MAJOR : ALPHA) * alphaScale
         strokeLevel(contour(level))
       }
 

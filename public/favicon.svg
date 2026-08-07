@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" fill="#F2EFE7"/>
-  <!-- A perturbed lattice: the same motif the home canvas draws. -->
+  <rect width="32" height="32" fill="#F4F0E4"/>
+  <!-- Perturbed grid mark. Predates the contour canvas. -->
   <g fill="#1C1B18">
     <circle cx="7"  cy="7"  r="1.6"/>
     <circle cx="16" cy="6"  r="1.6"/>
