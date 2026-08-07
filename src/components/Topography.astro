@@ -45,23 +45,16 @@
     const ALPHA_MAJOR = 0.46 // every 4th line
     const WARP_RADIUS = 200
     const WARP_MAX = 16 // px of domain displacement, capped
-    const FPS = 60 // the well and the trace need the frames; the terrain does not
+    const FPS = 60 // the click response needs the frames; the terrain does not
 
-    // Click presses a well into the field. The contours are not moved
-    // directly: lowering the scalar value pulls isolines into rings on their
-    // own, which is what contours do around a depression.
-    const WELL_LIFE = 5 // s, form fast then heal slowly
-    const WELL_RISE = 0.3 // s to reach full depth
-    const WELL_RADIUS = 230
-    const WELL_SIGMA = WELL_RADIUS / 2.6
-    const WELL_DEPTH = 0.55 // spans ~4 contour levels
-    const MAX_WELLS = 3
-
-    // The ring nearest the click draws itself in the accent, once.
-    const TRACE_LIFE = 1.5 // s
-    const TRACE_DRAW = 0.6 // s to complete the reveal
-    const TRACE_ALPHA = 0.85
-    const TRACE_RADIUS = 150 // only trace a ring genuinely near the click
+    // Click resolves the map. Extra levels are interpolated between the
+    // standing contours near the pointer, so the terrain gains detail there
+    // the way a survey sheet does at a finer interval, then relaxes back.
+    const ZOOM_LIFE = 4.5 // s
+    const ZOOM_RISE = 0.35 // s to reach full detail
+    const ZOOM_RADIUS = 250
+    const ZOOM_ALPHA = 0.34 // peak alpha of the interpolated lines
+    const MAX_ZOOMS = 2
 
     // --- 3D simplex noise ------------------------------------------------
     const F3 = 1 / 3
@@ -161,15 +154,8 @@
     let warp = 0 // eased 0..1, relaxes when the pointer leaves
     let warpTarget = 0
 
-    interface Well { x: number; y: number; born: number }
-    let wells: Well[] = []
-
-    // The single ring being traced, captured fresh each frame because the
-    // terrain underneath it keeps moving.
-    let trace: Well | null = null
-    let traceD2 = 0
-    let traceXs: number[] = []
-    let traceYs: number[] = []
+    interface Zoom { x: number; y: number; born: number }
+    let zooms: Zoom[] = []
 
     // Marching squares: case -> pairs of crossed edges (0 top, 1 right,
     // 2 bottom, 3 left). Saddles (5, 10) take the fixed resolution.
@@ -255,7 +241,7 @@
       for (let gy = 0; gy <= rows; gy++) {
         const py = gy * CELL
         for (let gx = 0; gx <= cols; gx++) {
-          let px = gx * CELL
+          const px = gx * CELL
           let sy = py
           let sx = px
 
@@ -275,24 +261,8 @@
 
           const a = sx * NOISE_SCALE
           const b = sy * NOISE_SCALE
-          let v = noise3(a, b, z) * 0.68 + noise3(a * 2.1, b * 2.1, z2) * 0.32
-
-          // Wells lower the field value rather than displacing geometry, so
-          // the isolines gather into rings by themselves.
-          for (let i = 0; i < wells.length; i++) {
-            const c = wells[i]!
-            const dx = px - c.x
-            const dy = py - c.y
-            const d2 = dx * dx + dy * dy
-            if (d2 > WELL_RADIUS * WELL_RADIUS) continue
-            const age = t - c.born
-            const rise = Math.min(1, age / WELL_RISE)
-            const heal = 1 - age / WELL_LIFE
-            v -= WELL_DEPTH * rise * heal * heal *
-                 Math.exp(-d2 / (2 * WELL_SIGMA * WELL_SIGMA))
-          }
-
-          field[gy * stride + gx] = v
+          field[gy * stride + gx] =
+            noise3(a, b, z) * 0.68 + noise3(a * 2.1, b * 2.1, z2) * 0.32
         }
       }
     }
@@ -300,15 +270,16 @@
     const hKey = (x: number, y: number) => (y * stride + x) * 2
     const vKey = (x: number, y: number) => (y * stride + x) * 2 + 1
 
-    function contour(level: number) {
+    function contour(level: number, win?: [number, number, number, number]) {
       linkA.fill(-1)
       linkB.fill(-1)
       seen.fill(0)
 
       const touched: number[] = []
+      const [x0, y0, x1, y1] = win ?? [0, 0, cols, rows]
 
-      for (let gy = 0; gy < rows; gy++) {
-        for (let gx = 0; gx < cols; gx++) {
+      for (let gy = y0; gy < y1; gy++) {
+        for (let gx = x0; gx < x1; gx++) {
           const i0 = gy * stride + gx
           const i1 = i0 + stride
           const v00 = field[i0]!
@@ -396,22 +367,6 @@
             cur = nxt
           }
 
-          // Keep the chain running closest to the click, across all levels.
-          if (trace) {
-            let best = Infinity
-            for (let i = 0; i < xs.length; i++) {
-              const dx = xs[i]! - trace.x
-              const dy = ys[i]! - trace.y
-              const d = dx * dx + dy * dy
-              if (d < best) best = d
-            }
-            if (best < traceD2) {
-              traceD2 = best
-              traceXs = xs.slice()
-              traceYs = ys.slice()
-            }
-          }
-
           // Quadratic through midpoints: each vertex becomes a control point.
           if (xs.length < 3) {
             if (xs.length === 2) ctx!.lineTo(xs[1]!, ys[1]!)
@@ -430,54 +385,57 @@
       ctx!.stroke()
     }
 
-    /** Draw the captured ring in the accent, revealing it along its length. */
-    function drawTrace() {
-      if (!trace || traceXs.length < 3) return
-      const age = t - trace.born
-      if (age > TRACE_LIFE || traceD2 > TRACE_RADIUS * TRACE_RADIUS) return
+    /**
+     * Interpolate extra contour levels around a click, so the map briefly
+     * resolves to a finer interval there.
+     *
+     * The marching-squares scan is restricted to the cells near the point,
+     * and the spatial falloff comes from stroking with a radial gradient
+     * rather than from clipping, which would leave a visible disc edge.
+     */
+    function drawZoom(z: Zoom) {
+      const age = t - z.born
+      if (age > ZOOM_LIFE) return
+      const env =
+        Math.min(1, age / ZOOM_RISE) * (1 - age / ZOOM_LIFE) ** 1.4
+      if (env <= 0.01) return
 
-      let len = 0
-      for (let i = 1; i < traceXs.length; i++) {
-        len += Math.hypot(traceXs[i]! - traceXs[i - 1]!, traceYs[i]! - traceYs[i - 1]!)
+      const win: [number, number, number, number] = [
+        Math.max(0, Math.floor((z.x - ZOOM_RADIUS) / CELL)),
+        Math.max(0, Math.floor((z.y - ZOOM_RADIUS) / CELL)),
+        Math.min(cols, Math.ceil((z.x + ZOOM_RADIUS) / CELL)),
+        Math.min(rows, Math.ceil((z.y + ZOOM_RADIUS) / CELL)),
+      ]
+      if (win[0] >= win[2] || win[1] >= win[3]) return
+
+      const g = ctx!.createRadialGradient(z.x, z.y, 0, z.x, z.y, ZOOM_RADIUS)
+      g.addColorStop(0, hexA(ink, ZOOM_ALPHA * env))
+      g.addColorStop(0.55, hexA(ink, ZOOM_ALPHA * env * 0.8))
+      g.addColorStop(1, hexA(ink, 0))
+      ctx!.strokeStyle = g
+      ctx!.globalAlpha = alphaScale
+      ctx!.lineWidth = 0.9
+
+      // Midpoints between the standing levels: 8 lines become 15 locally.
+      const step = (SPAN * 2) / (LEVELS - 1)
+      for (let i = 0; i < LEVELS - 1; i++) {
+        strokeLevel(contour(-SPAN + (i + 0.5) * step, win))
       }
-      if (len < 8) return
+    }
 
-      const reveal = Math.min(1, age / TRACE_DRAW)
-      // Rise quickly, hold, then fade out over the tail.
-      const p = age / TRACE_LIFE
-      const alpha = Math.sin(Math.PI * Math.min(1, p)) ** 0.6 * TRACE_ALPHA
-
-      ctx!.save()
-      ctx!.strokeStyle = inkMajor
-      ctx!.globalAlpha = alpha * alphaScale
-      ctx!.lineWidth = 1.7
-      ctx!.setLineDash([len, len])
-      ctx!.lineDashOffset = len * (1 - reveal)
-
-      ctx!.beginPath()
-      ctx!.moveTo(traceXs[0]!, traceYs[0]!)
-      for (let i = 1; i < traceXs.length - 1; i++) {
-        ctx!.quadraticCurveTo(
-          traceXs[i]!, traceYs[i]!,
-          (traceXs[i]! + traceXs[i + 1]!) / 2, (traceYs[i]! + traceYs[i + 1]!) / 2
-        )
-      }
-      ctx!.lineTo(traceXs[traceXs.length - 1]!, traceYs[traceYs.length - 1]!)
-      ctx!.stroke()
-      ctx!.restore()
+    /** #rrggbb plus an alpha, for gradient stops. */
+    function hexA(hex: string, a: number) {
+      const n = parseInt(hex.slice(1), 16)
+      return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a.toFixed(3)})`
     }
 
     function draw() {
-      // Expire finished wells here rather than in frame(), since reset()
-      // draws a standalone frame with no loop running.
-      if (wells.length) wells = wells.filter((c) => t - c.born < WELL_LIFE)
-      if (trace && t - trace.born > TRACE_LIFE) trace = null
+      // Expire here rather than in frame(), since reset() draws a standalone
+      // frame with no loop running.
+      if (zooms.length) zooms = zooms.filter((c) => t - c.born < ZOOM_LIFE)
 
       ctx!.clearRect(0, 0, w, h)
       sampleField()
-
-      traceD2 = Infinity
-      traceXs = []
 
       ctx!.lineWidth = 1.1
 
@@ -489,7 +447,7 @@
         strokeLevel(contour(level))
       }
 
-      drawTrace()
+      for (const z of zooms) drawZoom(z)
       ctx!.globalAlpha = 1
 
       if (maskGrad) {
@@ -556,7 +514,7 @@
     }
 
     /**
-     * Press a well on click. Bound on pointerdown rather than click so it
+     * Resolve the map on click. Bound on pointerdown rather than click so it
      * lands under 100ms, and enabled on touch even though the hover warp is
      * not: a tap is the only canvas interaction a phone has.
      */
@@ -569,10 +527,8 @@
       // Inside the masked column the effect would be invisible, so skip the work.
       if (maskGrad && Math.abs(e.clientX - w / 2) < 336) return
 
-      const c: Well = { x: e.clientX, y: e.clientY, born: t }
-      wells.push(c)
-      if (wells.length > MAX_WELLS) wells.shift()
-      trace = c
+      zooms.push({ x: e.clientX, y: e.clientY, born: t })
+      if (zooms.length > MAX_ZOOMS) zooms.shift()
 
       // A click while the tab is idle should still resolve.
       if (!raf && !document.hidden) start()
