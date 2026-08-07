@@ -58,5 +58,5 @@ export const experience: Role[] = [
 export const now: string[] = [
   'Software engineer intern at **Conmitto**, building the integration platform for a multi-tenant logistics product.',
   'Just wrapped **Global Infrastructure at American Express**, building ML autoscaling across a 500+ cluster DBaaS fleet.',
-  'Technical Director of **ACM.Industry**, the software consulting club at UCSB.',
+  'President of **ACM.Industry**, the software consulting club at UCSB.',
 ]

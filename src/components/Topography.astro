@@ -37,12 +37,12 @@
 
     // --- tuning ---------------------------------------------------------
     const CELL = 14 // grid pitch in CSS px
-    const LEVELS = 7
+    const LEVELS = 8
     const SPAN = 0.45 // contour levels run from -SPAN to +SPAN
     const NOISE_SCALE = 0.0034 // feature size, ~1/300px
     const TIME_SCALE = 0.0145 // one noise unit ≈ 69s
-    const ALPHA = 0.125
-    const ALPHA_MAJOR = 0.21 // every 4th line
+    const ALPHA = 0.3
+    const ALPHA_MAJOR = 0.46 // every 4th line
     const WARP_RADIUS = 200
     const WARP_MAX = 16 // px of domain displacement, capped
     const FPS = 30 // the motion is slow; 60 would be wasted work
@@ -196,7 +196,7 @@
       const peak = Math.max(0, Math.min(1, margin / 180)) * 0.94
       // Narrow screens have no margin to hide in, so contours necessarily run
       // under the text. Drop them to a paper texture rather than lines.
-      alphaScale = w < 760 ? 0.45 : 1
+      alphaScale = w < 760 ? 0.32 : 1
 
       if (peak <= 0.01) {
         maskGrad = null
@@ -374,7 +374,7 @@
       ctx!.clearRect(0, 0, w, h)
       sampleField()
 
-      ctx!.lineWidth = 1
+      ctx!.lineWidth = 1.1
 
       for (let i = 0; i < LEVELS; i++) {
         const level = -SPAN + (i / (LEVELS - 1)) * SPAN * 2

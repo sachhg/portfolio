@@ -48,7 +48,7 @@
   --paper-sunk: #f1ecde;
   /* Canvas ink. Separate from --muted, which is constrained to stay legible
      as metadata text and so cannot be tuned freely for the contours. */
-  --contour: #46536b;
+  --contour: #3a4760;
   --contour-major: #2f4a8a;
   --accent-faint: color-mix(in srgb, var(--accent) 28%, transparent);
 
