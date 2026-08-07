@@ -7,7 +7,6 @@ import Section from '../components/Section.astro'
 import ExperienceRow from '../components/ExperienceRow.astro'
 import ProjectRow from '../components/ProjectRow.astro'
 import PostRow from '../components/PostRow.astro'
-import Lattice from '../components/Lattice.astro'
 import { site } from '../data/site'
 import { experience, now } from '../data/experience'
 import { personSchema } from '../lib/schema'
@@ -37,8 +36,6 @@ const links = [
   description={site.description}
   schema={personSchema(Astro.site!.href)}
 >
-  <Lattice />
-
   <div class="column">
     <div class="intro">
       <Image

@@ -2,6 +2,7 @@
 import '../styles/global.css'
 import SiteHeader from '../components/SiteHeader.astro'
 import SiteFooter from '../components/SiteFooter.astro'
+import Topography from '../components/Topography.astro'
 import { site } from '../data/site'
 
 interface Props {
@@ -89,6 +90,7 @@ const ogImageUrl = new URL(ogImage, Astro.site).href
 
   <body>
     <a class="skip" href="#main">Skip to content</a>
+    <Topography />
     <SiteHeader />
     <main id="main">
       <slot />

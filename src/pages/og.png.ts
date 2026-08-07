@@ -18,8 +18,8 @@ const MUTED = '#6E6A5E'
 const LINE = '#E3DED2'
 const ACCENT = '#2F4A8A'
 
-/** Deterministic dots, so the card is stable across rebuilds. */
-function latticeDots() {
+/** Deterministic marks, so the card is stable across rebuilds. */
+function contourMarks() {
   const dots: any[] = []
   const COLS = 9
   const ROWS = 3
@@ -72,7 +72,7 @@ export const GET: APIRoute = async () => {
           position: 'relative',
         },
         children: [
-          // Lattice motif, top right.
+          // Contour motif, top right.
           {
             type: 'div',
             props: {
@@ -84,7 +84,7 @@ export const GET: APIRoute = async () => {
                 height: '150px',
                 display: 'flex',
               },
-              children: latticeDots(),
+              children: contourMarks(),
             },
           },
           {

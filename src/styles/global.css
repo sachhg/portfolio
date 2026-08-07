@@ -44,7 +44,7 @@
   --line: #e3ded2;
   --accent: #2f4a8a;
 
-  /* Derived. Kept as tokens so the lattice island can read them. */
+  /* Derived. Kept as tokens so the topography canvas can read them. */
   --paper-sunk: #efebe1;
   --accent-faint: color-mix(in srgb, var(--accent) 28%, transparent);
 
@@ -146,7 +146,7 @@ main {
   flex: 1 0 auto;
 }
 
-/* Content always sits above the lattice canvas, which paints at z-index 0. */
+/* Content always sits above the topography canvas, which paints at z-index 0. */
 header,
 main,
 footer {

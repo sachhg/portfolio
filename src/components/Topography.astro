@@ -1,0 +1,449 @@
+---
+/**
+ * Topographic contours, the site's one piece of motion.
+ *
+ * A scalar field from 3D simplex noise (x, y, time) is contoured with marching
+ * squares on a coarse grid, chained into continuous paths, and drawn as
+ * quadratic curves so the lines flow. The time axis advances slowly enough
+ * that a full morph takes over a minute.
+ *
+ * The center column is erased with a composite pass, so contours live in the
+ * outer margins and text sits on clean paper. The terrain is seeded from
+ * today's date: fixed for a day, different tomorrow.
+ */
+---
+
+<canvas id="topo" aria-hidden="true"></canvas>
+
+<style>
+  #topo {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  const canvas = document.getElementById('topo') as HTMLCanvasElement | null
+  const ctx = canvas?.getContext('2d')
+
+  if (canvas && ctx) {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)')
+    // Coarse pointer means no hover, so no warp to respond to.
+    const canWarp = matchMedia('(hover: hover) and (pointer: fine)').matches
+
+    // --- tuning ---------------------------------------------------------
+    const CELL = 14 // grid pitch in CSS px
+    const LEVELS = 7
+    const SPAN = 0.45 // contour levels run from -SPAN to +SPAN
+    const NOISE_SCALE = 0.0034 // feature size, ~1/300px
+    const TIME_SCALE = 0.0145 // one noise unit ≈ 69s
+    const ALPHA = 0.115
+    const ALPHA_MAJOR = 0.2 // every 4th line
+    const WARP_RADIUS = 200
+    const WARP_MAX = 16 // px of domain displacement, capped
+    const FPS = 30 // the motion is slow; 60 would be wasted work
+
+    // --- 3D simplex noise ------------------------------------------------
+    const F3 = 1 / 3
+    const G3 = 1 / 6
+    const GRAD = new Int8Array([
+      1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1, 0, 1, 0, 1, -1, 0, 1, 1, 0, -1, -1,
+      0, -1, 0, 1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1,
+    ])
+    const perm = new Uint8Array(512)
+
+    function seedNoise(seed: number) {
+      const p = new Uint8Array(256)
+      for (let i = 0; i < 256; i++) p[i] = i
+      // Seeded Fisher-Yates, so the terrain is stable for the whole day.
+      let s = seed >>> 0
+      for (let i = 255; i > 0; i--) {
+        s = (s * 1664525 + 1013904223) >>> 0
+        const j = s % (i + 1)
+        const t = p[i]!
+        p[i] = p[j]!
+        p[j] = t
+      }
+      for (let i = 0; i < 512; i++) perm[i] = p[i & 255]!
+    }
+
+    function noise3(x: number, y: number, z: number): number {
+      const s = (x + y + z) * F3
+      const i = Math.floor(x + s)
+      const j = Math.floor(y + s)
+      const k = Math.floor(z + s)
+      const t0 = (i + j + k) * G3
+      const x0 = x - (i - t0)
+      const y0 = y - (j - t0)
+      const z0 = z - (k - t0)
+
+      let i1, j1, k1, i2, j2, k2
+      if (x0 >= y0) {
+        if (y0 >= z0) { i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 1; k2 = 0 }
+        else if (x0 >= z0) { i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 0; k2 = 1 }
+        else { i1 = 0; j1 = 0; k1 = 1; i2 = 1; j2 = 0; k2 = 1 }
+      } else {
+        if (y0 < z0) { i1 = 0; j1 = 0; k1 = 1; i2 = 0; j2 = 1; k2 = 1 }
+        else if (x0 < z0) { i1 = 0; j1 = 1; k1 = 0; i2 = 0; j2 = 1; k2 = 1 }
+        else { i1 = 0; j1 = 1; k1 = 0; i2 = 1; j2 = 1; k2 = 0 }
+      }
+
+      const ii = i & 255, jj = j & 255, kk = k & 255
+      let n = 0
+
+      for (let c = 0; c < 4; c++) {
+        let dx: number, dy: number, dz: number, gi: number
+        if (c === 0) {
+          dx = x0; dy = y0; dz = z0
+          gi = perm[ii + perm[jj + perm[kk]!]!]! % 12
+        } else if (c === 1) {
+          dx = x0 - i1 + G3; dy = y0 - j1 + G3; dz = z0 - k1 + G3
+          gi = perm[ii + i1 + perm[jj + j1 + perm[kk + k1]!]!]! % 12
+        } else if (c === 2) {
+          dx = x0 - i2 + 2 * G3; dy = y0 - j2 + 2 * G3; dz = z0 - k2 + 2 * G3
+          gi = perm[ii + i2 + perm[jj + j2 + perm[kk + k2]!]!]! % 12
+        } else {
+          dx = x0 - 1 + 3 * G3; dy = y0 - 1 + 3 * G3; dz = z0 - 1 + 3 * G3
+          gi = perm[ii + 1 + perm[jj + 1 + perm[kk + 1]!]!]! % 12
+        }
+        let tt = 0.6 - dx * dx - dy * dy - dz * dz
+        if (tt > 0) {
+          tt *= tt
+          const g = gi * 3
+          n += tt * tt * (GRAD[g]! * dx + GRAD[g + 1]! * dy + GRAD[g + 2]! * dz)
+        }
+      }
+      return 32 * n
+    }
+
+    // --- state ------------------------------------------------------------
+    let w = 0, h = 0
+    let cols = 0, rows = 0, stride = 0
+    let field = new Float32Array(0)
+    let linkA = new Int32Array(0)
+    let linkB = new Int32Array(0)
+    let seen = new Uint8Array(0)
+    let ptX = new Float32Array(0)
+    let ptY = new Float32Array(0)
+    let maskGrad: CanvasGradient | null = null
+    let alphaScale = 1
+    let ink = '#6E6A5E'
+
+    let t = 0 // accumulated animation seconds
+    let raf = 0
+    let last = 0
+    let acc = 0
+
+    let mx = -1e5, my = -1e5
+    let warp = 0 // eased 0..1, relaxes when the pointer leaves
+    let warpTarget = 0
+
+    // Marching squares: case -> pairs of crossed edges (0 top, 1 right,
+    // 2 bottom, 3 left). Saddles (5, 10) take the fixed resolution.
+    const TABLE: number[][] = [
+      [], [3, 0], [0, 1], [3, 1],
+      [1, 2], [3, 0, 1, 2], [0, 2], [3, 2],
+      [2, 3], [2, 0], [0, 1, 2, 3], [2, 1],
+      [1, 3], [1, 0], [0, 3], [],
+    ]
+
+    function build() {
+      const dpr = Math.min(devicePixelRatio || 1, 2)
+      w = innerWidth
+      h = innerHeight
+      canvas!.width = Math.round(w * dpr)
+      canvas!.height = Math.round(h * dpr)
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
+      ctx!.lineCap = 'round'
+      ctx!.lineJoin = 'round'
+
+      ink = getComputedStyle(document.documentElement)
+        .getPropertyValue('--muted').trim() || '#6E6A5E'
+
+      cols = Math.ceil(w / CELL) + 1
+      rows = Math.ceil(h / CELL) + 1
+      stride = cols + 1
+
+      field = new Float32Array(stride * (rows + 1))
+      const edges = stride * (rows + 1) * 2
+      linkA = new Int32Array(edges)
+      linkB = new Int32Array(edges)
+      seen = new Uint8Array(edges)
+      ptX = new Float32Array(edges)
+      ptY = new Float32Array(edges)
+
+      const d = new Date()
+      seedNoise(d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate())
+
+      buildMask()
+    }
+
+    /**
+     * Erases the center so the 42rem text column sits on clean paper. On a
+     * narrow screen the column is the whole viewport, so there is nowhere to
+     * put contours: drop the mask and dim the whole field instead.
+     */
+    function buildMask() {
+      const inner = 336 // half of 42rem
+      const feather = 260
+      const margin = w / 2 - inner
+      const peak = Math.max(0, Math.min(1, margin / 180)) * 0.94
+      // Narrow screens have no margin to hide in, so contours necessarily run
+      // under the text. Drop them to a paper texture rather than lines.
+      alphaScale = w < 760 ? 0.45 : 1
+
+      if (peak <= 0.01) {
+        maskGrad = null
+        return
+      }
+
+      const g = ctx!.createLinearGradient(0, 0, w, 0)
+      const cx = w / 2
+      const stops: [number, number][] = [
+        [0, 0],
+        [(cx - inner - feather) / w, 0],
+        [(cx - inner) / w, peak],
+        [(cx + inner) / w, peak],
+        [(cx + inner + feather) / w, 0],
+        [1, 0],
+      ]
+      for (const [pos, a] of stops) {
+        g.addColorStop(Math.max(0, Math.min(1, pos)), `rgba(0,0,0,${a})`)
+      }
+      maskGrad = g
+    }
+
+    function sampleField() {
+      const z = t * TIME_SCALE
+      const z2 = z * 1.7
+      const warping = warp > 0.002
+
+      for (let gy = 0; gy <= rows; gy++) {
+        const py = gy * CELL
+        for (let gx = 0; gx <= cols; gx++) {
+          let px = gx * CELL
+          let sy = py
+          let sx = px
+
+          if (warping) {
+            const dx = px - mx
+            const dy = py - my
+            const d2 = dx * dx + dy * dy
+            if (d2 < WARP_RADIUS * WARP_RADIUS) {
+              const d = Math.sqrt(d2) || 1
+              const f = 1 - d / WARP_RADIUS
+              // Squared falloff, capped, so the lean stays gentle.
+              const m = f * f * WARP_MAX * warp
+              sx -= (dx / d) * m
+              sy -= (dy / d) * m
+            }
+          }
+
+          const a = sx * NOISE_SCALE
+          const b = sy * NOISE_SCALE
+          field[gy * stride + gx] =
+            noise3(a, b, z) * 0.68 + noise3(a * 2.1, b * 2.1, z2) * 0.32
+        }
+      }
+    }
+
+    const hKey = (x: number, y: number) => (y * stride + x) * 2
+    const vKey = (x: number, y: number) => (y * stride + x) * 2 + 1
+
+    function contour(level: number) {
+      linkA.fill(-1)
+      linkB.fill(-1)
+      seen.fill(0)
+
+      const touched: number[] = []
+
+      for (let gy = 0; gy < rows; gy++) {
+        for (let gx = 0; gx < cols; gx++) {
+          const i0 = gy * stride + gx
+          const i1 = i0 + stride
+          const v00 = field[i0]!
+          const v10 = field[i0 + 1]!
+          const v01 = field[i1]!
+          const v11 = field[i1 + 1]!
+
+          const c =
+            (v00 > level ? 1 : 0) |
+            (v10 > level ? 2 : 0) |
+            (v11 > level ? 4 : 0) |
+            (v01 > level ? 8 : 0)
+
+          const pairs = TABLE[c]!
+          for (let p = 0; p < pairs.length; p += 2) {
+            const ea = edgePoint(pairs[p]!, gx, gy, v00, v10, v11, v01, level)
+            const eb = edgePoint(pairs[p + 1]!, gx, gy, v00, v10, v11, v01, level)
+            if (ea === eb) continue
+            if (linkA[ea]! < 0) { linkA[ea] = eb; touched.push(ea) } else if (linkB[ea]! < 0) linkB[ea] = eb
+            if (linkA[eb]! < 0) { linkA[eb] = ea; touched.push(eb) } else if (linkB[eb]! < 0) linkB[eb] = ea
+          }
+        }
+      }
+      return touched
+    }
+
+    /** Interpolate the crossing on one cell edge and record its position. */
+    function edgePoint(
+      edge: number, gx: number, gy: number,
+      v00: number, v10: number, v11: number, v01: number, L: number
+    ): number {
+      let key: number, x: number, y: number
+      if (edge === 0) {
+        key = hKey(gx, gy)
+        x = (gx + (L - v00) / (v10 - v00)) * CELL
+        y = gy * CELL
+      } else if (edge === 1) {
+        key = vKey(gx + 1, gy)
+        x = (gx + 1) * CELL
+        y = (gy + (L - v10) / (v11 - v10)) * CELL
+      } else if (edge === 2) {
+        key = hKey(gx, gy + 1)
+        x = (gx + (L - v01) / (v11 - v01)) * CELL
+        y = (gy + 1) * CELL
+      } else {
+        key = vKey(gx, gy)
+        x = gx * CELL
+        y = (gy + (L - v00) / (v01 - v00)) * CELL
+      }
+      ptX[key] = x
+      ptY[key] = y
+      return key
+    }
+
+    /** Walk chains out of the link graph and stroke them as smooth curves. */
+    function strokeLevel(touched: number[]) {
+      ctx!.beginPath()
+
+      // Open chains first, starting from their free ends, then closed loops.
+      for (let pass = 0; pass < 2; pass++) {
+        for (let n = 0; n < touched.length; n++) {
+          const start = touched[n]!
+          if (seen[start]) continue
+          if (pass === 0 && linkB[start]! >= 0) continue // not an endpoint yet
+
+          let cur = start
+          let prev = -1
+          seen[cur] = 1
+          ctx!.moveTo(ptX[cur]!, ptY[cur]!)
+
+          const xs: number[] = [ptX[cur]!]
+          const ys: number[] = [ptY[cur]!]
+
+          for (;;) {
+            const a = linkA[cur]!
+            const b = linkB[cur]!
+            let nxt = a !== prev && a >= 0 ? a : b !== prev ? b : -1
+            if (nxt < 0) break
+            if (nxt === start && xs.length > 2) { xs.push(ptX[start]!); ys.push(ptY[start]!); break }
+            if (seen[nxt]) break
+            seen[nxt] = 1
+            xs.push(ptX[nxt]!)
+            ys.push(ptY[nxt]!)
+            prev = cur
+            cur = nxt
+          }
+
+          // Quadratic through midpoints: each vertex becomes a control point.
+          if (xs.length < 3) {
+            if (xs.length === 2) ctx!.lineTo(xs[1]!, ys[1]!)
+            continue
+          }
+          for (let i = 1; i < xs.length - 1; i++) {
+            ctx!.quadraticCurveTo(
+              xs[i]!, ys[i]!,
+              (xs[i]! + xs[i + 1]!) / 2, (ys[i]! + ys[i + 1]!) / 2
+            )
+          }
+          ctx!.lineTo(xs[xs.length - 1]!, ys[ys.length - 1]!)
+        }
+      }
+
+      ctx!.stroke()
+    }
+
+    function draw() {
+      ctx!.clearRect(0, 0, w, h)
+      sampleField()
+
+      ctx!.strokeStyle = ink
+      ctx!.lineWidth = 1
+
+      for (let i = 0; i < LEVELS; i++) {
+        const level = -SPAN + (i / (LEVELS - 1)) * SPAN * 2
+        ctx!.globalAlpha = (i % 4 === 0 ? ALPHA_MAJOR : ALPHA) * alphaScale
+        strokeLevel(contour(level))
+      }
+
+      ctx!.globalAlpha = 1
+
+      if (maskGrad) {
+        ctx!.globalCompositeOperation = 'destination-out'
+        ctx!.fillStyle = maskGrad
+        ctx!.fillRect(0, 0, w, h)
+        ctx!.globalCompositeOperation = 'source-over'
+      }
+    }
+
+    function frame(now: number) {
+      raf = requestAnimationFrame(frame)
+      const dt = Math.min((now - last) / 1000, 0.1)
+      last = now
+      acc += dt
+      if (acc < 1 / FPS) return
+      acc = 0
+
+      t += dt
+      warp += (warpTarget - warp) * Math.min(1, dt * 3)
+      draw()
+    }
+
+    function start() {
+      if (raf || reduced.matches) return
+      last = performance.now()
+      raf = requestAnimationFrame(frame)
+    }
+
+    function stop() {
+      cancelAnimationFrame(raf)
+      raf = 0
+    }
+
+    function reset() {
+      build()
+      draw()
+      if (reduced.matches) stop()
+      else if (!document.hidden) start()
+    }
+
+    let resizeTimer: ReturnType<typeof setTimeout>
+    addEventListener('resize', () => {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(reset, 150)
+    })
+
+    if (canWarp) {
+      addEventListener('pointermove', (e) => {
+        if (reduced.matches) return
+        mx = e.clientX
+        my = e.clientY
+        warpTarget = 1
+      }, { passive: true })
+      addEventListener('pointerleave', () => { warpTarget = 0 }, { passive: true })
+      document.addEventListener('mouseleave', () => { warpTarget = 0 })
+    }
+
+    document.addEventListener('visibilitychange', () =>
+      document.hidden ? stop() : start()
+    )
+    reduced.addEventListener('change', reset)
+
+    reset()
+  }
+</script>
