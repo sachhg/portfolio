@@ -2,19 +2,19 @@
   "name": "paper",
   "type": "light",
   "colors": {
-    "editor.background": "#F1ECDE",
+    "editor.background": "#E2DAC4",
     "editor.foreground": "#1C1B18"
   },
   "settings": [
     {
       "settings": {
-        "background": "#F1ECDE",
+        "background": "#E2DAC4",
         "foreground": "#1C1B18"
       }
     },
     {
       "scope": ["comment", "punctuation.definition.comment", "string.comment"],
-      "settings": { "foreground": "#9A9482", "fontStyle": "italic" }
+      "settings": { "foreground": "#757063", "fontStyle": "italic" }
     },
     {
       "scope": [
@@ -44,7 +44,7 @@
     },
     {
       "scope": ["constant.numeric", "constant.language.boolean", "constant.other"],
-      "settings": { "foreground": "#6E6A5E" }
+      "settings": { "foreground": "#666357" }
     },
     {
       "scope": ["entity.name.function", "support.function", "meta.function-call"],
@@ -75,7 +75,7 @@
     },
     {
       "scope": ["punctuation", "meta.brace", "keyword.operator"],
-      "settings": { "foreground": "#6E6A5E" }
+      "settings": { "foreground": "#666357" }
     },
     {
       "scope": ["markup.inserted", "markup.bold"],

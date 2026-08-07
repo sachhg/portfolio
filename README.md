@@ -60,10 +60,10 @@ Tokens live at the top of `src/styles/global.css`.
 
 | Token      | Value     | Role                        |
 | ---------- | --------- | --------------------------- |
-| `--paper`  | `#F4F0E4` | background                  |
+| `--paper`  | `#E8E0CA` | background                  |
 | `--ink`    | `#1C1B18` | text                        |
-| `--muted`  | `#6E6A5E` | metadata, captions          |
-| `--line`   | `#E3DED2` | hairline rules              |
+| `--muted`  | `#666357` | metadata, captions          |
+| `--line`   | `#D3CEC3` | hairline rules              |
 | `--accent` | `#2F4A8A` | links, active states, links in the lattice |
 
 Newsreader for display and body, Commit Mono for metadata only. Both are

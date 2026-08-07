@@ -131,8 +131,8 @@
     let ptY = new Float32Array(0)
     let maskGrad: CanvasGradient | null = null
     let alphaScale = 1
-    let ink = '#6E6A5E'
-    let inkMajor = '#6E6A5E'
+    let ink = '#3A4760'
+    let inkMajor = '#2F4A8A'
 
     let t = 0 // accumulated animation seconds
     let raf = 0
@@ -163,7 +163,7 @@
       ctx!.lineJoin = 'round'
 
       const cs = getComputedStyle(document.documentElement)
-      ink = cs.getPropertyValue('--contour').trim() || '#6E6A5E'
+      ink = cs.getPropertyValue('--contour').trim() || '#3A4760'
       inkMajor = cs.getPropertyValue('--contour-major').trim() || ink
 
       cols = Math.ceil(w / CELL) + 1
