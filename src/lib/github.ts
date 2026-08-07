@@ -169,7 +169,18 @@ async function resolveLastCommit(p: Push): Promise<LastCommit | null> {
   }
 }
 
-export async function getActivity(): Promise<Activity> {
+/**
+ * The footer renders on every page, but the data is identical across them.
+ * Memoise the in-flight promise so one build makes one round of API calls
+ * instead of one per page — which is what exhausts the anonymous rate limit.
+ */
+let inFlight: Promise<Activity> | null = null
+
+export function getActivity(): Promise<Activity> {
+  return (inFlight ??= fetchActivity())
+}
+
+async function fetchActivity(): Promise<Activity> {
   // "now" is build time, which the daily rebuild advances.
   const now = new Date()
   const since = new Date(now)
