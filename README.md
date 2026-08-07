@@ -3,7 +3,7 @@
 Personal site. Astro 5, MDX, hand-written CSS, no framework.
 
 Static output. The only JavaScript that reaches the browser is the lattice
-canvas on the home page — about **1.3 KB gzipped**, inlined.
+canvas on the home page, about **1.3 KB gzipped**, inlined.
 
 ```
 npm install
@@ -51,7 +51,7 @@ order: 2                  # ascending
 Posts (`src/content/writing/*.mdx`) take `title`, `date`, `description`, and
 optional `draft: true` (drafts are excluded from the index, RSS, and sitemap).
 
-`summary` is capped at 46 characters by the schema — the build fails if a row
+`summary` is capped at 46 characters by the schema, so the build fails if a row
 would wrap past its mono tag. That is deliberate.
 
 ## Design
@@ -72,18 +72,18 @@ self-hosted from `public/fonts/` with `font-display: swap`. Re-fetch with
 the OG image uses; the committed one is otherwise fine).
 
 Code blocks use a custom Shiki theme (`src/styles/shiki-paper.json`) that keeps
-the paper ground and spends colour only on keywords.
+the paper ground and spends color only on keywords.
 
 ## The footer strip
 
-Built at build time from the public GitHub API — last commit, commit count, and
-a 30-day sparkline. No token is required; `GITHUB_TOKEN` is honoured only to
-lift the 60 req/hr anonymous rate limit. Every failure path degrades to a
+Built at build time from the public GitHub API: last commit, commit count, and
+a 30-day sparkline. No token is required; `GITHUB_TOKEN` is only used to lift
+the 60 req/hr anonymous rate limit. Every failure path degrades to a
 static strip rather than an error, so a rate limit or outage never breaks a
 build.
 
-Because the data is baked in, the site needs a periodic rebuild to stay fresh —
-that is what `.github/workflows/daily-rebuild.yml` is for. It runs at 07:10 UTC
+Because the data is baked in, the site needs a periodic rebuild to stay fresh.
+That is what `.github/workflows/daily-rebuild.yml` is for. It runs at 07:10 UTC
 daily, verifies the build, then POSTs a Vercel deploy hook.
 
 **To finish wiring it up:** create a deploy hook at Vercel → Project → Settings
@@ -116,7 +116,7 @@ domain at the project.
 ## Notes
 
 - **Astro is pinned to 5.x.** Every release up to 7.0.9 carries open XSS
-  advisories, and there is no patched 5.x — the fix is the Astro 7 major. This
+  advisories, and there is no patched 5.x. The fix is the Astro 7 major. This
   site is fully static with no SSR and no user-controlled input, which is what
   those vectors require, and the one piece of external data rendered (GitHub
   commit messages) goes through escaped expressions, never `set:html`.

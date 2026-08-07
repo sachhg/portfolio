@@ -9,7 +9,7 @@ export const GET: APIRoute = async (context) => {
     .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 
   return rss({
-    title: `${site.name} — Writing`,
+    title: `${site.name} · Writing`,
     description:
       'Notes on distributed systems, databases, and machine learning infrastructure.',
     site: context.site!,

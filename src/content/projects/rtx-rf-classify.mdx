@@ -10,17 +10,17 @@ featured: true
 order: 4
 ---
 
-An inference engine that classifies radio signals by modulation type, written
-in C++23 and targeted at embedded RISC-V hardware where there is no room for a
-Python runtime or a general-purpose ML framework. It runs as a service exposed
-over TCP, with compute backends — OpenBLAS, hand-written SIMD, or portable
-scalar — selectable at configure time through CMake.
+An inference engine that classifies radio signals by modulation type. It targets
+embedded RISC-V, where a Python runtime or a general-purpose ML framework won't
+fit, so the whole thing is C++23. It runs as a service over TCP, and CMake picks
+the compute backend at configure time: OpenBLAS, hand-written SIMD, or portable
+scalar.
 
-I built the tensor layer and its expression-template system, which is where the
-performance comes from: chained element-wise operations compile down into a
-single fused loop instead of materializing a temporary buffer per operation. On
-top of that sit the convolution, normalization, pooling, and dense primitives,
-with FFTW3 wrapped behind a type-safe interface so plan lifetimes and buffer
-alignment are enforced by the compiler rather than by convention.
+I wrote the tensor layer and its expression templates. Chained element-wise
+operations compile into a single fused loop instead of allocating a temporary
+buffer at every step, which is where most of the speed comes from. The
+convolution, normalization, pooling, and dense primitives sit on top of that.
+FFTW3 goes behind a type-safe wrapper so the compiler enforces plan lifetimes
+and buffer alignment rather than leaving them to convention.
 
 Built with [ACM.Industry](https://acmindustry.org) for Raytheon.

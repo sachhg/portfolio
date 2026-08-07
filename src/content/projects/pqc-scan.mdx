@@ -4,28 +4,27 @@ year: 2026
 stack: ['Python', 'tree-sitter', 'SARIF', 'CycloneDX', 'GitHub Actions']
 repo: 'https://github.com/sachhg/pqc-scan'
 summary: 'Catches quantum-vulnerable crypto in CI'
-description: 'A CLI tool and GitHub Action that finds RSA, ECDSA, and Diffie–Hellman usage across a codebase with tree-sitter AST analysis, emitting SARIF 2.1.0 and a CycloneDX CBOM.'
+description: 'A CLI tool and GitHub Action that finds RSA, ECDSA, and Diffie-Hellman usage across a codebase with tree-sitter AST analysis, emitting SARIF 2.1.0 and a CycloneDX CBOM.'
 status: active
 tag: Python
 featured: true
 order: 1
 ---
 
-Every RSA key, ECDSA signature, and Diffie–Hellman handshake in a codebase is a
-liability with a deadline attached. `pqc-scan` is a CLI tool and GitHub Action
-that finds them: it walks a repository for quantum-vulnerable primitives, flags
-both the call sites and the dependencies that introduce them, and fails CI when
-someone adds a new one.
+`pqc-scan` finds quantum-vulnerable cryptography in a codebase. It runs as a CLI
+tool or a GitHub Action, looks for RSA, ECDSA, and Diffie-Hellman usage, and
+reports the call sites along with the dependencies that pull them in. Point it
+at CI and it fails the build when someone introduces a new one.
 
-The analysis is AST-based rather than regex-based, running over tree-sitter
-grammars for Python, JavaScript, Java, and Go. Resolving *import origin* and
-*call shape* is what separates a real finding from noise — knowing that a bare
-`generate_private_key` came from `cryptography.hazmat` and was called with an
-RSA backend, not that the string appeared somewhere in the file.
+It parses instead of grepping. Tree-sitter grammars cover Python, JavaScript,
+Java, and Go, and the scanner tracks where an import actually came from and how
+the function was called. That distinction is most of the work: a bare
+`generate_private_key` only counts if it resolves to `cryptography.hazmat` and
+was called with an RSA backend. Matching on the string alone gives you noise.
 
-Results are emitted as SARIF 2.1.0, so findings surface as native GitHub code
-scanning annotations, alongside a CycloneDX CBOM describing the cryptographic
-bill of materials. It's published on PyPI.
+Output is SARIF 2.1.0, so findings show up in GitHub code scanning rather than
+in build logs. It also writes a CycloneDX CBOM for the cryptographic bill of
+materials. Published on PyPI.
 
 ```bash
 pip install pqc-scan
@@ -34,8 +33,7 @@ pip install pqc-scan
 pqc-scan ./src --format sarif --out results.sarif --fail-on high
 ```
 
-Wiring it into a workflow takes one step, and findings land in the Security tab
-rather than in a log nobody reads:
+Adding it to a workflow takes two steps:
 
 ```yaml
 - name: Scan for quantum-vulnerable cryptography

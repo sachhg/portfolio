@@ -1,6 +1,6 @@
 /**
- * JSON-LD builders. Everything asserted here is also visible on the page —
- * structured data describes the content, it never adds claims of its own.
+ * JSON-LD builders. Everything asserted here is also visible on the page.
+ * Structured data describes the content, it never adds claims of its own.
  */
 
 import { site } from '../data/site'

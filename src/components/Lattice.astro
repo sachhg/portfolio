@@ -1,9 +1,9 @@
 ---
 /**
- * Drifting lattice — the one piece of motion on the site.
+ * Drifting lattice, the one piece of motion on the site.
  *
  * A sparse, slightly-perturbed point lattice drifting across the page over
- * minutes. Every 6–10s a few neighbouring points briefly connect, a nod to
+ * minutes. Every 6-10s a few neighboring points briefly connect, a nod to
  * lattice-based cryptography (see pqc-scan).
  *
  * The perturbation is seeded from today's date, so the arrangement is fixed
@@ -49,7 +49,7 @@
     const DOT_ALPHA = 0.22
     const LINK_ALPHA = 0.2
     const LINK_LIFE = 2600 // ms, fade in and out
-    const DRIFT_X = 3.4 // px/s — a full traversal takes minutes
+    const DRIFT_X = 3.4 // px/s, so a full traversal takes minutes
     const DRIFT_Y = 1.2
 
     interface Point { gx: number; gy: number; px: number; py: number; ph: number; am: number }
@@ -119,7 +119,7 @@
       }
     }
 
-    /** Connect one point to its 2–3 nearest neighbours. */
+    /** Connect one point to its 2-3 nearest neighbors. */
     function spawnLinks() {
       if (pts.length < 4) return
       const i = Math.floor(Math.random() * pts.length)

@@ -4,7 +4,7 @@ name: Daily rebuild
 # needs a rebuild to stay current. This runs daily and can be triggered by hand.
 on:
   schedule:
-    # 07:10 UTC — just after midnight Pacific, off the top of the hour so it
+    # 07:10 UTC, just after midnight Pacific. Off the top of the hour so it
     # is not queued behind everyone else's hourly cron.
     - cron: '10 7 * * *'
   workflow_dispatch:
@@ -48,7 +48,7 @@ jobs:
           HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
         run: |
           if [ -z "$HOOK" ]; then
-            echo "::warning::VERCEL_DEPLOY_HOOK is not set — skipping deploy."
+            echo "::warning::VERCEL_DEPLOY_HOOK is not set, skipping deploy."
             echo "Create one at Vercel → Project → Settings → Git → Deploy Hooks,"
             echo "then add it as a repository secret named VERCEL_DEPLOY_HOOK."
             exit 0

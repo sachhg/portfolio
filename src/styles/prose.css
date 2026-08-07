@@ -91,7 +91,7 @@
   margin-top: 0.35em;
 }
 
-/* A hairline en-dash rather than a bullet — quieter on paper. */
+/* A hairline rule rather than a bullet. Quieter on paper. */
 .prose ul > li {
   position: relative;
 }

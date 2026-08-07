@@ -27,7 +27,7 @@ export default defineConfig({
   integrations: [mdx(), sitemap()],
   markdown: {
     shikiConfig: {
-      // @ts-expect-error — a TextMate theme object is valid here.
+      // @ts-expect-error: a TextMate theme object is valid here.
       theme: paperTheme,
       wrap: false,
     },

@@ -2,7 +2,7 @@ export const site = {
   name: 'Sachit Madaan',
   identity: 'CS at UC Santa Barbara. I build infrastructure and ML systems.',
   description:
-    'Sachit Madaan — CS honors student at UC Santa Barbara building infrastructure and ML systems. Software engineering at American Express, Conmitto, Turing, and Raytheon.',
+    'CS honors student at UC Santa Barbara building infrastructure and ML systems. Software engineering at American Express, Conmitto, Turing, and Raytheon.',
   email: 'sachhg21@gmail.com',
   github: 'https://github.com/sachhg',
   githubUser: 'sachhg',

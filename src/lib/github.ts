@@ -1,11 +1,11 @@
 /**
  * Build-time GitHub activity for the footer strip.
  *
- * Anonymous access is enough; GITHUB_TOKEN is honoured only to lift the
+ * Anonymous access is enough; GITHUB_TOKEN is only used to lift the
  * 60 req/hr limit (the daily Actions rebuild passes one).
  *
  * Note on sourcing: the public events feed used to embed a `commits` array in
- * each PushEvent payload, and no longer does — it now carries only `before`
+ * each PushEvent payload, and no longer does. It now carries only `before`
  * and `head`. So exact counts come from the compare endpoint per push, and the
  * newest commit message from a single commit lookup. Both are public.
  *
@@ -128,7 +128,7 @@ async function fetchPushes(since: Date): Promise<Push[]> {
 
 /**
  * Exact commits introduced by one push. A push that created a branch has no
- * meaningful base, and a force-push can leave `before` unreachable — both
+ * meaningful base, and a force-push can leave `before` unreachable. Both
  * return null from the API, so fall back to counting the push as one commit
  * rather than dropping it.
  */
@@ -171,8 +171,8 @@ async function resolveLastCommit(p: Push): Promise<LastCommit | null> {
 
 /**
  * The footer renders on every page, but the data is identical across them.
- * Memoise the in-flight promise so one build makes one round of API calls
- * instead of one per page — which is what exhausts the anonymous rate limit.
+ * Memoize the in-flight promise so one build makes one round of API calls
+ * instead of one per page, which is what exhausts the anonymous rate limit.
  */
 let inFlight: Promise<Activity> | null = null
 
@@ -199,7 +199,7 @@ async function fetchActivity(): Promise<Activity> {
     return EMPTY
   }
 
-  // Newest push first — its tip is the last commit.
+  // Newest push first, so its tip is the last commit.
   pushes.sort((a, b) => b.at.getTime() - a.at.getTime())
   const lastCommit = await resolveLastCommit(pushes[0]!)
 

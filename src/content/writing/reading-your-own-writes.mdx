@@ -1,33 +1,32 @@
 ---
 title: Reading your own writes
 date: 2026-07-28
-description: 'Why replica lag breaks the most reasonable assumption a user makes, and what LSN fencing does about it.'
+description: 'Replica lag breaks read-your-writes, and pinning a session to the primary is just a guess. LSN fencing is the exact version.'
 ---
 
-The first thing you do when a Postgres primary starts to sweat is move reads
-onto replicas. The second thing you do is field a bug report that makes no
-sense: a user updated their profile, the request returned 200, the page
-reloaded, and the old name came back.
+When a Postgres primary starts struggling, the obvious move is to send reads to
+replicas. Then the bug reports start. A user updates their profile, gets a 200
+back, reloads the page, and sees the old name.
 
-Nothing is broken. The write committed on the primary, the read landed on a
-replica, and the replica was two hundred milliseconds behind. Every layer
-behaved correctly and the user still watched their change disappear. This is
-the gap between *eventual consistency*, which the database promises, and
-*read-your-writes consistency*, which the user assumes without ever being asked.
+Nothing is broken. The write committed on the primary, the read went to a
+replica, and that replica was two hundred milliseconds behind. Every layer did
+its job and the user still watched their change disappear. The database promises
+eventual consistency. Users assume they can read what they just wrote, and
+nobody ever asks them.
 
-The usual fix is to pin a session to the primary for some number of seconds
-after a write. It works, roughly, in the way that a sledgehammer works: the
-window is a guess, it is too long for most requests and too short for the
-unlucky ones, and every pinned session gives back the read capacity you moved
-replicas in to gain.
+The usual fix is to pin a session to the primary for a few seconds after it
+writes. That mostly works. The problem is the number. Pick five seconds and
+you've guessed: too long for almost every request, still too short for the
+unlucky one. And every pinned session gives back the read capacity you added
+replicas to get.
 
-There is an exact answer available, and Postgres already tracks it. Every commit
-has a log sequence number, and every replica reports how far through the WAL it
-has replayed. So instead of guessing at a duration, record the LSN a write
-committed at and compare it against replay positions:
+Postgres already tracks the number you actually want. Every commit has a log
+sequence number, and every replica reports how far through the WAL it has
+replayed. So record the LSN a write committed at, then compare it against replay
+positions:
 
 ```go
-// After a write, remember exactly how far this session needs replicas to be.
+// After a write, remember how far this session needs replicas to be.
 var lsn pglsn.LSN
 if err := tx.QueryRow(ctx, "SELECT pg_current_wal_lsn()").Scan(&lsn); err != nil {
     return err
@@ -40,14 +39,10 @@ func (r *Replica) CaughtUpTo(fence pglsn.LSN) bool {
 }
 ```
 
-The routing rule falls out of it. A read from a fenced session goes to any
-replica that has replayed past the fence, and to the primary if none has. No
-timer, no guess: sessions that just wrote get correctness, sessions that didn't
-keep using the replicas, and the fence lifts itself the moment replication
-actually catches up rather than when a countdown expires.
+Routing follows from that. A read from a fenced session goes to any replica that
+has replayed past the fence, and to the primary if none has. No timer anywhere.
+A session that just wrote gets correctness. Every other session keeps using the
+replicas, and the fence clears the moment replication catches up.
 
-What I like about this is that the correct version is *simpler* than the
-heuristic. There is no tuning parameter to get wrong, because the database was
-already publishing the number the heuristic was trying to approximate. That
-pattern shows up more often than it should — a system exposes an exact signal,
-and we reach for a timeout instead.
+There's also no constant to tune, which is the part I like. The database was
+already publishing the number the timeout was trying to approximate.

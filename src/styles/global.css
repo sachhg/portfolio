@@ -134,7 +134,7 @@ body {
   }
 }
 
-/* The single centred column every page shares. */
+/* The single centered column every page shares. */
 .column {
   width: 100%;
   max-width: var(--measure);
@@ -177,7 +177,7 @@ h3 {
   font-size: 1.15rem;
 }
 
-/* Light italic is the emphasis of choice — used sparingly. */
+/* Light italic is the emphasis of choice. Used sparingly. */
 em,
 .em {
   font-style: italic;
@@ -222,7 +222,7 @@ hr,
 /* --- Links --------------------------------------------------------------- */
 /*
  * Prose links carry a permanent faint underline so they are never
- * distinguishable by colour alone, then draw a full-strength accent rule
+ * distinguishable by color alone, then draw a full-strength accent rule
  * left-to-right on hover.
  */
 
@@ -258,7 +258,7 @@ a {
   transform: scaleX(1);
 }
 
-/* Tiny external-link arrow — the only icon in the design. */
+/* Tiny external-link arrow, the only icon in the design. */
 .ext::after {
   content: '↗';
   display: inline-block;
@@ -284,7 +284,7 @@ a {
   border-radius: 1px;
 }
 
-/* Skip link — visible only when focused. */
+/* Skip link, visible only when focused. */
 .skip {
   position: absolute;
   left: -9999px;
@@ -320,7 +320,7 @@ a {
     scroll-behavior: auto !important;
   }
 
-  /* Underlines still appear on hover — they just arrive instantly. */
+  /* Underlines still appear on hover, they just arrive instantly. */
   .link:hover::after,
   .link:focus-visible::after {
     transform: scaleX(1);

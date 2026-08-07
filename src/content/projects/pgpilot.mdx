@@ -11,15 +11,13 @@ featured: true
 order: 2
 ---
 
-Splitting reads across replicas is easy until a user writes a row and
-immediately reads it back from a replica that hasn't caught up yet. `pgpilot`
-is a transparent connection router that solves exactly that: it speaks the
-Postgres wire protocol, so applications point at it instead of the primary and
-change nothing else.
+Read replicas work fine until someone writes a row and reads it back before
+replication catches up. `pgpilot` sits in front of the cluster and handles that
+case. It speaks the Postgres wire protocol, so an application points at it
+instead of the primary and nothing else has to change.
 
-The mechanism is *LSN fencing*. After a write, the router records the log
-sequence number the transaction committed at, and any subsequent read from that
-session is only routed to a replica whose replay position has passed that
-LSN — otherwise it goes to the primary. You get read-your-writes consistency
-across a primary/replica cluster without pushing routing decisions into
-application code.
+It fences on LSN. When a session writes, the router records the log sequence
+number that transaction committed at. Later reads from the same session only go
+to a replica that has replayed past that point, and to the primary if none has.
+That gives you read-your-writes consistency across a primary/replica cluster
+without putting routing decisions in application code.

@@ -10,12 +10,12 @@ featured: true
 order: 3
 ---
 
-A semantic code assistant built for the multi-tenant case, where the hard part
-is not retrieval quality but isolation: many organizations' codebases indexed
-behind one service, with no query able to reach across a tenant boundary.
+A semantic code assistant for the multi-tenant case: several organizations'
+codebases behind one service, with no query allowed to cross a tenant boundary.
+Getting the isolation right took more work than getting the retrieval right.
 
-Chunking is syntax-aware rather than line-based — tree-sitter splits source at
-function and class boundaries so an embedded chunk is a semantically complete
-unit instead of an arbitrary window. Those chunks are embedded into TurboPuffer
-for vector search, and a LangGraph agent orchestrates retrieval, deciding when
-to search, when to widen context, and when it has enough to answer.
+Chunks follow syntax rather than line counts. Tree-sitter splits source at
+function and class boundaries, so an embedded chunk is a complete unit instead
+of an arbitrary window. Those go into TurboPuffer for vector search, and a
+LangGraph agent handles retrieval: when to search, when to pull in more context,
+and when it has enough to answer.

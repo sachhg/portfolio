@@ -1,8 +1,8 @@
 /**
  * Fetches and self-hosts the two typefaces this site uses.
  *
- *   Newsreader   (OFL)  — display + body. Variable, latin subset only.
- *   Commit Mono  (MIT)  — metadata voice. Variable.
+ *   Newsreader   (OFL)  display + body. Variable, latin subset only.
+ *   Commit Mono  (MIT)  metadata voice. Variable.
  *
  * Web fonts land in public/fonts/. A static Newsreader TTF also lands in
  * src/assets/fonts/ because satori (OG image generation) cannot read woff2.
@@ -45,7 +45,7 @@ const LICENSES = [
 
 async function get(url, asText = false) {
   const res = await fetch(url, { headers: { 'User-Agent': UA } })
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} — ${url}`)
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${url}`)
   return asText ? res.text() : Buffer.from(await res.arrayBuffer())
 }
 
@@ -56,7 +56,7 @@ async function save(dir, name, buf) {
 
 /**
  * Google's css2 response is grouped into `/* subset *\/` comments followed by
- * an @font-face. Pull only the latin block for each style — the site is
+ * an @font-face. Pull only the latin block for each style, since the site is
  * English-only, so vietnamese/latin-ext are dead weight.
  */
 function latinSrc(css, style) {
@@ -103,8 +103,8 @@ async function main() {
 /**
  * Trim the web fonts to what the site actually renders.
  *
- * Glyph subsetting alone barely dents Newsreader — its weight is variation
- * data, not outlines — so the axis ranges are narrowed too: the site uses
+ * Glyph subsetting alone barely dents Newsreader, whose weight is variation
+ * data rather than outlines, so the axis ranges are narrowed too. The site uses
  * weights 350–600 and type from 11px to 38px (~8–29pt optical). Commit Mono is
  * the opposite case: a huge glyph set, so the unicode pass does the work.
  *
@@ -159,7 +159,7 @@ async function subsetAll() {
       )
     } catch (err) {
       await rm(tmp, { force: true })
-      console.warn(`  ${file} skipped — ${err.message.split('\n')[0]}`)
+      console.warn(`  ${file} skipped: ${err.message.split('\n')[0]}`)
     }
   }
 }
@@ -167,7 +167,7 @@ async function subsetAll() {
 /**
  * satori cannot parse variable fonts, so pin both axes into a static cut.
  * Needs fontTools (`pip install fonttools`). The output is committed, so a
- * checkout without fontTools still builds — this only refreshes it.
+ * checkout without fontTools still builds. This only refreshes it.
  */
 async function instanceStatic() {
   const src = join(TTF_DIR, 'Newsreader-Regular.ttf')
@@ -182,7 +182,7 @@ async function instanceStatic() {
     console.log('  Newsreader-Static.ttf')
   } catch {
     console.warn(
-      '  skipped — fontTools not available. The committed static TTF still applies.'
+      '  skipped: fontTools not available. The committed static TTF still applies.'
     )
   }
 }

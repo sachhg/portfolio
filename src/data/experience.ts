@@ -9,7 +9,7 @@ export interface Role {
 }
 
 /**
- * Ordered by weight rather than recency — the reader gets ten seconds.
+ * Ordered by weight rather than recency. A reader gives this ten seconds.
  */
 export const experience: Role[] = [
   {
@@ -57,6 +57,6 @@ export const experience: Role[] = [
 /** The two or three lines under NOW. */
 export const now: string[] = [
   'Software engineer intern at **Conmitto**, building the integration platform for a multi-tenant logistics product.',
-  'Just wrapped **Global Infrastructure at American Express** — ML autoscaling across a 500+ cluster DBaaS fleet.',
+  'Just wrapped **Global Infrastructure at American Express**, building ML autoscaling across a 500+ cluster DBaaS fleet.',
   'Technical Director of **ACM.Industry**, the software consulting club at UCSB.',
 ]

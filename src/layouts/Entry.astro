@@ -24,7 +24,7 @@ const bits = (meta ?? []).filter(Boolean) as string[]
 ---
 
 <Base
-  title={`${title} — Sachit Madaan`}
+  title={`${title} · Sachit Madaan`}
   description={description}
   ogType={ogType}
   schema={schema}
@@ -106,7 +106,7 @@ const bits = (meta ?? []).filter(Boolean) as string[]
     transition: color var(--dur-fast) var(--ease-out);
   }
 
-  /* ::before, not ::after — .ext owns ::after for its external-link arrow. */
+  /* ::before, not ::after, because .ext owns ::after for its arrow. */
   .meta a::before {
     content: '';
     position: absolute;

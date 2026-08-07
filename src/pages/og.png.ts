@@ -1,8 +1,8 @@
 /**
- * Build-time Open Graph card: 1200×630, paper ground, Newsreader ink.
+ * Build-time Open Graph card: 1200x630, paper ground, Newsreader ink.
  *
- * satori lays out flexbox → SVG, resvg rasterises → PNG. Runs once at build,
- * so nothing here reaches the client.
+ * satori lays out flexbox into SVG, resvg rasterizes it to PNG. Runs once at
+ * build, so nothing here reaches the client.
  */
 
 import type { APIRoute } from 'astro'
@@ -23,7 +23,7 @@ function latticeDots() {
   const dots: any[] = []
   const COLS = 9
   const ROWS = 3
-  // Offsets chosen once, not random — the OG card should never churn.
+  // Offsets chosen once, not random, so the OG card never churns.
   const jitter = [4, -6, 3, -2, 7, -5, 2, 6, -3, 5, -4, 1, -7, 3, 6, -2, 4, -5]
 
   for (let r = 0; r < ROWS; r++) {
