@@ -1,0 +1,176 @@
+/* ==========================================================================
+   Long-form typography for MDX content.
+   Global rather than scoped, because MDX output carries no scope hash.
+   ========================================================================== */
+
+.prose {
+  --flow: 1.15em;
+}
+
+.prose > * + * {
+  margin-top: var(--flow);
+}
+
+.prose p {
+  text-wrap: pretty;
+}
+
+.prose h2,
+.prose h3 {
+  margin-top: 2.25em;
+  margin-bottom: 0.6em;
+  line-height: 1.25;
+}
+
+.prose h2 + *,
+.prose h3 + * {
+  margin-top: 0;
+}
+
+.prose h2 {
+  font-size: 1.3em;
+}
+
+.prose h3 {
+  font-size: 1.12em;
+}
+
+/* --- Inline ---------------------------------------------------------- */
+
+.prose a {
+  color: var(--accent);
+  position: relative;
+  background-image: linear-gradient(var(--accent-faint), var(--accent-faint));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+}
+
+.prose a::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.prose a:hover::after,
+.prose a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.prose em {
+  font-style: italic;
+  font-weight: 350;
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+/* --- Lists ----------------------------------------------------------- */
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+
+.prose ul {
+  list-style: none;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li + li {
+  margin-top: 0.35em;
+}
+
+/* A hairline en-dash rather than a bullet — quieter on paper. */
+.prose ul > li {
+  position: relative;
+}
+
+.prose ul > li::before {
+  content: '';
+  position: absolute;
+  left: -1.4em;
+  top: 0.78em;
+  width: 0.55em;
+  height: 1px;
+  background: var(--line);
+}
+
+.prose ol::marker,
+.prose li::marker {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.8em;
+}
+
+/* --- Code ------------------------------------------------------------ */
+
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  font-variant-ligatures: none;
+  background: var(--paper-sunk);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0.1em 0.32em;
+}
+
+.prose pre {
+  /* Shiki paints the background; the rule ties it to the page. */
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  font-size: 0.82em;
+  line-height: 1.6;
+  /* Code is allowed to breathe past the measure a little. */
+  margin-inline: calc(var(--gutter) * -0.5);
+  tab-size: 2;
+}
+
+.prose pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+@media (max-width: 34rem) {
+  .prose pre {
+    margin-inline: 0;
+  }
+}
+
+/* --- Blocks ---------------------------------------------------------- */
+
+.prose blockquote {
+  border-left: 1px solid var(--line);
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.prose hr {
+  margin-block: 2.25em;
+}
+
+.prose img {
+  border-radius: 2px;
+}
+
+.prose figcaption {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+}

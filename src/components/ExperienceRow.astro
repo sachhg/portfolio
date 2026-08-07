@@ -1,0 +1,74 @@
+---
+import type { Role } from '../data/experience'
+
+interface Props {
+  role: Role
+}
+
+const { role } = Astro.props
+---
+
+<li class="row">
+  <div class="head">
+    <h3 class="company">{role.company}</h3>
+    <span class="dates mono">{role.dates}</span>
+  </div>
+  <p class="detail">
+    <span class="title">{role.role}</span><span class="sep" aria-hidden="true"> · </span
+    ><span class="impact">{role.impact}</span>
+  </p>
+</li>
+
+<style>
+  .row {
+    padding-block: var(--space-row);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row:last-child {
+    border-bottom: 0;
+  }
+
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .company {
+    font-size: inherit;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .dates {
+    color: var(--muted);
+    white-space: nowrap;
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .detail {
+    color: var(--muted);
+    /* One notch down so the company name leads the eye. */
+    font-size: 0.95em;
+    line-height: 1.5;
+    margin-top: 0.1rem;
+  }
+
+  .title {
+    color: color-mix(in srgb, var(--ink) 72%, var(--paper));
+  }
+
+  .sep {
+    color: color-mix(in srgb, var(--muted) 50%, var(--paper));
+  }
+
+  @media (max-width: 30rem) {
+    .head {
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+  }
+</style>

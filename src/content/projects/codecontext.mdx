@@ -1,0 +1,21 @@
+---
+title: CodeContext
+year: 2026
+stack: ['TurboPuffer', 'tree-sitter', 'LangGraph', 'RAG']
+summary: 'Tenant-isolated semantic code search'
+description: 'A multi-tenant semantic code assistant built on TurboPuffer, tree-sitter, and LangGraph, with syntax-aware chunking and strict per-tenant retrieval isolation.'
+status: in progress
+tag: RAG
+featured: true
+order: 3
+---
+
+A semantic code assistant built for the multi-tenant case, where the hard part
+is not retrieval quality but isolation: many organizations' codebases indexed
+behind one service, with no query able to reach across a tenant boundary.
+
+Chunking is syntax-aware rather than line-based — tree-sitter splits source at
+function and class boundaries so an embedded chunk is a semantically complete
+unit instead of an arbitrary window. Those chunks are embedded into TurboPuffer
+for vector search, and a LangGraph agent orchestrates retrieval, deciding when
+to search, when to widen context, and when it has enough to answer.

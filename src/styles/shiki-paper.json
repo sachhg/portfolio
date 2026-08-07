@@ -1,0 +1,93 @@
+{
+  "name": "paper",
+  "type": "light",
+  "colors": {
+    "editor.background": "#EFEBE1",
+    "editor.foreground": "#1C1B18"
+  },
+  "settings": [
+    {
+      "settings": {
+        "background": "#EFEBE1",
+        "foreground": "#1C1B18"
+      }
+    },
+    {
+      "scope": ["comment", "punctuation.definition.comment", "string.comment"],
+      "settings": { "foreground": "#9A9482", "fontStyle": "italic" }
+    },
+    {
+      "scope": [
+        "keyword",
+        "keyword.control",
+        "keyword.operator.new",
+        "keyword.operator.expression",
+        "storage",
+        "storage.type",
+        "storage.modifier",
+        "variable.language",
+        "constant.language",
+        "support.type.primitive",
+        "entity.name.tag"
+      ],
+      "settings": { "foreground": "#2F4A8A" }
+    },
+    {
+      "scope": [
+        "string",
+        "string.quoted",
+        "string.template",
+        "punctuation.definition.string",
+        "constant.other.symbol"
+      ],
+      "settings": { "foreground": "#5E6B57" }
+    },
+    {
+      "scope": ["constant.numeric", "constant.language.boolean", "constant.other"],
+      "settings": { "foreground": "#6E6A5E" }
+    },
+    {
+      "scope": ["entity.name.function", "support.function", "meta.function-call"],
+      "settings": { "foreground": "#1C1B18", "fontStyle": "bold" }
+    },
+    {
+      "scope": [
+        "entity.name.type",
+        "entity.name.class",
+        "entity.other.inherited-class",
+        "support.class",
+        "support.type"
+      ],
+      "settings": { "foreground": "#3D5590" }
+    },
+    {
+      "scope": ["variable", "variable.other", "meta.definition.variable"],
+      "settings": { "foreground": "#1C1B18" }
+    },
+    {
+      "scope": [
+        "variable.parameter",
+        "entity.other.attribute-name",
+        "meta.object-literal.key",
+        "support.variable.property"
+      ],
+      "settings": { "foreground": "#4A4639" }
+    },
+    {
+      "scope": ["punctuation", "meta.brace", "keyword.operator"],
+      "settings": { "foreground": "#6E6A5E" }
+    },
+    {
+      "scope": ["markup.inserted", "markup.bold"],
+      "settings": { "fontStyle": "bold" }
+    },
+    {
+      "scope": ["markup.italic"],
+      "settings": { "fontStyle": "italic" }
+    },
+    {
+      "scope": ["invalid", "invalid.illegal"],
+      "settings": { "foreground": "#8A3D3D" }
+    }
+  ]
+}

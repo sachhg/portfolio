@@ -1,0 +1,67 @@
+---
+interface Props {
+  href: string
+  title: string
+  date: Date
+  transitionName?: string
+}
+
+const { href, title, date, transitionName } = Astro.props
+
+const iso = date.toISOString().slice(0, 10)
+const display = date.toLocaleDateString('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+---
+
+<a class="row" href={href}>
+  <span
+    class="title"
+    style={transitionName ? `view-transition-name:${transitionName}` : undefined}>{title}</span
+  >
+  <time class="date mono" datetime={iso}>{display}</time>
+</a>
+
+<style>
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 0.2rem 1.5rem;
+    padding-block: var(--space-row);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row:last-child {
+    border-bottom: 0;
+  }
+
+  .title {
+    color: var(--ink);
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    transition: background-size var(--dur-fast) var(--ease-out);
+  }
+
+  .row:hover .title,
+  .row:focus-visible .title {
+    background-size: 100% 1px;
+  }
+
+  .date {
+    color: var(--muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 30rem) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

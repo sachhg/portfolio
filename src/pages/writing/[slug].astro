@@ -1,0 +1,43 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content'
+import Entry from '../../layouts/Entry.astro'
+import { articleSchema } from '../../lib/schema'
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('writing')).filter((p) => !p.data.draft)
+  return posts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }))
+}
+
+interface Props {
+  entry: CollectionEntry<'writing'>
+}
+
+const { entry } = Astro.props
+const { Content } = await render(entry)
+const d = entry.data
+
+const display = d.date.toLocaleDateString('en-US', {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+---
+
+<Entry
+  title={d.title}
+  description={d.description}
+  meta={[display]}
+  ogType="article"
+  schema={articleSchema({
+    origin: Astro.site!.href,
+    path: `/writing/${entry.id}`,
+    title: d.title,
+    description: d.description,
+    date: d.date,
+  })}
+  transitionName={`t-${entry.id}`}
+  back={{ href: '/writing', label: 'All writing' }}
+>
+  <Content />
+</Entry>

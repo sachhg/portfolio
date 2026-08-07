@@ -1,0 +1,47 @@
+---
+title: pqc-scan
+year: 2026
+stack: ['Python', 'tree-sitter', 'SARIF', 'CycloneDX', 'GitHub Actions']
+repo: 'https://github.com/sachhg/pqc-scan'
+summary: 'Catches quantum-vulnerable crypto in CI'
+description: 'A CLI tool and GitHub Action that finds RSA, ECDSA, and Diffie–Hellman usage across a codebase with tree-sitter AST analysis, emitting SARIF 2.1.0 and a CycloneDX CBOM.'
+status: active
+tag: Python
+featured: true
+order: 1
+---
+
+Every RSA key, ECDSA signature, and Diffie–Hellman handshake in a codebase is a
+liability with a deadline attached. `pqc-scan` is a CLI tool and GitHub Action
+that finds them: it walks a repository for quantum-vulnerable primitives, flags
+both the call sites and the dependencies that introduce them, and fails CI when
+someone adds a new one.
+
+The analysis is AST-based rather than regex-based, running over tree-sitter
+grammars for Python, JavaScript, Java, and Go. Resolving *import origin* and
+*call shape* is what separates a real finding from noise — knowing that a bare
+`generate_private_key` came from `cryptography.hazmat` and was called with an
+RSA backend, not that the string appeared somewhere in the file.
+
+Results are emitted as SARIF 2.1.0, so findings surface as native GitHub code
+scanning annotations, alongside a CycloneDX CBOM describing the cryptographic
+bill of materials. It's published on PyPI.
+
+```bash
+pip install pqc-scan
+
+# Fail the build when a non-quantum-safe primitive is introduced.
+pqc-scan ./src --format sarif --out results.sarif --fail-on high
+```
+
+Wiring it into a workflow takes one step, and findings land in the Security tab
+rather than in a log nobody reads:
+
+```yaml
+- name: Scan for quantum-vulnerable cryptography
+  run: pqc-scan . --format sarif --out results.sarif --fail-on high
+
+- uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: results.sarif
+```

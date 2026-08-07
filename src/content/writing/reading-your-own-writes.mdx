@@ -1,0 +1,53 @@
+---
+title: Reading your own writes
+date: 2026-07-28
+description: 'Why replica lag breaks the most reasonable assumption a user makes, and what LSN fencing does about it.'
+---
+
+The first thing you do when a Postgres primary starts to sweat is move reads
+onto replicas. The second thing you do is field a bug report that makes no
+sense: a user updated their profile, the request returned 200, the page
+reloaded, and the old name came back.
+
+Nothing is broken. The write committed on the primary, the read landed on a
+replica, and the replica was two hundred milliseconds behind. Every layer
+behaved correctly and the user still watched their change disappear. This is
+the gap between *eventual consistency*, which the database promises, and
+*read-your-writes consistency*, which the user assumes without ever being asked.
+
+The usual fix is to pin a session to the primary for some number of seconds
+after a write. It works, roughly, in the way that a sledgehammer works: the
+window is a guess, it is too long for most requests and too short for the
+unlucky ones, and every pinned session gives back the read capacity you moved
+replicas in to gain.
+
+There is an exact answer available, and Postgres already tracks it. Every commit
+has a log sequence number, and every replica reports how far through the WAL it
+has replayed. So instead of guessing at a duration, record the LSN a write
+committed at and compare it against replay positions:
+
+```go
+// After a write, remember exactly how far this session needs replicas to be.
+var lsn pglsn.LSN
+if err := tx.QueryRow(ctx, "SELECT pg_current_wal_lsn()").Scan(&lsn); err != nil {
+    return err
+}
+session.Fence(lsn)
+
+// A replica is only eligible once it has replayed past that point.
+func (r *Replica) CaughtUpTo(fence pglsn.LSN) bool {
+    return r.ReplayLSN() >= fence
+}
+```
+
+The routing rule falls out of it. A read from a fenced session goes to any
+replica that has replayed past the fence, and to the primary if none has. No
+timer, no guess: sessions that just wrote get correctness, sessions that didn't
+keep using the replicas, and the fence lifts itself the moment replication
+actually catches up rather than when a countdown expires.
+
+What I like about this is that the correct version is *simpler* than the
+heuristic. There is no tuning parameter to get wrong, because the database was
+already publishing the number the heuristic was trying to approximate. That
+pattern shows up more often than it should — a system exposes an exact signal,
+and we reach for a timeout instead.

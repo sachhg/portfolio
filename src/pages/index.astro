@@ -1,0 +1,216 @@
+---
+import { getCollection } from 'astro:content'
+import { Image } from 'astro:assets'
+import portrait from '../assets/portrait.jpg'
+import Base from '../layouts/Base.astro'
+import Section from '../components/Section.astro'
+import ExperienceRow from '../components/ExperienceRow.astro'
+import ProjectRow from '../components/ProjectRow.astro'
+import PostRow from '../components/PostRow.astro'
+import Lattice from '../components/Lattice.astro'
+import { site } from '../data/site'
+import { experience, now } from '../data/experience'
+import { personSchema } from '../lib/schema'
+
+const featured = (await getCollection('projects'))
+  .filter((p) => p.data.featured)
+  .sort((a, b) => a.data.order - b.data.order)
+
+const posts = (await getCollection('writing'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3)
+
+/** `**word**` → <strong>. Split, don't inject: odd indices are the emphasis. */
+const segments = (line: string) => line.split(/\*\*(.+?)\*\*/g)
+
+const links = [
+  { href: site.github, label: 'GitHub' },
+  { href: site.linkedin, label: 'LinkedIn' },
+  { href: `mailto:${site.email}`, label: 'Email' },
+  { href: site.resume, label: 'Résumé' },
+]
+---
+
+<Base
+  title={`${site.name} — Infrastructure and ML systems`}
+  description={site.description}
+  schema={personSchema(Astro.site!.href)}
+>
+  <Lattice />
+
+  <div class="column">
+    <div class="intro">
+      <Image
+        class="portrait"
+        src={portrait}
+        alt={site.name}
+        width={104}
+        height={104}
+        densities={[1, 2]}
+        loading="eager"
+      />
+      <div>
+        <h1>{site.name}</h1>
+        <p class="identity">{site.identity}</p>
+      </div>
+    </div>
+
+    <Section label="Now" rule={false}>
+      <ul class="now">
+        {
+          now.map((line) => (
+            <li>
+              {segments(line).map((part, i) =>
+                i % 2 === 1 ? <strong>{part}</strong> : part
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </Section>
+
+    <Section label="Experience">
+      <ul>
+        {experience.map((role) => <ExperienceRow role={role} />)}
+      </ul>
+    </Section>
+
+    <Section label="Selected work" more={{ href: '/projects', label: 'all projects' }}>
+      <div class="rows">
+        {
+          featured.map((p) => (
+            <ProjectRow
+              href={`/projects/${p.id}`}
+              title={p.data.title}
+              summary={p.data.summary}
+              tag={p.data.tag}
+              transitionName={`t-${p.id}`}
+            />
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section label="Writing" more={{ href: '/writing', label: 'all writing' }}>
+      <div class="rows">
+        {
+          posts.map((p) => (
+            <PostRow
+              href={`/writing/${p.id}`}
+              title={p.data.title}
+              date={p.data.date}
+              transitionName={`t-${p.id}`}
+            />
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section label="Elsewhere">
+      <ul class="links mono">
+        {
+          links.map((l) => (
+            <li>
+              <a href={l.href} rel={l.href.startsWith('http') ? 'me noopener' : undefined}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Section>
+  </div>
+</Base>
+
+<style>
+  .intro {
+    padding-top: 4.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.35rem;
+  }
+
+  .portrait {
+    flex: 0 0 auto;
+    width: 104px;
+    height: 104px;
+    border-radius: 2px;
+    /* A hairline, never a shadow — this is still paper. */
+    border: 1px solid var(--line);
+    /* Pulled a touch off full saturation so it sits on the warm ground. */
+    filter: saturate(0.88);
+    view-transition-name: portrait;
+  }
+
+  h1 {
+    /* The name is the anchor of the page, not a banner. */
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    view-transition-name: site-name;
+  }
+
+  .identity {
+    color: var(--muted);
+    margin-top: 0.35rem;
+    text-wrap: pretty;
+  }
+
+  .now li {
+    padding-block: 0.25rem;
+    text-wrap: pretty;
+  }
+
+  .now strong {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .now {
+    color: color-mix(in srgb, var(--ink) 82%, var(--paper));
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+  }
+
+  .links a {
+    color: var(--muted);
+    position: relative;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .links a::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -3px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .links a:hover {
+    color: var(--accent);
+  }
+
+  .links a:hover::after {
+    transform: scaleX(1);
+  }
+
+  @media (max-width: 30rem) {
+    .intro {
+      padding-top: 3rem;
+      gap: 1rem;
+    }
+
+    .portrait {
+      width: 72px;
+      height: 72px;
+    }
+  }
+</style>

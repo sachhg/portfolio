@@ -1,0 +1,107 @@
+---
+interface Props {
+  href: string
+  title: string
+  summary: string
+  tag: string
+  /** Enables the heading morph between this row and the detail page h1. */
+  transitionName?: string
+}
+
+const { href, title, summary, tag, transitionName } = Astro.props
+---
+
+<a class="row" href={href}>
+  <span class="body">
+    <span class="title" style={transitionName ? `view-transition-name:${transitionName}` : undefined}
+      >{title}</span
+    ><span class="sep" aria-hidden="true"> — </span><span class="summary">{summary}</span>
+  </span>
+  <span class="tag mono">
+    {tag}
+    <span class="arrow" aria-hidden="true">→</span>
+  </span>
+</a>
+
+<style>
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 0.35rem 1.5rem;
+    padding-block: var(--space-row);
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* The list closes with prose, not a stray rule. */
+  .row:last-child {
+    border-bottom: 0;
+  }
+
+  .body {
+    min-width: 0;
+    /* Keeps a single trailing word from stranding on its own line. */
+    text-wrap: pretty;
+  }
+
+  .title {
+    color: var(--ink);
+    position: relative;
+    /* Sits above the accent underline so descenders stay legible. */
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    transition: background-size var(--dur-fast) var(--ease-out);
+  }
+
+  .row:hover .title,
+  .row:focus-visible .title {
+    background-size: 100% 1px;
+  }
+
+  .sep {
+    /* Legible as punctuation, but never competing with either side of it. */
+    color: color-mix(in srgb, var(--muted) 50%, var(--paper));
+  }
+
+  .summary {
+    color: var(--muted);
+  }
+
+  .tag {
+    color: var(--muted);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.6875rem;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .row:hover .tag,
+  .row:focus-visible .tag {
+    color: var(--ink);
+  }
+
+  .arrow {
+    display: inline-block;
+    margin-left: 0.15rem;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .row:hover .arrow,
+  .row:focus-visible .arrow {
+    transform: translateX(2px);
+  }
+
+  /* Below the fold of a phone, the tag drops under the title. */
+  @media (max-width: 34rem) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+
+    .tag {
+      order: 2;
+    }
+  }
+</style>

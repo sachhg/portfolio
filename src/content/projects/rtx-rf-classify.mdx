@@ -1,0 +1,26 @@
+---
+title: rtx-rf-classify
+year: 2026
+stack: ['C++23', 'CMake', 'FFTW3', 'OpenBLAS', 'RISC-V']
+summary: 'RF modulation inference on RISC-V'
+description: 'A C++23 inference engine classifying RF signals by modulation type on embedded RISC-V, with expression-template tensor fusion and CMake-selectable OpenBLAS, SIMD, or scalar backends.'
+status: shipped
+tag: C++23
+featured: true
+order: 4
+---
+
+An inference engine that classifies radio signals by modulation type, written
+in C++23 and targeted at embedded RISC-V hardware where there is no room for a
+Python runtime or a general-purpose ML framework. It runs as a service exposed
+over TCP, with compute backends — OpenBLAS, hand-written SIMD, or portable
+scalar — selectable at configure time through CMake.
+
+I built the tensor layer and its expression-template system, which is where the
+performance comes from: chained element-wise operations compile down into a
+single fused loop instead of materializing a temporary buffer per operation. On
+top of that sit the convolution, normalization, pooling, and dense primitives,
+with FFTW3 wrapped behind a type-safe interface so plan lifetimes and buffer
+alignment are enforced by the compiler rather than by convention.
+
+Built with [ACM.Industry](https://acmindustry.org) for Raytheon.

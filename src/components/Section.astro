@@ -1,0 +1,76 @@
+---
+interface Props {
+  /** Mono eyebrow: NOW, SELECTED WORK, WRITING. */
+  label: string
+  /** Hairline above the section. Omitted on the first block of a page. */
+  rule?: boolean
+  /** Optional right-hand link, e.g. "all projects". */
+  more?: { href: string; label: string }
+}
+
+const { label, rule = true, more } = Astro.props
+const headingId = `s-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+---
+
+<section aria-labelledby={headingId}>
+  {rule && <hr class="rule" />}
+  <div class="head">
+    <h2 class="eyebrow" id={headingId}>{label}</h2>
+    {
+      more && (
+        <a class="more mono" href={more.href}>
+          {more.label}
+        </a>
+      )
+    }
+  </div>
+  <slot />
+</section>
+
+<style>
+  section {
+    margin-top: var(--space-section);
+  }
+
+  .rule {
+    margin-bottom: 1.5rem;
+  }
+
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  /* h2 carries .eyebrow globally; reset its default block margin here. */
+  .eyebrow {
+    margin-bottom: 1.15rem;
+  }
+
+  .more {
+    color: var(--muted);
+    position: relative;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .more::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -2px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .more:hover {
+    color: var(--accent);
+  }
+
+  .more:hover::after {
+    transform: scaleX(1);
+  }
+</style>

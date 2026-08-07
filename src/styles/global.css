@@ -1,0 +1,347 @@
+/* ==========================================================================
+   Paper and ink.
+   Tokens, typography, and the ambient interaction layer.
+   ========================================================================== */
+
+/* --- Typefaces ----------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Newsreader';
+  src: url('/fonts/newsreader-latin-var.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Newsreader';
+  src: url('/fonts/newsreader-latin-var-italic.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Commit Mono';
+  src: url('/fonts/commit-mono-var.woff2') format('woff2');
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- Tokens -------------------------------------------------------------- */
+
+:root {
+  --paper: #f2efe7;
+  --ink: #1c1b18;
+  --muted: #6e6a5e;
+  --line: #e3ded2;
+  --accent: #2f4a8a;
+
+  /* Derived. Kept as tokens so the lattice island can read them. */
+  --paper-sunk: #efebe1;
+  --accent-faint: color-mix(in srgb, var(--accent) 28%, transparent);
+
+  --serif: 'Newsreader', ui-serif, Georgia, 'Times New Roman', serif;
+  --mono: 'Commit Mono', ui-monospace, 'SF Mono', 'Menlo', monospace;
+
+  --measure: 42rem;
+  --gutter: clamp(1.25rem, 5vw, 2.5rem);
+
+  /* Rhythm. The rule sits nearer the block it opens than the one it closes,
+     so sections read as separated rather than adrift. */
+  --space-section: clamp(2.25rem, 5.5vw, 3.25rem);
+  --space-row: 0.7rem;
+
+  --dur-fast: 150ms;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  color-scheme: light;
+}
+
+/* --- Reset --------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body,
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+li,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* --- Base ---------------------------------------------------------------- */
+
+html {
+  background: var(--paper);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.0625rem; /* 17px */
+  line-height: 1.65;
+  font-optical-sizing: auto;
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+@media (min-width: 40rem) {
+  body {
+    font-size: 1.125rem; /* 18px */
+  }
+}
+
+/* The single centred column every page shares. */
+.column {
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+/* Content always sits above the lattice canvas, which paints at z-index 0. */
+header,
+main,
+footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Headings ------------------------------------------------------------ */
+
+h1,
+h2,
+h3 {
+  font-weight: 400;
+  line-height: 1.2;
+  text-wrap: balance;
+  letter-spacing: -0.005em;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 1.35rem + 1.75vw, 2.35rem);
+}
+
+h2 {
+  font-size: clamp(1.3rem, 1.1rem + 0.9vw, 1.6rem);
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+/* Light italic is the emphasis of choice — used sparingly. */
+em,
+.em {
+  font-style: italic;
+  font-weight: 350;
+}
+
+strong {
+  font-weight: 600;
+}
+
+/* --- Mono voice ---------------------------------------------------------- */
+/* Reserved for metadata: dates, tags, paths, the footer strip. Never prose. */
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-variant-ligatures: none;
+}
+
+/* Section labels: NOW, SELECTED WORK, WRITING. */
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1.15rem;
+}
+
+/* --- Rules --------------------------------------------------------------- */
+
+hr,
+.rule {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 0;
+}
+
+/* --- Links --------------------------------------------------------------- */
+/*
+ * Prose links carry a permanent faint underline so they are never
+ * distinguishable by colour alone, then draw a full-strength accent rule
+ * left-to-right on hover.
+ */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.link {
+  color: var(--accent);
+  position: relative;
+  display: inline;
+  background-image: linear-gradient(var(--accent-faint), var(--accent-faint));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.link:hover::after,
+.link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Tiny external-link arrow — the only icon in the design. */
+.ext::after {
+  content: '↗';
+  display: inline-block;
+  margin-left: 0.15em;
+  font-size: 0.8em;
+  line-height: 1;
+  vertical-align: 0.15em;
+  color: var(--muted);
+  transition: transform var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.ext:hover::after {
+  color: var(--accent);
+  transform: translate(1px, -1px);
+}
+
+/* --- Focus --------------------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+/* Skip link — visible only when focused. */
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10;
+  background: var(--paper);
+  color: var(--accent);
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--line);
+}
+
+.skip:focus {
+  left: var(--gutter);
+  top: 0.5rem;
+}
+
+/* --- Selection ----------------------------------------------------------- */
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--ink);
+}
+
+/* --- Reduced motion ------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Underlines still appear on hover — they just arrive instantly. */
+  .link:hover::after,
+  .link:focus-visible::after {
+    transform: scaleX(1);
+  }
+}
+
+/* --- View transitions ---------------------------------------------------- */
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}

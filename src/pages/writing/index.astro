@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content'
+import Base from '../../layouts/Base.astro'
+import PostRow from '../../components/PostRow.astro'
+
+const posts = (await getCollection('writing'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+---
+
+<Base
+  title="Writing — Sachit Madaan"
+  description="Notes on distributed systems, databases, and machine learning infrastructure by Sachit Madaan."
+>
+  <div class="column page">
+    <h1>Writing</h1>
+    <p class="lede">Occasional notes on systems I&rsquo;ve had to reason carefully about.</p>
+
+    <hr class="rule" />
+
+    {
+      posts.length > 0 ? (
+        <div class="rows">
+          {posts.map((p) => (
+            <PostRow
+              href={`/writing/${p.id}`}
+              title={p.data.title}
+              date={p.data.date}
+              transitionName={`t-${p.id}`}
+            />
+          ))}
+        </div>
+      ) : (
+        <p class="empty">Nothing published yet.</p>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-top: 3.5rem;
+  }
+
+  .lede {
+    color: var(--muted);
+    margin-top: 0.4rem;
+    max-width: 34rem;
+    text-wrap: pretty;
+  }
+
+  .rule {
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .empty {
+    color: var(--muted);
+  }
+
+  @media (max-width: 30rem) {
+    .page {
+      padding-top: 2.5rem;
+    }
+  }
+</style>

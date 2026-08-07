@@ -1,0 +1,165 @@
+---
+import '../styles/prose.css'
+import Base from '../layouts/Base.astro'
+
+interface Props {
+  title: string
+  description: string
+  /** Mono metadata row under the title. */
+  meta?: (string | null)[]
+  /** Trailing link in the metadata row. */
+  link?: { href: string; label: string }
+  ogType?: 'website' | 'article'
+  schema?: Record<string, unknown> | Record<string, unknown>[]
+  /** Matches the list row so the heading morphs across navigation. */
+  transitionName?: string
+  /** Where "back" goes. */
+  back: { href: string; label: string }
+}
+
+const { title, description, meta, link, ogType, schema, transitionName, back } =
+  Astro.props
+
+const bits = (meta ?? []).filter(Boolean) as string[]
+---
+
+<Base
+  title={`${title} — Sachit Madaan`}
+  description={description}
+  ogType={ogType}
+  schema={schema}
+>
+  <article class="column entry">
+    <header class="head">
+      <h1 style={transitionName ? `view-transition-name:${transitionName}` : undefined}>
+        {title}
+      </h1>
+      {
+        (bits.length > 0 || link) && (
+          <p class="meta mono">
+            {bits.map((b, i) => (
+              <>
+                {i > 0 && (
+                  <span class="sep" aria-hidden="true">
+                    ·
+                  </span>
+                )}
+                <span>{b}</span>
+              </>
+            ))}
+            {link && (
+              <>
+                <span class="sep" aria-hidden="true">
+                  ·
+                </span>
+                <a class="ext" href={link.href} rel="noopener">
+                  {link.label}
+                </a>
+              </>
+            )}
+          </p>
+        )
+      }
+    </header>
+
+    <hr class="rule" />
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    <hr class="rule bottom" />
+
+    <a class="back mono" href={back.href}>
+      <span class="arrow" aria-hidden="true">←</span>
+      {back.label}
+    </a>
+  </article>
+</Base>
+
+<style>
+  .entry {
+    padding-top: 3.5rem;
+  }
+
+  .head h1 {
+    text-wrap: balance;
+  }
+
+  .meta {
+    color: var(--muted);
+    margin-top: 0.7rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.45rem;
+    line-height: 1.9;
+  }
+
+  .sep {
+    color: var(--line);
+  }
+
+  .meta a {
+    color: var(--muted);
+    position: relative;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  /* ::before, not ::after — .ext owns ::after for its external-link arrow. */
+  .meta a::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -2px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .meta a:hover {
+    color: var(--accent);
+  }
+
+  .meta a:hover::before {
+    transform: scaleX(1);
+  }
+
+  .rule {
+    margin-top: 1.6rem;
+    margin-bottom: 2rem;
+  }
+
+  .bottom {
+    margin-top: 3rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    color: var(--muted);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  .arrow {
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .back:hover .arrow {
+    transform: translateX(-2px);
+  }
+
+  @media (max-width: 30rem) {
+    .entry {
+      padding-top: 2.5rem;
+    }
+  }
+</style>

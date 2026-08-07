@@ -1,0 +1,25 @@
+---
+title: pgpilot
+year: 2026
+stack: ['Go', 'PostgreSQL', 'LSN fencing']
+repo: 'https://github.com/sachhg/pgpilot'
+summary: 'Read-your-writes routing for Postgres'
+description: 'A transparent PostgreSQL connection router that uses LSN fencing to guarantee read-your-writes consistency across a primary/replica cluster, with no application changes.'
+status: active
+tag: Go
+featured: true
+order: 2
+---
+
+Splitting reads across replicas is easy until a user writes a row and
+immediately reads it back from a replica that hasn't caught up yet. `pgpilot`
+is a transparent connection router that solves exactly that: it speaks the
+Postgres wire protocol, so applications point at it instead of the primary and
+change nothing else.
+
+The mechanism is *LSN fencing*. After a write, the router records the log
+sequence number the transaction committed at, and any subsequent read from that
+session is only routed to a replica whose replay position has passed that
+LSN — otherwise it goes to the primary. You get read-your-writes consistency
+across a primary/replica cluster without pushing routing decisions into
+application code.

@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content'
+import Base from '../../layouts/Base.astro'
+import ProjectRow from '../../components/ProjectRow.astro'
+import { site } from '../../data/site'
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => a.data.order - b.data.order
+)
+---
+
+<Base
+  title="Projects — Sachit Madaan"
+  description="Systems and tools by Sachit Madaan: post-quantum cryptography scanning, PostgreSQL routing, semantic code retrieval, and embedded RF inference."
+>
+  <div class="column page">
+    <h1>Projects</h1>
+    <p class="lede">
+      Things I&rsquo;ve built, mostly infrastructure. Source is linked where it&rsquo;s public.
+    </p>
+
+    <hr class="rule" />
+
+    <div class="rows">
+      {
+        projects.map((p) => (
+          <ProjectRow
+            href={`/projects/${p.id}`}
+            title={p.data.title}
+            summary={p.data.summary}
+            tag={p.data.tag}
+            transitionName={`t-${p.id}`}
+          />
+        ))
+      }
+    </div>
+
+    <p class="tail mono">
+      More at <a class="ext" href={site.github} rel="me noopener">github.com/{site.githubUser}</a>
+    </p>
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-top: 3.5rem;
+  }
+
+  .lede {
+    color: var(--muted);
+    margin-top: 0.4rem;
+    max-width: 34rem;
+    text-wrap: pretty;
+  }
+
+  .rule {
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tail {
+    margin-top: 2.5rem;
+    color: var(--muted);
+  }
+
+  .tail a {
+    color: var(--muted);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .tail a:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 30rem) {
+    .page {
+      padding-top: 2.5rem;
+    }
+  }
+</style>

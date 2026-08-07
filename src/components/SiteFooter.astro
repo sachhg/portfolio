@@ -1,0 +1,129 @@
+---
+import { getActivity, WINDOW_DAYS } from '../lib/github'
+import { site } from '../data/site'
+import Sparkline from './Sparkline.astro'
+
+const { lastCommit, commitCount, sparkline } = await getActivity()
+
+// Only draw the sparkline when there is something to see.
+const showSpark = sparkline?.some((v) => v > 0) ?? false
+---
+
+<footer>
+  <div class="column">
+    <hr class="rule" />
+    <p class="mono strip">
+      {
+        lastCommit ? (
+          <span class="part">
+            <span class="label">last commit:</span>{' '}
+            <a class="repo" href={lastCommit.url} rel="noopener">
+              {lastCommit.repo}
+            </a>{' '}
+            <span class="msg">&ldquo;{lastCommit.message}&rdquo;</span>
+          </span>
+        ) : (
+          <span class="part">
+            <a class="repo" href={site.github} rel="noopener">
+              github.com/{site.githubUser}
+            </a>
+          </span>
+        )
+      }
+
+      {
+        commitCount !== null && commitCount > 0 && (
+          <>
+            <span class="sep" aria-hidden="true">
+              ·
+            </span>
+            <span class="part">
+              {commitCount} commit{commitCount === 1 ? '' : 's'} in {WINDOW_DAYS} days
+            </span>
+          </>
+        )
+      }
+
+      {
+        showSpark && (
+          <span class="part spark-wrap">
+            <Sparkline values={sparkline!} />
+          </span>
+        )
+      }
+    </p>
+  </div>
+</footer>
+
+<style>
+  footer {
+    margin-top: var(--space-section);
+    padding-bottom: 2.5rem;
+  }
+
+  .rule {
+    margin-bottom: 1rem;
+  }
+
+  .strip {
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.4rem;
+    line-height: 1.9;
+  }
+
+  .label {
+    /* Stays at full --muted: anything lighter drops under 4.5:1 on paper. */
+    color: var(--muted);
+  }
+
+  .repo {
+    color: var(--muted);
+    position: relative;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .repo::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -2px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .repo:hover {
+    color: var(--accent);
+  }
+
+  .repo:hover::after {
+    transform: scaleX(1);
+  }
+
+  .msg {
+    /* Commit messages are external text: clamp rather than let them run. */
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .sep {
+    color: var(--line);
+  }
+
+  .spark-wrap {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* At 360px the strip becomes two or three quiet lines rather than a scroll. */
+  @media (max-width: 30rem) {
+    .strip {
+      font-size: 0.6875rem;
+    }
+  }
+</style>

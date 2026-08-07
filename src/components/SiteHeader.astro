@@ -1,0 +1,76 @@
+---
+import { nav } from '../data/site'
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/'
+const isCurrent = (href: string) =>
+  href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`)
+---
+
+<header>
+  <div class="column bar">
+    <nav aria-label="Primary">
+      <ul class="mono">
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isCurrent(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .bar {
+    padding-block: 1.6rem 0;
+  }
+
+  ul {
+    display: flex;
+    gap: 1.15rem;
+    align-items: baseline;
+  }
+
+  a {
+    color: var(--muted);
+    position: relative;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  /* The nav underline draws in like a prose link, one notch quieter. */
+  a::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -3px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  a:hover {
+    color: var(--ink);
+  }
+
+  a:hover::after {
+    transform: scaleX(1);
+  }
+
+  a[aria-current='page'] {
+    color: var(--ink);
+  }
+
+  a[aria-current='page']::after {
+    background: var(--accent);
+    transform: scaleX(1);
+  }
+</style>

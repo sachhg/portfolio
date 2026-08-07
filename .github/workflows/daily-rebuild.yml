@@ -1,0 +1,62 @@
+name: Daily rebuild
+
+# The footer strip is baked at build time from the GitHub API, so the site
+# needs a rebuild to stay current. This runs daily and can be triggered by hand.
+on:
+  schedule:
+    # 07:10 UTC — just after midnight Pacific, off the top of the hour so it
+    # is not queued behind everyone else's hourly cron.
+    - cron: '10 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-rebuild
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Verify build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Proves the site still builds against live GitHub data before we ask
+      # Vercel to deploy it. GITHUB_TOKEN only lifts the API rate limit.
+      - name: Build
+        run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SITE_URL: ${{ vars.SITE_URL }}
+
+  deploy:
+    name: Trigger Vercel deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call deploy hook
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::warning::VERCEL_DEPLOY_HOOK is not set — skipping deploy."
+            echo "Create one at Vercel → Project → Settings → Git → Deploy Hooks,"
+            echo "then add it as a repository secret named VERCEL_DEPLOY_HOOK."
+            exit 0
+          fi
+          code=$(curl -sS -X POST -o /tmp/hook.out -w '%{http_code}' "$HOOK")
+          cat /tmp/hook.out
+          if [ "$code" -ge 300 ]; then
+            echo "::error::Deploy hook returned HTTP $code"
+            exit 1
+          fi
+          echo "Deploy triggered (HTTP $code)."
