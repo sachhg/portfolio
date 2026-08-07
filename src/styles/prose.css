@@ -168,6 +168,38 @@
   border-radius: 2px;
 }
 
+.prose figure {
+  margin-top: 0;
+  margin-bottom: 2.25em;
+}
+
+/*
+ * Break a figure out past the 42rem measure and re-centre it. A poster is
+ * unreadable at text width, and this keeps it from going full-bleed.
+ */
+.prose .wide {
+  --wide: min(56rem, calc(100vw - 2 * var(--gutter)));
+  width: var(--wide);
+  margin-left: calc((100% - var(--wide)) / 2);
+}
+
+.prose .wide img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+/* The poster is a link; it should not pick up the prose underline treatment. */
+.prose .wide a {
+  display: block;
+  background-image: none;
+}
+
+.prose .wide a::after {
+  content: none;
+}
+
 .prose figcaption {
   font-family: var(--mono);
   font-size: 0.72rem;

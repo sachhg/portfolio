@@ -1,8 +1,26 @@
 ---
-title: Getting an agent to reproduce FFmpeg crashes
+title: Program-analysis-guided PoC generation for FFmpeg
 date: 2026-08-05
 description: 'A year in the UCSB Verification Lab pointing PAGENT at FFmpeg. 33 working proof-of-concept inputs out of 69 vulnerabilities, and one bug that still reproduces today.'
 ---
+
+import { Image } from 'astro:assets'
+import poster from '../../assets/pagent-poster.png'
+
+<figure class="wide">
+  <a href="/pagent-poster.pdf">
+    <Image
+      src={poster}
+      alt="Research poster: PAGENT, automated proof-of-concept generation for FFmpeg vulnerabilities"
+      widths={[640, 960, 1600]}
+      sizes="(min-width: 60rem) 56rem, 100vw"
+      quality={70}
+      loading="eager"
+      fetchpriority="high"
+    />
+  </a>
+  <figcaption>ERSP final poster. Open for the full-resolution PDF.</figcaption>
+</figure>
 
 A vulnerability report usually tells you a bug exists. It rarely gives you a
 file that triggers it. Somebody still has to sit down with the report, the
@@ -10,9 +28,9 @@ source, and a debugger, and build an input that makes the crash happen. That
 takes days, and until it is done nobody can confirm the bug is real or check
 that a patch actually fixed it.
 
-PAGENT automates that step. We did not write it. My ERSP team at the UCSB
-Verification Lab spent the year taking it and making it work against FFmpeg,
-which is where almost all of our time went.
+PAGENT automates that step. My ERSP team at the UCSB Verification Lab spent
+the year taking it and making it work against FFmpeg, which is where almost
+all of our time went.
 
 ## Why FFmpeg is the hard case
 
@@ -82,5 +100,4 @@ at a new project means a lot of manual environment and rule setup. Automating
 that is what would make it general.
 
 Work with Tim Fan, Katelyn Dang, and Aiden Hunter, mentored by Prof. Tevfik
-Bultan and Achintya Desai, in the
-[UCSB Verification Lab](https://verlab.cs.ucsb.edu).
+Bultan and Achintya Desai, in the UCSB Verification Lab.
