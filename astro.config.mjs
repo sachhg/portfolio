@@ -19,7 +19,12 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'never',
   build: {
-    format: 'file',
+    // 'directory', not 'file'. With 'file' a collection index emits
+    // projects.html *beside* a projects/ directory holding its children, and
+    // a static host resolving /projects picks the directory, finds no
+    // index.html in it, and 404s. Directory format gives every route its own
+    // index.html with nothing to collide with.
+    format: 'directory',
     // The whole stylesheet is ~2.4 KB over the wire. Inlining it removes the
     // only render-blocking request on the critical path.
     inlineStylesheets: 'always',
