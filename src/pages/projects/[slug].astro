@@ -1,7 +1,6 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content'
 import Entry from '../../layouts/Entry.astro'
-import { softwareSchema } from '../../lib/schema'
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects')
@@ -16,21 +15,6 @@ const { entry } = Astro.props
 const { Content } = await render(entry)
 const d = entry.data
 
-const path = `/projects/${entry.id}`
-
-// SoftwareSourceCode only where a repo actually exists.
-const schema = d.repo
-  ? softwareSchema({
-      origin: Astro.site!.href,
-      path,
-      title: d.title,
-      description: d.description,
-      repo: d.repo,
-      stack: d.stack,
-      year: d.year,
-    })
-  : undefined
-
 const repoLabel = d.repo?.replace(/^https:\/\/(www\.)?github\.com\//, '')
 ---
 
@@ -39,7 +23,12 @@ const repoLabel = d.repo?.replace(/^https:\/\/(www\.)?github\.com\//, '')
   description={d.description}
   meta={[String(d.year), d.stack.join(', '), d.status]}
   link={d.repo ? { href: d.repo, label: repoLabel! } : undefined}
-  schema={schema}
+  kind="software"
+  trail={[
+    { name: 'Projects', path: '/projects' },
+    { name: d.title, path: `/projects/${entry.id}` },
+  ]}
+  software={{ repo: d.repo, stack: d.stack, year: d.year, status: d.status }}
   transitionName={`t-${entry.id}`}
   back={{ href: '/projects', label: 'All projects' }}
 >

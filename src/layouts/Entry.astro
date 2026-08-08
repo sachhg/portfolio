@@ -1,6 +1,7 @@
 ---
 import '../styles/prose.css'
 import Base from '../layouts/Base.astro'
+import type { PageInput } from '../lib/schema'
 
 interface Props {
   title: string
@@ -10,15 +11,22 @@ interface Props {
   /** Trailing link in the metadata row. */
   link?: { href: string; label: string }
   ogType?: 'website' | 'article'
-  schema?: Record<string, unknown> | Record<string, unknown>[]
+  trail?: { name: string; path: string }[]
+  kind?: PageInput['kind']
+  article?: PageInput['article']
+  software?: PageInput['software']
+  /** Machine-readable date for the metadata row. */
+  datetime?: string
   /** Matches the list row so the heading morphs across navigation. */
   transitionName?: string
   /** Where "back" goes. */
   back: { href: string; label: string }
 }
 
-const { title, description, meta, link, ogType, schema, transitionName, back } =
-  Astro.props
+const {
+  title, description, meta, link, ogType, trail, kind, article, software,
+  datetime, transitionName, back,
+} = Astro.props
 
 const bits = (meta ?? []).filter(Boolean) as string[]
 ---
@@ -27,7 +35,10 @@ const bits = (meta ?? []).filter(Boolean) as string[]
   title={`${title} · Sachit Madaan`}
   description={description}
   ogType={ogType}
-  schema={schema}
+  trail={trail}
+  kind={kind}
+  article={article}
+  software={software}
 >
   <article class="column entry">
     <header class="head">
@@ -44,7 +55,7 @@ const bits = (meta ?? []).filter(Boolean) as string[]
                     ·
                   </span>
                 )}
-                <span>{b}</span>
+                {i === 0 && datetime ? <time datetime={datetime}>{b}</time> : <span>{b}</span>}
               </>
             ))}
             {link && (

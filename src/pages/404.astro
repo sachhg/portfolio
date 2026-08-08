@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro'
+import { site } from '../data/site'
+---
+
+<Base
+  title={`Not found · ${site.name}`}
+  description="That page does not exist."
+  noindex
+>
+  <div class="column page">
+    <h1>Not found</h1>
+    <p class="lede">
+      That page does not exist. Try <a class="link" href="/projects">projects</a> or
+      <a class="link" href="/writing">writing</a>, or head back to the
+      <a class="link" href="/">index</a>.
+    </p>
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-top: 5rem;
+  }
+
+  .lede {
+    color: var(--muted);
+    margin-top: 0.6rem;
+    max-width: 32rem;
+    text-wrap: pretty;
+  }
+</style>

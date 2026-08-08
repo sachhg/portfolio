@@ -1,7 +1,6 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content'
 import Entry from '../../layouts/Entry.astro'
-import { articleSchema } from '../../lib/schema'
 
 export async function getStaticPaths() {
   const posts = (await getCollection('writing')).filter((p) => !p.data.draft)
@@ -22,20 +21,29 @@ const display = d.date.toLocaleDateString('en-US', {
   year: 'numeric',
   timeZone: 'UTC',
 })
+
+// Counted off the raw MDX, minus frontmatter and any JSX, so timeRequired in
+// the structured data reflects the prose rather than the markup.
+const wordCount = entry.body!
+  .replace(/^---[\s\S]*?---/, '')
+  .replace(/<[^>]+>/g, ' ')
+  .replace(/```[\s\S]*?```/g, ' ')
+  .split(/\s+/)
+  .filter(Boolean).length
 ---
 
 <Entry
   title={d.title}
   description={d.description}
   meta={[display]}
+  datetime={d.date.toISOString()}
   ogType="article"
-  schema={articleSchema({
-    origin: Astro.site!.href,
-    path: `/writing/${entry.id}`,
-    title: d.title,
-    description: d.description,
-    date: d.date,
-  })}
+  kind="article"
+  trail={[
+    { name: 'Writing', path: '/writing' },
+    { name: d.title, path: `/writing/${entry.id}` },
+  ]}
+  article={{ date: d.date, wordCount, section: 'Engineering' }}
   transitionName={`t-${entry.id}`}
   back={{ href: '/writing', label: 'All writing' }}
 >

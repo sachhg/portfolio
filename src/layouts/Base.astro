@@ -4,28 +4,56 @@ import SiteHeader from '../components/SiteHeader.astro'
 import SiteFooter from '../components/SiteFooter.astro'
 import Topography from '../components/Topography.astro'
 import { site } from '../data/site'
+import { pageGraph, type PageInput } from '../lib/schema'
 
 interface Props {
   title: string
   description: string
-  /** Overrides the default OG card. */
-  ogImage?: string
-  /** `article` on writing posts. */
-  ogType?: 'website' | 'article'
-  /** Rendered into <head> verbatim; used for JSON-LD. */
-  schema?: Record<string, unknown> | Record<string, unknown>[]
+  ogType?: 'website' | 'article' | 'profile'
+  /** Breadcrumb trail below the root, root first. */
+  trail?: { name: string; path: string }[]
+  /** Shapes the JSON-LD nodes describing this page. */
+  kind?: PageInput['kind']
+  article?: PageInput['article']
+  software?: PageInput['software']
+  collection?: PageInput['collection']
+  /** Keeps a page out of the index; the 404 is the only one that wants it. */
+  noindex?: boolean
 }
 
 const {
   title,
   description,
-  ogImage = '/og.png',
   ogType = 'website',
-  schema,
+  trail = [],
+  kind,
+  article,
+  software,
+  collection,
+  noindex = false,
 } = Astro.props
 
-const canonical = new URL(Astro.url.pathname, Astro.site).href.replace(/\/$/, '') || Astro.site!.href
-const ogImageUrl = new URL(ogImage, Astro.site).href
+const origin = Astro.site!.href
+const path = Astro.url.pathname.replace(/\/$/, '') || '/'
+const canonical =
+  path === '/' ? new URL('/', origin).href.replace(/\/$/, '') : new URL(path, origin).href
+
+// One card per route; 'index' keeps the home page addressable.
+const ogImage = new URL(`/og/${path === '/' ? 'index' : path.slice(1)}.png`, origin).href
+const ogAlt = `${title}, ${site.name}`
+
+const schema = pageGraph({
+  origin,
+  url: canonical,
+  title,
+  description,
+  ogImage,
+  trail: [{ name: 'Home', path: '/' }, ...trail],
+  kind,
+  article,
+  software,
+  collection,
+})
 ---
 
 <!doctype html>
@@ -38,28 +66,63 @@ const ogImageUrl = new URL(ogImage, Astro.site).href
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
 
+    {/* Allow full-size previews and untruncated snippets. */}
+    <meta
+      name="robots"
+      content={
+        noindex
+          ? 'noindex, follow'
+          : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+      }
+    />
+
     <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:secure_url" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogAlt} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:locale" content="en_US" />
+
+    {
+      article && (
+        <>
+          <meta property="article:published_time" content={article.date.toISOString()} />
+          <meta
+            property="article:modified_time"
+            content={(article.updated ?? article.date).toISOString()}
+          />
+          <meta property="article:author" content={site.linkedin} />
+          <meta property="article:section" content={article.section} />
+        </>
+      )
+    }
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogAlt} />
 
     <meta name="author" content={site.name} />
     <meta name="theme-color" content="#E8E0CA" />
     <meta name="color-scheme" content="light" />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" type="application/rss+xml" title={`${site.name} · Writing`} href="/rss.xml" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="me" href={site.github} />
+    <link rel="me" href={site.linkedin} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.name} · Writing`}
+      href="/rss.xml"
+    />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
     {/* Both faces are used on every page; italic is loaded on demand. */}
     <link
@@ -77,15 +140,7 @@ const ogImageUrl = new URL(ogImage, Astro.site).href
       crossorigin
     />
 
-    {
-      schema && (
-        <script
-          is:inline
-          type="application/ld+json"
-          set:html={JSON.stringify(schema)}
-        />
-      )
-    }
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
   </head>
 
   <body>

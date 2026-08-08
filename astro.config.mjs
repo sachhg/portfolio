@@ -29,7 +29,21 @@ export default defineConfig({
     // only render-blocking request on the critical path.
     inlineStylesheets: 'always',
   },
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    sitemap({
+      // Weight the entry points above the leaves, and mark the writing index
+      // as the page most likely to change.
+      serialize(item) {
+        const path = new URL(item.url).pathname.replace(/\/$/, '')
+        if (path === '') return { ...item, priority: 1.0, changefreq: 'weekly' }
+        if (path === '/writing') return { ...item, priority: 0.9, changefreq: 'weekly' }
+        if (path === '/projects') return { ...item, priority: 0.9, changefreq: 'monthly' }
+        return { ...item, priority: 0.7, changefreq: 'monthly' }
+      },
+      filter: (page) => !page.includes('/og/'),
+    }),
+  ],
   markdown: {
     shikiConfig: {
       // @ts-expect-error: a TextMate theme object is valid here.

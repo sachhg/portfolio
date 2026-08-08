@@ -12,6 +12,14 @@ const projects = (await getCollection('projects')).sort(
 <Base
   title="Projects · Sachit Madaan"
   description="Systems and tools by Sachit Madaan: post-quantum cryptography scanning, PostgreSQL routing, semantic code retrieval, and embedded RF inference."
+  kind="collection"
+  trail={[{ name: 'Projects', path: '/projects' }]}
+  collection={{
+    items: projects.map((p) => ({
+      name: p.data.title,
+      url: new URL(`/projects/${p.id}`, Astro.site).href,
+    })),
+  }}
 >
   <div class="column page">
     <h1>Projects</h1>

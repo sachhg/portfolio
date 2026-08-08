@@ -10,7 +10,15 @@ const posts = (await getCollection('writing'))
 
 <Base
   title="Writing · Sachit Madaan"
-  description="Notes on distributed systems, databases, and machine learning infrastructure by Sachit Madaan."
+  description="Notes on distributed systems, databases, program analysis, and machine learning infrastructure by Sachit Madaan."
+  kind="collection"
+  trail={[{ name: 'Writing', path: '/writing' }]}
+  collection={{
+    items: posts.map((p) => ({
+      name: p.data.title,
+      url: new URL(`/writing/${p.id}`, Astro.site).href,
+    })),
+  }}
 >
   <div class="column page">
     <h1>Writing</h1>

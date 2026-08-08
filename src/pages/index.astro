@@ -9,7 +9,6 @@ import ProjectRow from '../components/ProjectRow.astro'
 import PostRow from '../components/PostRow.astro'
 import { site } from '../data/site'
 import { experience, now } from '../data/experience'
-import { personSchema } from '../lib/schema'
 
 const featured = (await getCollection('projects'))
   .filter((p) => p.data.featured)
@@ -34,7 +33,8 @@ const links = [
 <Base
   title={`${site.name} · Infrastructure and ML systems`}
   description={site.description}
-  schema={personSchema(Astro.site!.href)}
+  ogType="profile"
+  kind="profile"
 >
   <div class="column">
     <div class="intro">
