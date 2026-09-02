@@ -4,10 +4,14 @@
  * Anonymous access is enough; GITHUB_TOKEN is only used to lift the
  * 60 req/hr limit (the daily Actions rebuild passes one).
  *
- * Note on sourcing: the public events feed used to embed a `commits` array in
- * each PushEvent payload, and no longer does. It now carries only `before`
- * and `head`. So exact counts come from the compare endpoint per push, and the
- * newest commit message from a single commit lookup. Both are public.
+ * Note on sourcing: this reads the repositories directly rather than the
+ * public events feed. The feed looks like the obvious source and is not one:
+ * it holds ~90 days and at most 300 events, it is written only while a repo
+ * is public so making a repo public never backfills the pushes that came
+ * before, and it trails a live push by minutes. An account whose work sits in
+ * repos that were opened up later therefore reads as almost no activity. The
+ * repos themselves have no such gaps, so the strip now walks the repo list
+ * newest-push-first and asks each one in the window for its commits.
  *
  * Every failure path degrades rather than throws: a missing piece renders as
  * absent, and a total failure renders the strip with no live parts at all.
@@ -34,24 +38,31 @@ const EMPTY: Activity = { lastCommit: null, commitCount: null, sparkline: null }
 const WINDOW_DAYS = 30
 const TIMEOUT_MS = 8000
 const MAX_MESSAGE = 72
-const PAGES = 3
+/** Repo-list pages. 100 per page, newest push first; one page is plenty. */
+const REPO_PAGES = 2
+/** Commit pages per repo. Caps an unusually busy month at 200 per repo. */
+const COMMIT_PAGES = 2
+const PER_PAGE = 100
 const CONCURRENCY = 5
-/** Backstop so an unusually busy month cannot balloon the request count. */
-const MAX_COMPARES = 60
 
-const ZERO_SHA = '0'.repeat(40)
-
-interface GhEvent {
-  type: string
-  created_at: string
-  repo?: { name: string }
-  payload?: { before?: string; head?: string }
+interface GhRepo {
+  full_name: string
+  pushed_at: string | null
 }
 
-interface Push {
+interface GhCommit {
+  sha: string
+  commit?: {
+    message?: string
+    author?: { date?: string }
+    committer?: { date?: string }
+  }
+}
+
+interface Commit {
   repo: string
-  head: string
-  before: string
+  sha: string
+  message: string
   at: Date
 }
 
@@ -99,45 +110,61 @@ async function mapLimit<T, R>(
   return out
 }
 
-async function fetchPushes(since: Date): Promise<Push[]> {
-  const pushes: Push[] = []
+/**
+ * Repos touched since the window opened, newest push first. Forks are kept:
+ * the commit query filters by author, and an account cannot fork itself, so
+ * nothing can be counted twice.
+ */
+async function fetchActiveRepos(since: Date): Promise<string[]> {
+  const active: string[] = []
 
-  for (let page = 1; page <= PAGES; page++) {
-    const batch = await api<GhEvent[]>(
-      `/users/${site.githubUser}/events/public?per_page=100&page=${page}`
+  for (let page = 1; page <= REPO_PAGES; page++) {
+    const batch = await api<GhRepo[]>(
+      `/users/${site.githubUser}/repos?per_page=${PER_PAGE}&page=${page}&sort=pushed&direction=desc`
     )
     if (!batch?.length) break
 
-    for (const e of batch) {
-      if (e.type !== 'PushEvent' || !e.repo?.name || !e.payload?.head) continue
-      pushes.push({
-        repo: e.repo.name,
-        head: e.payload.head,
-        before: e.payload.before ?? ZERO_SHA,
-        at: new Date(e.created_at),
-      })
+    for (const r of batch) {
+      if (!r.pushed_at) continue
+      if (new Date(r.pushed_at) < since) return active
+      active.push(r.full_name)
     }
 
-    // The feed is newest-first; stop once it runs past the window.
-    const oldest = batch[batch.length - 1]
-    if (batch.length < 100 || (oldest && new Date(oldest.created_at) < since)) break
+    if (batch.length < PER_PAGE) break
   }
 
-  return pushes
+  return active
 }
 
 /**
- * Exact commits introduced by one push. A push that created a branch has no
- * meaningful base, and a force-push can leave `before` unreachable. Both
- * return null from the API, so fall back to counting the push as one commit
- * rather than dropping it.
+ * The user's own commits in one repo since the window opened. This is the
+ * default branch only, which is where the work being advertised lives.
  */
-async function countCommits(p: Push): Promise<number> {
-  if (p.before === ZERO_SHA) return 1
-  const cmp = await api<{ total_commits?: number }>(
-    `/repos/${p.repo}/compare/${p.before}...${p.head}`
-  )
-  return cmp?.total_commits && cmp.total_commits > 0 ? cmp.total_commits : 1
+async function fetchCommits(repo: string, since: Date): Promise<Commit[]> {
+  const out: Commit[] = []
+
+  for (let page = 1; page <= COMMIT_PAGES; page++) {
+    const batch = await api<GhCommit[]>(
+      `/repos/${repo}/commits?author=${site.githubUser}` +
+        `&since=${since.toISOString()}&per_page=${PER_PAGE}&page=${page}`
+    )
+    if (!batch?.length) break
+
+    for (const c of batch) {
+      const raw = c.commit?.committer?.date ?? c.commit?.author?.date
+      const message = c.commit?.message
+      if (!raw || !message || !c.sha) continue
+
+      const at = new Date(raw)
+      if (Number.isNaN(at.getTime()) || at < since) continue
+
+      out.push({ repo, sha: c.sha, message, at })
+    }
+
+    if (batch.length < PER_PAGE) break
+  }
+
+  return out
 }
 
 function tidyMessage(raw: string): string {
@@ -154,20 +181,6 @@ function shortRepo(full: string): string {
 }
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10)
-
-async function resolveLastCommit(p: Push): Promise<LastCommit | null> {
-  const commit = await api<{ commit?: { message?: string } }>(
-    `/repos/${p.repo}/commits/${p.head}`
-  )
-  const message = commit?.commit?.message
-  if (!message) return null
-
-  return {
-    repo: shortRepo(p.repo),
-    message: tidyMessage(message),
-    url: `https://github.com/${p.repo}/commit/${p.head}`,
-  }
-}
 
 /**
  * The footer renders on every page, but the data is identical across them.
@@ -187,28 +200,28 @@ async function fetchActivity(): Promise<Activity> {
   since.setUTCDate(since.getUTCDate() - (WINDOW_DAYS - 1))
   since.setUTCHours(0, 0, 0, 0)
 
-  let pushes: Push[]
+  let repos: string[]
   try {
-    pushes = await fetchPushes(since)
+    repos = await fetchActiveRepos(since)
   } catch {
-    pushes = []
+    repos = []
   }
 
-  if (!pushes.length) {
-    console.warn('[footer] no public push activity resolved; rendering static strip')
+  if (!repos.length) {
+    console.warn('[footer] no repos resolved in window; rendering static strip')
     return EMPTY
   }
 
-  // Newest push first, so its tip is the last commit.
-  pushes.sort((a, b) => b.at.getTime() - a.at.getTime())
-  const lastCommit = await resolveLastCommit(pushes[0]!)
+  const commits = (await mapLimit(repos, CONCURRENCY, (r) => fetchCommits(r, since))).flat()
 
-  const inWindow = pushes.filter((p) => p.at >= since).slice(0, MAX_COMPARES)
-  if (inWindow.length === MAX_COMPARES) {
-    console.warn(`[footer] capped commit counting at ${MAX_COMPARES} pushes`)
+  if (!commits.length) {
+    console.warn(`[footer] ${repos.length} repos in window resolved no commits`)
+    return EMPTY
   }
 
-  const counts = await mapLimit(inWindow, CONCURRENCY, countCommits)
+  // Newest first, so the head of the list is the last commit.
+  commits.sort((a, b) => b.at.getTime() - a.at.getTime())
+  const head = commits[0]!
 
   const buckets = new Map<string, number>()
   for (let i = 0; i < WINDOW_DAYS; i++) {
@@ -217,15 +230,22 @@ async function fetchActivity(): Promise<Activity> {
     buckets.set(dayKey(d), 0)
   }
 
-  let commitCount = 0
-  inWindow.forEach((p, i) => {
-    const n = counts[i] ?? 0
-    commitCount += n
-    const key = dayKey(p.at)
-    if (buckets.has(key)) buckets.set(key, buckets.get(key)! + n)
-  })
+  // A commit dated ahead of the last bucket (clock skew, or a rewritten date)
+  // still counts, it just has nowhere to sit on the sparkline.
+  for (const c of commits) {
+    const key = dayKey(c.at)
+    if (buckets.has(key)) buckets.set(key, buckets.get(key)! + 1)
+  }
 
-  return { lastCommit, commitCount, sparkline: [...buckets.values()] }
+  return {
+    lastCommit: {
+      repo: shortRepo(head.repo),
+      message: tidyMessage(head.message),
+      url: `https://github.com/${head.repo}/commit/${head.sha}`,
+    },
+    commitCount: commits.length,
+    sparkline: [...buckets.values()],
+  }
 }
 
 export { WINDOW_DAYS }

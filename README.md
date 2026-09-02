@@ -109,11 +109,19 @@ Built at build time from the public GitHub API: last commit, commit count, and
 a 30-day sparkline. Every failure path degrades to a static strip rather than
 an error, so a rate limit or outage never breaks a build.
 
-Three things to know about why it might look stale:
+It reads the **repositories**, not the public events feed. The feed is the
+obvious source and a bad one: it keeps ~90 days and 300 events, it is only
+written while a repo is public so making a repo public never backfills the
+pushes that came before, and it trails a live push by minutes. Sourcing from
+it left the strip reading "1 commit in 30 days" against a real 38. Instead
+`fetchActiveRepos` walks the repo list newest-push-first, stops at the window
+edge, and each repo in the window is asked for its own commits. That is one
+call plus one per active repo, roughly 8 per build.
 
-1. **It reads the *public* events feed.** Activity in private repos never
-   appears, and making a repo public does **not** backfill its earlier pushes
-   into the timeline. Only pushes made while a repo is public show up.
+Three things to know about why it might still look stale:
+
+1. **Private repos never appear.** The token lifts the rate limit, it does not
+   widen visibility, and the commit query only sees each repo's default branch.
 2. **The data is baked in at build.** It only changes when the site rebuilds.
    Vercel rebuilds on push; for days without a push, that is what
    `.github/workflows/daily-rebuild.yml` is for. It runs at 07:10 UTC, verifies
@@ -121,10 +129,10 @@ Three things to know about why it might look stale:
    `VERCEL_DEPLOY_HOOK` repo secret exists the deploy step only warns**, so the
    strip will not refresh on quiet days.
 3. **Builds are anonymous unless given a token.** `GITHUB_TOKEN` is honoured
-   only to lift the 60 req/hr anonymous limit. A build makes about 20 calls
-   from shared Vercel IPs, so setting it in Vercel's env vars makes the strip
-   reliable. A rate-limited build renders the strip with no live parts, which
-   looks identical to being stale.
+   only to lift the 60 req/hr anonymous limit. Those calls leave from shared
+   Vercel IPs, so setting it in Vercel's env vars makes the strip reliable. A
+   rate-limited build renders the strip with no live parts, which looks
+   identical to being stale.
 
 ## Deployment
 
