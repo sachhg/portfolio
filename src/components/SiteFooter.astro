@@ -3,10 +3,15 @@ import { getActivity, WINDOW_DAYS } from '../lib/github'
 import { site } from '../data/site'
 import Sparkline from './Sparkline.astro'
 
-const { lastCommit, commitCount, sparkline } = await getActivity()
+const { lastCommit, contributionCount, sparkline } = await getActivity()
 
 // Only draw the sparkline when there is something to see.
 const showSpark = sparkline?.some((v) => v > 0) ?? false
+
+const countLabel =
+  contributionCount && contributionCount > 0
+    ? `${contributionCount} contribution${contributionCount === 1 ? '' : 's'} in ${WINDOW_DAYS} days`
+    : null
 ---
 
 <footer>
@@ -32,14 +37,12 @@ const showSpark = sparkline?.some((v) => v > 0) ?? false
       }
 
       {
-        commitCount !== null && commitCount > 0 && (
+        countLabel && (
           <>
             <span class="sep" aria-hidden="true">
               ·
             </span>
-            <span class="part">
-              {commitCount} commit{commitCount === 1 ? '' : 's'} in {WINDOW_DAYS} days
-            </span>
+            <span class="part">{countLabel}</span>
           </>
         )
       }
