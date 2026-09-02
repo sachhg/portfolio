@@ -9,6 +9,7 @@ import ProjectRow from '../components/ProjectRow.astro'
 import PostRow from '../components/PostRow.astro'
 import { site } from '../data/site'
 import { experience, now } from '../data/experience'
+import { existsSync } from 'node:fs'
 
 const featured = (await getCollection('projects'))
   .filter((p) => p.data.featured)
@@ -22,11 +23,19 @@ const posts = (await getCollection('writing'))
 /** `**word**` → <strong>. Split, don't inject: odd indices are the emphasis. */
 const segments = (line: string) => line.split(/\*\*(.+?)\*\*/g)
 
+/**
+ * The résumé is a file dropped into public/, not something the repo carries.
+ * Linking it unconditionally shipped a dead link to the 404 for as long as
+ * the file was missing, which is worse than not offering it, so the link
+ * appears only once the PDF is actually there to serve.
+ */
+const hasResume = existsSync(new URL(`../../public${site.resume}`, import.meta.url))
+
 const links = [
   { href: site.github, label: 'GitHub' },
   { href: site.linkedin, label: 'LinkedIn' },
   { href: `mailto:${site.email}`, label: 'Email' },
-  { href: site.resume, label: 'Résumé' },
+  ...(hasResume ? [{ href: site.resume, label: 'Résumé' }] : []),
 ]
 ---
 
