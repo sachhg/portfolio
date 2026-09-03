@@ -23,21 +23,44 @@ replicas to get.
 Postgres already tracks the number you actually want. Every commit has a log
 sequence number, and every replica reports how far through the WAL it has
 replayed. So record the LSN a write committed at, then compare it against replay
-positions:
+positions.
+
+That is what [pgpilot](https://github.com/sachhg/pgpilot) does, and both halves
+sit in
+[`internal/proxy/session.go`](https://github.com/sachhg/pgpilot/blob/main/internal/proxy/session.go).
+When a session's transaction commits on the primary, its fence advances to the
+primary's current WAL position:
 
 ```go
-// After a write, remember how far this session needs replicas to be.
-var lsn pglsn.LSN
-if err := tx.QueryRow(ctx, "SELECT pg_current_wal_lsn()").Scan(&lsn); err != nil {
-    return err
-}
-session.Fence(lsn)
-
-// A replica is only eligible once it has replayed past that point.
-func (r *Replica) CaughtUpTo(fence pglsn.LSN) bool {
-    return r.ReplayLSN() >= fence
+if heldAddr == primary && wroteThisTx {
+    if lsn, lerr := s.primaryLSN(ctx, held); lerr == nil && lsn > fence {
+        fence = lsn
+        s.log.Debug("advanced write fence", "lsn", lsn)
+    }
 }
 ```
+
+`primaryLSN` is a `SELECT pg_current_wal_lsn()` on the connection that just did
+the writing. A replica then gets the session's next read only once its replayed
+position has reached that fence:
+
+```go
+func (s *session) replicaEligible(st registry.Status, fence uint64) bool {
+    switch s.cfg.Fencing.Mode {
+    case config.FenceRelaxed:
+        return true
+    case config.FenceBounded:
+        return st.LagSeconds*1000 <= float64(s.cfg.Fencing.BoundedMs)
+    default: // strict
+        return st.LSN >= fence
+    }
+}
+```
+
+Strict is the default. The other two modes are escape hatches: `relaxed` sends
+reads to any healthy replica, and `bounded` accepts a staleness window in
+milliseconds, which is the guess this post started with, kept for people who
+would rather have the throughput.
 
 Routing follows from that. A read from a fenced session goes to any replica that
 has replayed past the fence, and to the primary if none has. No timer anywhere.
