@@ -9,6 +9,7 @@ import ProjectRow from '../components/ProjectRow.astro'
 import PostRow from '../components/PostRow.astro'
 import { site } from '../data/site'
 import { experience, now } from '../data/experience'
+import { contributions } from '../data/open-source'
 import { existsSync } from 'node:fs'
 
 const featured = (await getCollection('projects'))
@@ -31,12 +32,27 @@ const segments = (line: string) => line.split(/\*\*(.+?)\*\*/g)
  */
 const hasResume = existsSync(new URL(`../../public${site.resume}`, import.meta.url))
 
-const links = [
-  { href: site.github, label: 'GitHub' },
-  { href: site.linkedin, label: 'LinkedIn' },
+interface IndexLink {
+  href: string
+  label: string
+  /** rel=me, pairing with the identity links in the document head. */
+  me?: boolean
+  /** The résumé is a PDF: opening it in place would drop you out of the site. */
+  newTab?: boolean
+}
+
+const links: IndexLink[] = [
+  { href: site.github, label: 'GitHub', me: true },
+  { href: site.linkedin, label: 'LinkedIn', me: true },
   { href: `mailto:${site.email}`, label: 'Email' },
-  ...(hasResume ? [{ href: site.resume, label: 'Résumé' }] : []),
+  ...(hasResume ? [{ href: site.resume, label: 'Résumé', newTab: true }] : []),
 ]
+
+/** rel is a token list, so it is assembled rather than branched over. */
+const relFor = (l: IndexLink) =>
+  [l.me && 'me', (l.newTab || l.href.startsWith('http')) && 'noopener']
+    .filter(Boolean)
+    .join(' ') || undefined
 ---
 
 <Base
@@ -97,6 +113,16 @@ const links = [
       </div>
     </Section>
 
+    <Section label="Open source">
+      <div class="rows">
+        {
+          contributions.map((c) => (
+            <ProjectRow href={c.url} title={c.repo} summary={c.summary} tag={c.tag} newTab />
+          ))
+        }
+      </div>
+    </Section>
+
     <Section label="Writing" more={{ href: '/writing', label: 'all writing' }}>
       <div class="rows">
         {
@@ -117,7 +143,7 @@ const links = [
         {
           links.map((l) => (
             <li>
-              <a href={l.href} rel={l.href.startsWith('http') ? 'me noopener' : undefined}>
+              <a href={l.href} target={l.newTab ? '_blank' : undefined} rel={relFor(l)}>
                 {l.label}
               </a>
             </li>

@@ -6,12 +6,19 @@ interface Props {
   tag: string
   /** Enables the heading morph between this row and the detail page h1. */
   transitionName?: string
+  /** For rows that leave the site, which should not replace the page. */
+  newTab?: boolean
 }
 
-const { href, title, summary, tag, transitionName } = Astro.props
+const { href, title, summary, tag, transitionName, newTab = false } = Astro.props
 ---
 
-<a class="row" href={href}>
+<a
+  class="row"
+  href={href}
+  target={newTab ? '_blank' : undefined}
+  rel={newTab ? 'noopener' : undefined}
+>
   <span class="body">
     <span class="title" style={transitionName ? `view-transition-name:${transitionName}` : undefined}
       >{title}</span

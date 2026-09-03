@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro'
 import { getCollection } from 'astro:content'
 import { site } from '../data/site'
 import { experience } from '../data/experience'
+import { contributions } from '../data/open-source'
 
 /**
  * llms.txt: a plain-text summary for language-model crawlers, mirroring what
@@ -28,6 +29,10 @@ ${experience.map((r) => `- **${r.company}**, ${r.role} (${r.dates}): ${r.impact}
 ## Projects
 
 ${projects.map((p) => `- [${p.data.title}](${abs(`/projects/${p.id}`)}): ${p.data.description}${p.data.repo ? ` Source: ${p.data.repo}` : ''}`).join('\n')}
+
+## Open source
+
+${contributions.map((c) => `- [${c.repo}](${c.url}) (merged ${c.merged}): ${c.description}`).join('\n')}
 
 ## Writing
 
