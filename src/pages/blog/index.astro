@@ -3,25 +3,25 @@ import { getCollection } from 'astro:content'
 import Base from '../../layouts/Base.astro'
 import PostRow from '../../components/PostRow.astro'
 
-const posts = (await getCollection('writing'))
+const posts = (await getCollection('blog'))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 ---
 
 <Base
-  title="Writing · Sachit Madaan"
+  title="Blog · Sachit Madaan"
   description="Notes on distributed systems, databases, program analysis, and machine learning infrastructure by Sachit Madaan."
   kind="collection"
-  trail={[{ name: 'Writing', path: '/writing' }]}
+  trail={[{ name: 'Blog', path: '/blog' }]}
   collection={{
     items: posts.map((p) => ({
       name: p.data.title,
-      url: new URL(`/writing/${p.id}`, Astro.site).href,
+      url: new URL(`/blog/${p.id}`, Astro.site).href,
     })),
   }}
 >
   <div class="column page">
-    <h1>Writing</h1>
+    <h1>Blog</h1>
     <p class="lede">Notes on things I&rsquo;ve had to think hard about.</p>
 
     <hr class="rule" />
@@ -31,7 +31,7 @@ const posts = (await getCollection('writing'))
         <div class="rows">
           {posts.map((p) => (
             <PostRow
-              href={`/writing/${p.id}`}
+              href={`/blog/${p.id}`}
               title={p.data.title}
               date={p.data.date}
               transitionName={`t-${p.id}`}

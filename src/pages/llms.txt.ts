@@ -12,7 +12,7 @@ import { contributions } from '../data/open-source'
 export const GET: APIRoute = async ({ site: origin }) => {
   const abs = (p: string) => new URL(p, origin).href
   const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order)
-  const posts = (await getCollection('writing'))
+  const posts = (await getCollection('blog'))
     .filter((p) => !p.data.draft)
     .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 
@@ -20,7 +20,7 @@ export const GET: APIRoute = async ({ site: origin }) => {
 
 > ${site.description}
 
-${site.identity} Personal site, portfolio, and writing.
+${site.identity} Personal site, portfolio, and blog.
 
 ## Experience
 
@@ -32,11 +32,13 @@ ${projects.map((p) => `- [${p.data.title}](${abs(`/projects/${p.id}`)}): ${p.dat
 
 ## Open source
 
+Index: ${abs('/open-source')}
+
 ${contributions.map((c) => `- [${c.repo}](${c.url}) (merged ${c.merged}): ${c.description}`).join('\n')}
 
-## Writing
+## Blog
 
-${posts.map((p) => `- [${p.data.title}](${abs(`/writing/${p.id}`)}) (${p.data.date.toISOString().slice(0, 10)}): ${p.data.description}`).join('\n')}
+${posts.map((p) => `- [${p.data.title}](${abs(`/blog/${p.id}`)}) (${p.data.date.toISOString().slice(0, 10)}): ${p.data.description}`).join('\n')}
 
 ## Links
 

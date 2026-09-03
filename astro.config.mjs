@@ -32,13 +32,14 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      // Weight the entry points above the leaves, and mark the writing index
+      // Weight the entry points above the leaves, and mark the blog index
       // as the page most likely to change.
       serialize(item) {
         const path = new URL(item.url).pathname.replace(/\/$/, '')
         if (path === '') return { ...item, priority: 1.0, changefreq: 'weekly' }
-        if (path === '/writing') return { ...item, priority: 0.9, changefreq: 'weekly' }
+        if (path === '/blog') return { ...item, priority: 0.9, changefreq: 'weekly' }
         if (path === '/projects') return { ...item, priority: 0.9, changefreq: 'monthly' }
+        if (path === '/open-source') return { ...item, priority: 0.8, changefreq: 'monthly' }
         return { ...item, priority: 0.7, changefreq: 'monthly' }
       },
       filter: (page) => !page.includes('/og/'),

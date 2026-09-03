@@ -6,7 +6,7 @@ import { site } from '../../data/site'
 /** One card per page. Home is 'index' so the route always has a slug to match. */
 export async function getStaticPaths() {
   const projects = await getCollection('projects')
-  const posts = (await getCollection('writing')).filter((p) => !p.data.draft)
+  const posts = (await getCollection('blog')).filter((p) => !p.data.draft)
 
   return [
     {
@@ -22,11 +22,19 @@ export async function getStaticPaths() {
       },
     },
     {
-      params: { slug: 'writing' },
+      params: { slug: 'blog' },
       props: {
-        eyebrow: 'Writing',
-        title: 'Writing',
+        eyebrow: 'Blog',
+        title: 'Blog',
         subtitle: 'Notes on systems worth thinking hard about.',
+      },
+    },
+    {
+      params: { slug: 'open-source' },
+      props: {
+        eyebrow: 'Open source',
+        title: 'Open source',
+        subtitle: 'Patches merged into other people\u2019s projects.',
       },
     },
     ...projects.map((p) => ({
@@ -34,8 +42,8 @@ export async function getStaticPaths() {
       props: { eyebrow: 'Project', title: p.data.title, subtitle: p.data.summary },
     })),
     ...posts.map((p) => ({
-      params: { slug: `writing/${p.id}` },
-      props: { eyebrow: 'Writing', title: p.data.title, subtitle: p.data.description },
+      params: { slug: `blog/${p.id}` },
+      props: { eyebrow: 'Blog', title: p.data.title, subtitle: p.data.description },
     })),
   ]
 }

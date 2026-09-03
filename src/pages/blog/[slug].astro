@@ -3,12 +3,12 @@ import { getCollection, render, type CollectionEntry } from 'astro:content'
 import Entry from '../../layouts/Entry.astro'
 
 export async function getStaticPaths() {
-  const posts = (await getCollection('writing')).filter((p) => !p.data.draft)
+  const posts = (await getCollection('blog')).filter((p) => !p.data.draft)
   return posts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }))
 }
 
 interface Props {
-  entry: CollectionEntry<'writing'>
+  entry: CollectionEntry<'blog'>
 }
 
 const { entry } = Astro.props
@@ -40,12 +40,12 @@ const wordCount = entry.body!
   ogType="article"
   kind="article"
   trail={[
-    { name: 'Writing', path: '/writing' },
-    { name: d.title, path: `/writing/${entry.id}` },
+    { name: 'Blog', path: '/blog' },
+    { name: d.title, path: `/blog/${entry.id}` },
   ]}
   article={{ date: d.date, wordCount, section: 'Engineering' }}
   transitionName={`t-${entry.id}`}
-  back={{ href: '/writing', label: 'All writing' }}
+  back={{ href: '/blog', label: 'All posts' }}
 >
   <Content />
 </Entry>

@@ -1,0 +1,113 @@
+---
+import Base from '../layouts/Base.astro'
+import ProjectRow from '../components/ProjectRow.astro'
+import { contributions } from '../data/open-source'
+import { site } from '../data/site'
+---
+
+<Base
+  title="Open source · Sachit Madaan"
+  description="Patches by Sachit Madaan merged into projects maintained by other people, with what each one fixed."
+  kind="collection"
+  trail={[{ name: 'Open source', path: '/open-source' }]}
+  collection={{
+    items: contributions.map((c) => ({ name: c.repo, url: c.url })),
+  }}
+>
+  <div class="column page">
+    <h1>Open source</h1>
+    <p class="lede">
+      Patches that landed in someone else&rsquo;s codebase. Each one links to the merged
+      pull request, so the review and the diff are the record.
+    </p>
+
+    <hr class="rule" />
+
+    {
+      contributions.length > 0 ? (
+        <div class="rows">
+          {contributions.map((c) => (
+            <ProjectRow href={c.url} title={c.repo} summary={c.summary} tag={c.tag} newTab />
+          ))}
+        </div>
+      ) : (
+        <p class="empty">Nothing merged upstream yet.</p>
+      )
+    }
+
+    <div class="notes">
+      {
+        contributions.map((c) => (
+          <div class="note">
+            <p class="meta mono">
+              {c.tag} · merged {c.merged}
+            </p>
+            <p class="what">{c.description}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="tail mono">
+      More at <a class="ext" href={site.github} rel="me noopener">github.com/{site.githubUser}</a>
+    </p>
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-top: 3.5rem;
+  }
+
+  .lede {
+    color: var(--muted);
+    margin-top: 0.4rem;
+    max-width: 34rem;
+    text-wrap: pretty;
+  }
+
+  .rule {
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .empty {
+    color: var(--muted);
+  }
+
+  /* The row above states what changed; this states what was wrong. Keyed by
+     PR number rather than by repeating the repo, which the row already names. */
+  .notes {
+    margin-top: 2.5rem;
+  }
+
+  .note {
+    max-width: 38rem;
+  }
+
+  .note + .note {
+    margin-top: 1.75rem;
+  }
+
+  /* Full --muted, like the footer strip: anything lighter drops under 4.5:1. */
+  .meta {
+    color: var(--muted);
+  }
+
+  .what {
+    color: var(--muted);
+    margin-top: 0.35rem;
+    text-wrap: pretty;
+  }
+
+  .tail {
+    margin-top: 2.5rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 30rem) {
+    .page {
+      padding-top: 2.5rem;
+    }
+  }
+</style>

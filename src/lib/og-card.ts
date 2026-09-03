@@ -72,7 +72,7 @@ const text = (children: string, style: Record<string, unknown>) => ({
 })
 
 export interface Card {
-  /** Mono eyebrow, e.g. WRITING or PROJECT. */
+  /** Mono eyebrow, e.g. BLOG or PROJECT. */
   eyebrow: string
   title: string
   /** One line under the title. Trimmed to fit. */

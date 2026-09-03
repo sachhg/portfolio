@@ -4,12 +4,12 @@ import type { APIRoute } from 'astro'
 import { site } from '../data/site'
 
 export const GET: APIRoute = async (context) => {
-  const posts = (await getCollection('writing'))
+  const posts = (await getCollection('blog'))
     .filter((p) => !p.data.draft)
     .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 
   return rss({
-    title: `${site.name} · Writing`,
+    title: `${site.name} · Blog`,
     description:
       'Notes on distributed systems, databases, and machine learning infrastructure.',
     site: context.site!,
@@ -17,7 +17,7 @@ export const GET: APIRoute = async (context) => {
       title: p.data.title,
       description: p.data.description,
       pubDate: p.data.date,
-      link: `/writing/${p.id}`,
+      link: `/blog/${p.id}`,
     })),
     customData: '<language>en-us</language>',
   })

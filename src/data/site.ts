@@ -7,7 +7,7 @@ export const site = {
   github: 'https://github.com/sachhg',
   githubUser: 'sachhg',
   linkedin: 'https://www.linkedin.com/in/madaan-sachit',
-  /** Drop the PDF at public/resume.pdf to activate this link. */
+  /** The index links this only when public/resume.pdf is actually present. */
   resume: '/resume.pdf',
   school: 'University of California, Santa Barbara',
 } as const
@@ -15,5 +15,6 @@ export const site = {
 export const nav = [
   { href: '/', label: 'Index' },
   { href: '/projects', label: 'Projects' },
-  { href: '/writing', label: 'Writing' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/open-source', label: 'Open source' },
 ] as const

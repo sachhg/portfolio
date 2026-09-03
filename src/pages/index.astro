@@ -16,7 +16,7 @@ const featured = (await getCollection('projects'))
   .filter((p) => p.data.featured)
   .sort((a, b) => a.data.order - b.data.order)
 
-const posts = (await getCollection('writing'))
+const posts = (await getCollection('blog'))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .slice(0, 3)
@@ -113,7 +113,7 @@ const relFor = (l: IndexLink) =>
       </div>
     </Section>
 
-    <Section label="Open source">
+    <Section label="Open source" more={{ href: '/open-source', label: 'all contributions' }}>
       <div class="rows">
         {
           contributions.map((c) => (
@@ -123,12 +123,12 @@ const relFor = (l: IndexLink) =>
       </div>
     </Section>
 
-    <Section label="Writing" more={{ href: '/writing', label: 'all writing' }}>
+    <Section label="Blog" more={{ href: '/blog', label: 'all posts' }}>
       <div class="rows">
         {
           posts.map((p) => (
             <PostRow
-              href={`/writing/${p.id}`}
+              href={`/blog/${p.id}`}
               title={p.data.title}
               date={p.data.date}
               transitionName={`t-${p.id}`}

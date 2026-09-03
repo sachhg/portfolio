@@ -20,8 +20,9 @@ src/
   components/     Topography.astro is the only one with a script
   content/
     projects/     MDX, one file per project
-    writing/      MDX, one file per post
-  data/           site.ts (links, identity), experience.ts (roles)
+    blog/         MDX, one file per post
+  data/           site.ts (links, identity), experience.ts (roles),
+                  open-source.ts (merged upstream contributions)
   layouts/        Base.astro (head + SEO), Entry.astro (project/post shell)
   lib/            github.ts (footer data), schema.ts (JSON-LD graph),
                   og-card.ts (satori OG cards)
@@ -32,7 +33,7 @@ scripts/
   fetch-fonts.mjs Downloads, subsets, and instances the two typefaces
 ```
 
-## Writing content
+## Adding content
 
 Projects (`src/content/projects/*.mdx`):
 
@@ -51,8 +52,17 @@ order: 2                  # ascending
 ---
 ```
 
-Posts (`src/content/writing/*.mdx`) take `title`, `date`, `description`, and
+Posts (`src/content/blog/*.mdx`) take `title`, `date`, `description`, and
 optional `draft: true` (drafts are excluded from the index, RSS, and sitemap).
+
+Open-source contributions are not a collection: they live as a typed list in
+`src/data/open-source.ts`, because the thing worth recording is what a patch
+fixed, which no API reports. Adding an entry surfaces it on the home page, on
+`/open-source`, and in `llms.txt` at once.
+
+The blog lives at `/blog`. It was `/writing` until the rename; `vercel.json`
+keeps permanent redirects from the old paths, including the OG card routes, so
+anything already linking to a post still resolves.
 
 `summary` is capped at 46 characters by the schema, so the build fails if a row
 would wrap past its mono tag. That is deliberate.
