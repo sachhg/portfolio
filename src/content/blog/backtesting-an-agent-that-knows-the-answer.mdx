@@ -1,0 +1,179 @@
+---
+title: Backtesting an agent that already knows the answer
+date: 2026-09-02
+description: 'I wanted to replay a season an agent had already read about. Filtering the tool output is the easy half. The model brings the future in with it.'
+---
+
+I wanted an agent to predict the coming NFL season game by game. Before
+trusting it on games nobody has played, the obvious check is to point it at
+last season, run it on what was knowable in September, and score its picks
+against what happened.
+
+So I set the as-of date to 1 September 2025, gave the agent an archive to
+search, and told it the current date in the system prompt. The picks came back
+good, and I had no way to tell whether that was a working strategy or a model
+that had already read about the season.
+
+[ChronoGuard](https://github.com/sachhg/chronoguard) came out of trying to
+answer that question.
+
+## Two ways the future gets in
+
+The first is tool leakage. The agent searches, a document published in December
+2025 comes back, and it reasons over information that did not exist in
+September. This is a plumbing problem and it is fixable. Every piece of
+evidence has, or should have, a publication timestamp, so intercept the call
+and drop anything stamped after the as-of date.
+
+The second is parametric leakage. The model's weights were trained on text
+written after September 2025. Ask it who won a game played in November and it
+may simply tell you, with no tools, no retrieval, and nothing in the context.
+Filtering does not touch this, because it is not coming in through a door. It
+was inside before the run started.
+
+From outside the two are identical. An answer that is too good looks the same
+either way, and the fixes have nothing to do with each other.
+
+## The filter is one comparison and a pile of decisions
+
+`published_at < as_of` is the whole comparison. Everything that matters is the
+discipline around it.
+
+An adapter turns each tool's output, whatever shape it arrives in, into one
+record type: content, a source id, a timezone-aware `published_at`, a
+`retrieved_at`, and free-form metadata. After that, guarding a tool is one
+decorator:
+
+```python
+guard = TemporalGuard("2025-09-01T00:00:00Z")
+audit = AuditLog()
+
+@guarded_tool(guard, MappingAdapter(source_key="url", published_key="date"), audit=audit)
+def search_archive(query: str) -> list[dict]:
+    """Search the archive."""
+    return archive.query(query)
+```
+
+The agent calls `search_archive` and sees only the survivors. Filtering lives
+in one place and every tool inherits it.
+
+The defaults are where the real choices are. A record with no timestamp gets
+dropped rather than waved through, and so does one whose timestamp is junk or
+has no timezone. Those are separate verdicts in the output, because "no date"
+and "date we choked on" are different problems in your corpus. The boundary is
+exclusive, so a record published at exactly the as-of instant is rejected. That
+looks pedantic until you feed it a corpus that stores bare days, where
+everything published on 1 September arrives as `2025-09-01T00:00:00Z` and an
+inclusive rule hands the agent a full day of hindsight. Losing the record
+published on the exact microsecond of the cutoff costs nothing. If you want the
+whole day, name the next midnight.
+
+Counts are part of the output, not debug logging. "The guard dropped 41 of 60
+retrieved documents" says something real about your corpus, and in most runs it
+is the most interesting number there.
+
+The agent is never told that anything was filtered. An empty tool result reads
+`(no results)`, not "4 documents were withheld". Saying documents were held
+back for postdating the cutoff is itself a signal: it tells the model the
+future exists, that it is relevant here, and roughly how much of it there is. A
+model that then reaches into its weights to fill the gap is doing the exact
+thing the run is trying to prevent. The counts still get collected. They go to
+an audit log and into the report, never into a prompt.
+
+The system prompt does state the date, but that is there to keep the model on
+task rather than to contain anything. The prompt asks the model to behave and
+the filter decides what it can see, so if the answer to "how do we blind this
+better" is "write a firmer prompt", that improves compliance and leaves
+containment where it was.
+
+## Measuring the half you cannot filter
+
+Parametric leakage has two honest responses and neither one is a fix. Pick a
+model whose training predates your as-of date, or measure how much it knows and
+report the number.
+
+The probe is blunt on purpose. Ask the model questions whose answers only
+became knowable after the as-of date, give it no tools at all, and count how
+many it gets right. A correct answer with zero evidence in context came from
+the weights.
+
+Two details do most of the work there. The probe does not ask the model to
+pretend it is a past date, because that measures instruction-following instead
+of knowledge. It asks straight, so the model tries its hardest. And it scores a
+control group of cases that were already knowable at the as-of date. Without
+controls, a model that is genuinely blinded and a model that is bad at
+questions both score zero on the future and look the same in the numbers. So a
+zero leakage score sitting next to controls under 50% reports as inconclusive,
+not low.
+
+ChronoGuard ships approximate training cutoffs by model family, and it is
+careful about what that file is for. Vendors are vague, post-training on recent
+data blurs the line, and models misreport their own cutoff in both directions.
+The cutoffs decide whether a run gets flagged before any scoring happens. The
+probe is the evidence, and when the two disagree the probe wins.
+
+## A clean run that is still a bad one
+
+The third measurement bridges the two layers. A claim classifier takes the
+final answer together with the evidence the agent actually received after
+filtering, and labels each assertion: traceable to that evidence, benign, or a
+specific fact that came from nowhere. An untraceable specific fact is what
+parametric leakage looks like at the end of a run.
+
+The report puts all three side by side. Here is a run against the packaged
+fixtures, which is the case the project exists for:
+
+```
+RISK: HIGH
+  - with no tools at all the model reproduced 75% of the post-as-of facts it was asked about
+  - the model's training data runs past the simulated date (2024-08-01), so filtering cannot blind it
+
+TOOL LEAKAGE (contained by filtering)
+  2 tool call(s), 15 record(s) retrieved
+  kept 7, filtered 8  (allowed=7, future=5, undated=2, unparseable=1)
+
+PARAMETRIC LEAKAGE (measured, not contained)
+  leakage 3/4 (75%), control 3/3 (100%), risk high
+
+CLAIMS IN THE ANSWER
+  6 claim(s): 5 grounded, 1 benign, 0 suspected leak(s), groundedness 100%
+```
+
+The filter worked. The answer is clean, and every factual claim in it traces
+back to a document the agent was allowed to see. The run is still high risk,
+because the same model asked directly, with no documents at all, hands over
+three facts from after the as-of date. Print the first and third blocks alone
+and this reads as a good run. It was not a good run, it was a lucky one.
+
+The headline takes the worst signal of the three and carries its reasons with
+it. Nothing can push it down. A model whose cutoff postdates the as-of date
+caps at elevated however well the filter held, and a measurement you skipped
+reports as unknown instead of letting absence of evidence read as evidence of
+absence.
+
+## Why the test corpora are invented
+
+The packaged fixtures are about a company that does not exist launching a
+product that does not exist, and the worked example is a fictional council
+arguing about a congestion charge. That is deliberate. No model has invented
+material in its weights, so a post-as-of string appearing in an answer came
+through a tool and nowhere else. Use a real scenario and you cannot attribute a
+leak to a channel, which is the distinction the whole thing is built on.
+
+Each corpus lists canary strings that must never reach the agent, and the tests
+assert that the unguarded tool leaks them before checking that the guarded one
+does not. Otherwise a passing test only proves the search came back empty.
+
+## Back to football
+
+The answer to my original question was not the one I wanted. Every model I can
+run locally was trained well past September 2025, so I am not blinding
+anything. I am asking a model that watched the season to act like it did not,
+and the probe puts a number on how badly that goes.
+
+It is still better than where I started. A backtest that scores 70% tells me
+nothing by itself. The same 70% next to a probe result showing the model
+reproduces most post-cutoff facts with no evidence in front of it tells me the
+score is mostly recall. So the strategy gets judged on the season that has not
+happened yet, and the replay is good for one thing: checking that the pipeline
+runs.

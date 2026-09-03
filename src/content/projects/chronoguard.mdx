@@ -1,0 +1,39 @@
+---
+title: ChronoGuard
+year: 2026
+stack: ['Python', 'Ollama', 'Pydantic', 'Typer']
+repo: 'https://github.com/sachhg/chronoguard'
+summary: 'Point-in-time leakage guard for LLM agents'
+description: 'A domain-agnostic point-in-time leakage guard for LLM agents: it filters post-cutoff evidence out of tool calls, probes the model for what its weights already know, and scores both in one verdict.'
+status: active
+tag: Python
+featured: true
+order: 5
+---
+
+ChronoGuard runs an agent as if it were working at a chosen past date, then
+measures how well that blinding actually held. It is domain-agnostic, tied to
+no agent framework, and aimed at local models served by Ollama.
+
+Reasoning as of a past date fails in two ways that look identical from outside.
+The first is that a tool returns a document published after the as-of date, and
+filtering handles that. Every tool's output is normalized into one record type
+carrying a publication timestamp, and a decorator puts the guard in front of any
+Python callable that returns evidence. Undated and unparseable records are
+dropped by default, the boundary is exclusive so day-precision corpora cannot
+smuggle in a day of hindsight, and the agent never learns what was withheld.
+
+The second way is the weights, which already encode facts from after the date.
+No filter reaches that, so the only honest move is to measure it. A probe asks
+questions that were only answerable after the as-of date, with no tools at all,
+and scores a control group next to them so a model that simply cannot answer
+anything does not read as blinded. A claim classifier then checks the final
+answer against the evidence the agent actually received.
+
+```bash
+chronoguard report "When will Halden ship Meridian, and what will it cost per seat?"
+```
+
+The verdict takes the worst of the three measurements and carries its reasons
+with it. Nothing can push it down, and a run on a model whose training postdates
+the simulated date never reports as low risk however well the filter held.
