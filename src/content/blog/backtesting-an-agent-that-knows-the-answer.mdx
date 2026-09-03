@@ -42,7 +42,9 @@ discipline around it.
 An adapter turns each tool's output, whatever shape it arrives in, into one
 record type: content, a source id, a timezone-aware `published_at`, a
 `retrieved_at`, and free-form metadata. After that, guarding a tool is one
-decorator:
+decorator. It lives in
+[`interception.py`](https://github.com/sachhg/chronoguard/blob/main/src/chronoguard/interception.py)
+with the adapter and the audit log:
 
 ```python
 guard = TemporalGuard("2025-09-01T00:00:00Z")
@@ -120,8 +122,9 @@ filtering, and labels each assertion: traceable to that evidence, benign, or a
 specific fact that came from nowhere. An untraceable specific fact is what
 parametric leakage looks like at the end of a run.
 
-The report puts all three side by side. Here is a run against the packaged
-fixtures, which is the case the project exists for:
+The report puts all three side by side. Here is a run against the
+[packaged fixtures](https://github.com/sachhg/chronoguard/blob/main/src/chronoguard/fixtures/tools.py),
+which is the case the project exists for:
 
 ```
 RISK: HIGH
@@ -149,7 +152,8 @@ The headline takes the worst signal of the three and carries its reasons with
 it. Nothing can push it down. A model whose cutoff postdates the as-of date
 caps at elevated however well the filter held, and a measurement you skipped
 reports as unknown instead of letting absence of evidence read as evidence of
-absence.
+absence. The four verdicts and what to do about each one are written up in
+[interpreting-reports.md](https://github.com/sachhg/chronoguard/blob/main/docs/interpreting-reports.md).
 
 ## Why the test corpora are invented
 
