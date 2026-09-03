@@ -45,7 +45,7 @@ at finding bugs you did not know about. Here we already knew the bug and the
 line it lived on, and we wanted one input that reached it. A fuzzer spends most
 of a 24 hour window on inputs that die in the first few hundred bytes.
 
-## What the loop actually does
+## What the loop does
 
 The agent reads the vulnerability report, writes a candidate input, builds an
 instrumented target, runs it under AddressSanitizer, and reads what comes back.
@@ -79,8 +79,8 @@ times faster.
 ## The one that still works
 
 We also took successful PoCs and replayed them against patched builds, which is
-the check that tells you whether a fix actually closed the hole. We ran 18 of
-them that way.
+the check that tells you whether a fix closed the hole. We ran 18 of them that
+way.
 
 One still reproduces on current FFmpeg and causes a denial of service. That
 result is the part I keep coming back to, because it came out of a pipeline
