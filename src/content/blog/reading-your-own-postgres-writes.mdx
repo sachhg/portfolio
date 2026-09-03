@@ -63,9 +63,10 @@ milliseconds, which is the guess this post started with, kept for people who
 would rather have the throughput.
 
 Routing follows from that. A read from a fenced session goes to any replica that
-has replayed past the fence, and to the primary if none has. No timer anywhere.
-A session that just wrote gets correctness. Every other session keeps using the
-replicas, and the fence clears the moment replication catches up.
+has replayed past the fence, and to the primary if none has, with no timer
+involved at any point. A session that just wrote gets correctness. Every other
+session keeps using the replicas, and the fence clears the moment replication
+catches up.
 
 There's also no constant to tune, which is the part I like. The database was
 already publishing the number the timeout was trying to approximate.
