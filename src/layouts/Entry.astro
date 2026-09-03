@@ -111,10 +111,19 @@ const bits = (meta ?? []).filter(Boolean) as string[]
     color: var(--line);
   }
 
+  /* The repo link sits in a row of plain metadata, all of it --muted and
+     dot-separated, so at --muted it read as one more bit of text. Accent is
+     what marks it as the one thing here you can click. */
   .meta a {
-    color: var(--muted);
+    color: var(--accent);
     position: relative;
     transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  /* The arrow belongs to the link, so it takes the link's colour rather than
+     the muted default it carries elsewhere. */
+  .meta a.ext::after {
+    color: inherit;
   }
 
   /* ::before, not ::after, because .ext owns ::after for its arrow. */
@@ -128,10 +137,6 @@ const bits = (meta ?? []).filter(Boolean) as string[]
     transform: scaleX(0);
     transform-origin: left center;
     transition: transform var(--dur-fast) var(--ease-out);
-  }
-
-  .meta a:hover {
-    color: var(--accent);
   }
 
   .meta a:hover::before {
