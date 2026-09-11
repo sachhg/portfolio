@@ -196,5 +196,5 @@ domain at the project.
   those vectors require, and the one piece of external data rendered (GitHub
   commit messages) goes through escaped expressions, never `set:html`.
   Upgrading to 7 is worth doing when there is time to test it.
-- `public/resume.pdf` is referenced by the home page but not committed. Drop the
-  file there to activate the link.
+- `public/resume.pdf` is committed, and the home page links it only when the file
+  is actually present. Remove it and the link disappears rather than 404s.
