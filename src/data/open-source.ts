@@ -21,6 +21,15 @@ export interface Contribution {
  */
 export const contributions: Contribution[] = [
   {
+    repo: 'labstack/echo',
+    url: 'https://github.com/labstack/echo/pull/3094',
+    summary: 'Stops the Problem Details handler rewriting shared errors',
+    tag: 'PR #3094',
+    description:
+      'The RFC 9457 error handler filled in missing fields by writing them back into the error it was handed. Apps often return one shared error value, so concurrent requests raced on the same struct, and after the first request the app\'s own error had a type and title it never set. The defaults now go on a copy, with a test that fails on the old handler. Merged into Echo, the Go web framework.',
+    merged: '2026-09-11',
+  },
+  {
     repo: 'datalayer/jupyter-mcp-server',
     url: 'https://github.com/datalayer/jupyter-mcp-server/pull/449',
     summary: 'Keeps insert_cell from breaking older notebooks',
