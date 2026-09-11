@@ -22,6 +22,15 @@ export interface Contribution {
 export const contributions: Contribution[] = [
   {
     repo: 'datalayer/jupyter-mcp-server',
+    url: 'https://github.com/datalayer/jupyter-mcp-server/pull/449',
+    summary: 'Keeps insert_cell from breaking older notebooks',
+    tag: 'PR #449',
+    description:
+      'insert_cell gave every new cell an id, but cell ids only exist from nbformat 4.5 on. Inserting into a 4.4 or older notebook wrote a file that failed validation, while the tool still reported success. The id is now left off for older notebooks, and the file keeps the version it had. Added tests that insert each cell type into 4.2, 4.4 and 4.5 notebooks and validate the result. Merged into the Model Context Protocol server for Jupyter.',
+    merged: '2026-09-11',
+  },
+  {
+    repo: 'datalayer/jupyter-mcp-server',
     url: 'https://github.com/datalayer/jupyter-mcp-server/pull/450',
     summary: 'Stops terminal escape codes leaking into cell output',
     tag: 'PR #450',
