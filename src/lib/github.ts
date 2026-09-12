@@ -313,3 +313,41 @@ async function fetchActivity(): Promise<Activity> {
 }
 
 export { WINDOW_DAYS }
+
+/* --- Upstream stars ------------------------------------------------------- */
+
+interface GhRepoStars {
+  stargazers_count?: number
+}
+
+/**
+ * Star counts for the repos the open-source page links into.
+ *
+ * Same contract as the footer: a repo that cannot be read is simply absent
+ * from the map, and the page renders the rest. Memoized per repo so the
+ * static build makes one request each no matter how many pages ask.
+ */
+const starCache = new Map<string, Promise<number | null>>()
+
+export async function getStars(repos: string[]): Promise<Map<string, number>> {
+  const pairs = await Promise.all(
+    repos.map(async (repo) => {
+      let pending = starCache.get(repo)
+      if (!pending) {
+        pending = api<GhRepoStars>(`/repos/${repo}`).then((r) =>
+          typeof r?.stargazers_count === 'number' ? r.stargazers_count : null
+        )
+        starCache.set(repo, pending)
+      }
+      return [repo, await pending] as const
+    })
+  )
+
+  return new Map(pairs.filter((p): p is readonly [string, number] => p[1] !== null))
+}
+
+/** 32706 → "32.7k". Whole thousands lose the ".0", so 2000 is "2k". */
+export function formatStars(n: number): string {
+  if (n < 1000) return String(n)
+  return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k`
+}

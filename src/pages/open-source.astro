@@ -3,6 +3,12 @@ import Base from '../layouts/Base.astro'
 import ProjectRow from '../components/ProjectRow.astro'
 import { contributions } from '../data/open-source'
 import { site } from '../data/site'
+import { getStars, formatStars } from '../lib/github'
+
+/* One entry per upstream repo, not per PR: three of the four patches landed
+   in the same project, and the star count belongs to the project. */
+const upstream = [...new Set(contributions.map((c) => c.repo))]
+const stars = await getStars(upstream)
 ---
 
 <Base
@@ -27,6 +33,24 @@ import { site } from '../data/site'
         </div>
       ) : (
         <p class="empty">Nothing merged upstream yet.</p>
+      )
+    }
+
+    {
+      stars.size > 0 && (
+        <p class="stars mono">
+          {upstream
+            .filter((repo) => stars.has(repo))
+            .map((repo, i) => (
+              <>
+                {i > 0 && <span class="sep" aria-hidden="true"> · </span>}
+                {formatStars(stars.get(repo)!)} stars on{' '}
+                <a class="ext" href={`https://github.com/${repo}`} target="_blank" rel="noopener">
+                  {repo}
+                </a>
+              </>
+            ))}
+        </p>
       )
     }
 
@@ -61,6 +85,18 @@ import { site } from '../data/site'
 
   .empty {
     color: var(--muted);
+  }
+
+  /* Read at build time, so it ages with the deploy rather than with the file.
+     Absent entirely if GitHub cannot be reached. */
+  .stars {
+    color: var(--muted);
+    margin-top: 1.25rem;
+    text-wrap: pretty;
+  }
+
+  .stars .sep {
+    color: color-mix(in srgb, var(--muted) 50%, var(--paper));
   }
 
   /* The row above states what changed; this states what was wrong. Keyed by
