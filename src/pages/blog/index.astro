@@ -22,8 +22,6 @@ const posts = (await getCollection('blog'))
 >
   <div class="column page">
     <h1>Blog</h1>
-    <p class="lede">Notes on things I&rsquo;ve had to think hard about.</p>
-
     <hr class="rule" />
 
     {
@@ -48,13 +46,6 @@ const posts = (await getCollection('blog'))
 <style>
   .page {
     padding-top: 3.5rem;
-  }
-
-  .lede {
-    color: var(--muted);
-    margin-top: 0.4rem;
-    max-width: 34rem;
-    text-wrap: pretty;
   }
 
   .rule {

@@ -23,10 +23,6 @@ const projects = (await getCollection('projects')).sort(
 >
   <div class="column page">
     <h1>Projects</h1>
-    <p class="lede">
-      Things I&rsquo;ve built, mostly infrastructure. Source is linked where it&rsquo;s public.
-    </p>
-
     <hr class="rule" />
 
     <div class="rows">
@@ -52,13 +48,6 @@ const projects = (await getCollection('projects')).sort(
 <style>
   .page {
     padding-top: 3.5rem;
-  }
-
-  .lede {
-    color: var(--muted);
-    margin-top: 0.4rem;
-    max-width: 34rem;
-    text-wrap: pretty;
   }
 
   .rule {
