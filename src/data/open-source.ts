@@ -21,6 +21,42 @@ export interface Contribution {
  */
 export const contributions: Contribution[] = [
   {
+    repo: 'redis/redis-py',
+    url: 'https://github.com/redis/redis-py/pull/4320',
+    summary: 'Stops exponential backoff overflowing on long outages',
+    tag: 'PR #4320',
+    description:
+      'Clients configured to retry forever crashed with OverflowError once consecutive failures passed 1024, because multiplying a float base by the arbitrary-precision integer 2**failures exceeded the 64-bit float limit. OverflowError bypassed RedisError handlers and aborted the retry loop. Added a shared _exponential helper using math.ldexp that caps at infinity, scaled the base before exponentiation in ExponentialWithJitterBackoff to preserve zero jitter, and added tests covering large failure counts. Merged into redis-py, the Python client for Redis.',
+    merged: '2026-09-29',
+  },
+  {
+    repo: 'datalayer/jupyter-mcp-server',
+    url: 'https://github.com/datalayer/jupyter-mcp-server/pull/448',
+    summary: 'Stops leaking the MCP client secret to Jupyter',
+    tag: 'PR #448',
+    description:
+      'When configured with password authentication, the server forwarded the client\'s MCP bearer token as the Jupyter token on session PUTs and WebSocket room URLs. The cookie authenticated the requests, but the secret was exposed in reverse proxy and access logs. Wrapped the shared-secret verifier to clear the token on verified access credentials so secrets are not passed upstream. Added unit tests verifying token clearing and fallback handling. Merged into the Model Context Protocol server for Jupyter.',
+    merged: '2026-09-25',
+  },
+  {
+    repo: 'fmtlib/fmt',
+    url: 'https://github.com/fmtlib/fmt/pull/4942',
+    summary: 'Fixes printf zero precision with zero values',
+    tag: 'PR #4942',
+    description:
+      'C99 requires converting a zero value with a precision of zero to emit no characters (e.g. %.0d of 0), but fmt::printf printed 0 instead across d, i, o, u, x, and X. Updated write_int to omit digits when both precision and value are zero while preserving flags and width padding, and handled the %#o octal exception. Added tests against platform snprintf covering specifier, flag, and width combinations. Merged into {fmt}, the C++ formatting library.',
+    merged: '2026-09-19',
+  },
+  {
+    repo: 'valyala/fasthttp',
+    url: 'https://github.com/valyala/fasthttp/pull/2392',
+    summary: 'Normalizes trailing /. segments in URI paths',
+    tag: 'PR #2392',
+    description:
+      'RFC 3986 section 5.2.4 step 2B specifies that trailing /. segments must be replaced with /, but normalizePath left them untouched so URI.Path() returned paths like /foo/. instead of /foo/. Added normalization for trailing single-dot segments positioned after parent-directory segment removal, with test cases covering dot runs and dotfiles across RFC-compliant paths. Merged into fasthttp, the fast Go HTTP package.',
+    merged: '2026-09-19',
+  },
+  {
     repo: 'labstack/echo',
     url: 'https://github.com/labstack/echo/pull/3094',
     summary: 'Stops the Problem Details handler rewriting shared errors',
