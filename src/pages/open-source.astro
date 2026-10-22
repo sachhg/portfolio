@@ -5,8 +5,7 @@ import { contributions } from '../data/open-source'
 import { site } from '../data/site'
 import { getStars, formatStars } from '../lib/github'
 
-/* One entry per upstream repo, not per PR: three of the four patches landed
-   in the same project, and the star count belongs to the project. */
+/* Count stars once per upstream repo, even when it has multiple patches. */
 const upstream = [...new Set(contributions.map((c) => c.repo))]
 const stars = await getStars(upstream)
 ---
@@ -54,19 +53,6 @@ const stars = await getStars(upstream)
       )
     }
 
-    <div class="notes">
-      {
-        contributions.map((c) => (
-          <div class="note">
-            <p class="meta mono">
-              {c.tag} · merged {c.merged}
-            </p>
-            <p class="what">{c.description}</p>
-          </div>
-        ))
-      }
-    </div>
-
     <p class="tail mono">
       More at <a class="ext" href={site.github} rel="me noopener">github.com/{site.githubUser}</a>
     </p>
@@ -97,31 +83,6 @@ const stars = await getStars(upstream)
 
   .stars .sep {
     color: color-mix(in srgb, var(--muted) 50%, var(--paper));
-  }
-
-  /* The row above states what changed; this states what was wrong. Keyed by
-     PR number rather than by repeating the repo, which the row already names. */
-  .notes {
-    margin-top: 2.5rem;
-  }
-
-  .note {
-    max-width: 38rem;
-  }
-
-  .note + .note {
-    margin-top: 1.75rem;
-  }
-
-  /* Full --muted, like the footer strip: anything lighter drops under 4.5:1. */
-  .meta {
-    color: var(--muted);
-  }
-
-  .what {
-    color: var(--muted);
-    margin-top: 0.35rem;
-    text-wrap: pretty;
   }
 
   .tail {

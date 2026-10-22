@@ -34,7 +34,7 @@ ${projects.map((p) => `- [${p.data.title}](${abs(`/projects/${p.id}`)}): ${p.dat
 
 Index: ${abs('/open-source')}
 
-${contributions.map((c) => `- [${c.repo}](${c.url}) (merged ${c.merged}): ${c.description}`).join('\n')}
+${contributions.map((c) => `- [${c.repo}](${c.url}) (${c.tag}): ${c.summary}`).join('\n')}
 
 ## Blog
 
