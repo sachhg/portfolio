@@ -29,9 +29,19 @@ const { series } = Astro.props
     object-position: left bottom;
     border-radius: 1px 3px 3px 1px;
     box-shadow: 2px 4px 9px rgb(40 32 18 / 16%);
+    transform-origin: bottom left;
+    transition: transform 250ms var(--ease-out);
   }
   .cover-stack img[data-depth='2'] { transform: translate(12px, -12px); }
   .cover-stack img[data-depth='1'] { transform: translate(6px, -6px); }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .series:hover .cover-stack img[data-depth='2'] {
+      transform: translate(12px, -12px) rotate(5deg);
+    }
+    .series:hover .cover-stack img[data-depth='1'] {
+      transform: translate(6px, -6px) rotate(2.5deg);
+    }
+  }
   h3 { font-size: 1.2rem; line-height: 1.25; text-wrap: pretty; }
   .author { color: var(--muted); font-size: 0.95rem; line-height: 1.4; margin-top: 0.4rem; }
   .favorite-ribbon {
