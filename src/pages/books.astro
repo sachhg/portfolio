@@ -1,26 +1,24 @@
 ---
 import { Image } from 'astro:assets'
 import Base from '../layouts/Base.astro'
-import { currentlyReading, completedBooks } from '../data/books'
+import { currentlyReading, completedBooks, completedSeries } from '../data/books'
+import BookSeries from '../components/BookSeries.astro'
 ---
 
 <Base
   title="What I’m reading · Sachit Madaan"
-  description="On my nightstand and back on the shelf: what I’m reading, what I’ve finished, and a few favorites."
+  description="What I’m reading, completed books and series, and a few favorites."
   trail={[{ name: 'Books', path: '/books' }]}
   wide
 >
   <div class="column bookshelf">
     <div class="page-intro">
-      <p class="eyebrow">The bookshelf</p>
       <h1>What I’m reading</h1>
-      <p class="intro-copy">On my nightstand, and back on the shelf.</p>
     </div>
 
     <section aria-labelledby="currently-reading" class="current-section">
       <div class="section-head">
         <h2 class="eyebrow" id="currently-reading">Currently reading</h2>
-        <span class="mono count">01</span>
       </div>
       {currentlyReading.map((book) => (
         <article class="current-book">
@@ -28,7 +26,6 @@ import { currentlyReading, completedBooks } from '../data/books'
             <Image src={book.cover} alt={`Cover of ${book.title}: ${book.subtitle}`} widths={[240, 480]} sizes="(max-width: 600px) 124px, 180px" width={480} loading="eager" format="webp" />
           </div>
           <div class="current-details">
-            <p class="eyebrow in-progress"><span aria-hidden="true"></span>In progress</p>
             <h3>{book.title}</h3>
             <p class="subtitle">{book.subtitle}</p>
             <p class="author">{book.author}</p>
@@ -40,7 +37,6 @@ import { currentlyReading, completedBooks } from '../data/books'
     <section aria-labelledby="completed" class="completed-section">
       <div class="section-head">
         <h2 class="eyebrow" id="completed">Completed</h2>
-        <span class="mono count">{completedBooks.length} books</span>
       </div>
       <p class="favorite-key mono"><span aria-hidden="true">★</span> A favorite read</p>
       <ul class="book-grid">
@@ -56,6 +52,9 @@ import { currentlyReading, completedBooks } from '../data/books'
             </article>
           </li>
         ))}
+        {completedSeries.map((series) => (
+          <li class="series-entry"><BookSeries series={series} /></li>
+        ))}
       </ul>
     </section>
     <p class="back mono"><a class="link" href="/">← Back to the index</a></p>
@@ -69,9 +68,7 @@ import { currentlyReading, completedBooks } from '../data/books'
     background: var(--paper);
   }
   .page-intro { margin-bottom: 3.25rem; }
-  .page-intro .eyebrow { margin-bottom: 0.8rem; }
   h1 { font-size: clamp(2.3rem, 5vw, 3.5rem); letter-spacing: -0.025em; }
-  .intro-copy { color: var(--muted); margin-top: 0.75rem; }
   .section-head {
     display: flex;
     justify-content: space-between;
@@ -81,7 +78,6 @@ import { currentlyReading, completedBooks } from '../data/books'
     border-top: 1px solid var(--line);
   }
   .section-head .eyebrow { margin-bottom: 0; }
-  .count { color: var(--muted); }
   .current-book {
     display: flex;
     gap: clamp(1.75rem, 5vw, 3.5rem);
@@ -97,8 +93,6 @@ import { currentlyReading, completedBooks } from '../data/books'
     box-shadow: 2px 4px 9px rgb(40 32 18 / 14%);
   }
   .current-cover, .cover-wrap { aspect-ratio: 2 / 3; }
-  .in-progress { display: flex; align-items: center; gap: 0.6rem; color: var(--accent); margin-bottom: 0.8rem; font-size: 0.6rem; }
-  .in-progress span { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
   .current-details h3 { font-size: clamp(2rem, 4vw, 3rem); }
   .subtitle { font-size: clamp(1.2rem, 2.5vw, 1.6rem); line-height: 1.35; max-width: 25ch; margin-top: 0.4rem; }
   .author { color: var(--muted); font-size: 0.95rem; line-height: 1.4; margin-top: 0.4rem; }
@@ -106,6 +100,7 @@ import { currentlyReading, completedBooks } from '../data/books'
   .favorite-key { display: flex; gap: 0.55rem; align-items: center; color: var(--muted); margin-top: 0.85rem; font-size: 0.65rem; }
   .favorite-key span { color: var(--accent); font-size: 0.8rem; }
   .book-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 2.75rem; row-gap: 2.75rem; margin-top: 2rem; }
+  .series-entry:has(details[open]) { grid-column: 1 / -1; }
   .cover-wrap { position: relative; margin-bottom: 1.1rem; }
   .book h3 { font-size: 1.2rem; line-height: 1.25; text-wrap: pretty; }
   .favorite-ribbon {
@@ -131,7 +126,6 @@ import { currentlyReading, completedBooks } from '../data/books'
     .current-cover { width: 124px; }
     .current-book { gap: 1.5rem; margin-bottom: 2.5rem; }
     .current-details .author { font-size: 0.9rem; overflow-wrap: anywhere; }
-    .in-progress { font-size: 0.55rem; letter-spacing: 0.08em; }
     .subtitle { font-size: 1.1rem; }
     .book-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem 1.5rem; }
     .book h3 { font-size: 1.12rem; }

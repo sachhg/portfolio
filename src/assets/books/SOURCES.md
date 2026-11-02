@@ -21,3 +21,40 @@ respective publisher or artist.
 | the-kite-runner.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9781594631931 |
 | all-quiet-on-the-western-front.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9780449213940 |
 | naked-economics.jpg | https://covers.openlibrary.org/b/isbn/9780393356496-L.jpg?default=false |
+
+## Additional covers
+
+| File | Download source |
+| --- | --- |
+| hatchet.jpg | https://d28hgpri8am2if.cloudfront.net/book_images/onix/cvr9781416936473/hatchet-9781416936473_hr.jpg |
+| romeo-and-juliet.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9780141396477 |
+| series/hp-2.jpg | https://covers.openlibrary.org/b/isbn/9780439064873-L.jpg?default=false |
+| series/hp-4.jpg | https://covers.openlibrary.org/b/isbn/9780439139601-L.jpg?default=false |
+| series/hp-5.jpg | https://covers.openlibrary.org/b/isbn/9780439358071-L.jpg?default=false |
+| series/hp-6.jpg | https://covers.openlibrary.org/b/isbn/9780439785969-L.jpg?default=false |
+| series/hp-7.jpg | https://covers.openlibrary.org/b/isbn/9780545010221-L.jpg?default=false |
+| series/heroes-2.jpg | https://covers.openlibrary.org/b/isbn/9781423141990-L.jpg?default=false |
+| series/heroes-3.jpg | https://covers.openlibrary.org/b/isbn/9781423140603-L.jpg?default=false |
+| series/heroes-4.jpg | https://covers.openlibrary.org/b/isbn/9781423146728-L.jpg?default=false |
+| series/kane-1.jpg | https://books.disney.com/content/uploads/2013/09/9781423113386.jpg |
+| series/kane-2.jpg | https://books.disney.com/content/uploads/2013/09/9781423140566.jpg |
+| series/hp-1.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780590353427/primary/renditions/700 |
+| series/hp-3.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780439136365/primary/renditions/700 |
+| series/percy-1.jpg | https://books.disney.com/content/uploads/2022/03/9781368051477.jpg |
+| series/percy-2.jpg | https://books.disney.com/content/uploads/2022/03/9781368051491.jpg |
+| series/percy-3.jpg | https://books.disney.com/content/uploads/2022/03/9781368051484.jpg |
+| series/percy-4.jpg | https://books.disney.com/content/uploads/2013/09/9781423101468.jpg |
+| series/percy-5.jpg | https://books.disney.com/content/uploads/2013/09/9781423101475.jpg |
+| series/heroes-1.jpg | https://books.disney.com/content/uploads/2013/09/9781423113393.jpg |
+| series/heroes-5.jpg | https://books.disney.com/content/uploads/2014/08/1423155149-678x1024.jpg |
+| life-on-mars.jpg | https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_1000,c_scale/jackets/9781619632530.jpg |
+| the-finisher.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545652209/primary/renditions/700 |
+| wonder.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9780375869020 |
+| series/hunger-1.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780439023481/primary/renditions/700 |
+| series/hunger-2.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780439023498/primary/renditions/700 |
+| series/hunger-3.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780439023511/primary/renditions/700 |
+| series/hunger-4.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9781338635171/primary/renditions/700 |
+| series/hunger-5.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9781546171461/primary/renditions/700 |
+| series/maze-1.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9780385737951 |
+| series/maze-2.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9780385738767 |
+| series/maze-3.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9780385738781 |
