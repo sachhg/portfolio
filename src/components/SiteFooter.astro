@@ -2,6 +2,7 @@
 import { getActivity, WINDOW_DAYS } from '../lib/github'
 import { site } from '../data/site'
 import Sparkline from './Sparkline.astro'
+import Elsewhere from './Elsewhere.astro'
 
 const { lastCommit, contributionCount, sparkline } = await getActivity()
 
@@ -16,6 +17,7 @@ const countLabel =
 
 <footer>
   <div class="column">
+    <Elsewhere />
     <hr class="rule" />
     <p class="mono strip">
       {
@@ -60,11 +62,11 @@ const countLabel =
 
 <style>
   footer {
-    margin-top: var(--space-section);
     padding-bottom: 2.5rem;
   }
 
   .rule {
+    margin-top: var(--space-section);
     margin-bottom: 1rem;
   }
 

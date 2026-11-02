@@ -10,7 +10,6 @@ import PostRow from '../components/PostRow.astro'
 import { site } from '../data/site'
 import { experience, now } from '../data/experience'
 import { contributions } from '../data/open-source'
-import { existsSync } from 'node:fs'
 
 const featured = (await getCollection('projects'))
   .filter((p) => p.data.featured)
@@ -24,35 +23,7 @@ const posts = (await getCollection('blog'))
 /** `**word**` → <strong>. Split, don't inject: odd indices are the emphasis. */
 const segments = (line: string) => line.split(/\*\*(.+?)\*\*/g)
 
-/**
- * The résumé is a file dropped into public/, not something the repo carries.
- * Linking it unconditionally shipped a dead link to the 404 for as long as
- * the file was missing, which is worse than not offering it, so the link
- * appears only once the PDF is actually there to serve.
- */
-const hasResume = existsSync(new URL(`../../public${site.resume}`, import.meta.url))
 
-interface IndexLink {
-  href: string
-  label: string
-  /** rel=me, pairing with the identity links in the document head. */
-  me?: boolean
-  /** The résumé is a PDF: opening it in place would drop you out of the site. */
-  newTab?: boolean
-}
-
-const links: IndexLink[] = [
-  { href: site.github, label: 'GitHub', me: true },
-  { href: site.linkedin, label: 'LinkedIn', me: true },
-  { href: `mailto:${site.email}`, label: 'Email' },
-  ...(hasResume ? [{ href: site.resume, label: 'Résumé', newTab: true }] : []),
-]
-
-/** rel is a token list, so it is assembled rather than branched over. */
-const relFor = (l: IndexLink) =>
-  [l.me && 'me', (l.newTab || l.href.startsWith('http')) && 'noopener']
-    .filter(Boolean)
-    .join(' ') || undefined
 ---
 
 <Base
@@ -138,22 +109,7 @@ const relFor = (l: IndexLink) =>
       </div>
     </Section>
 
-    <Section label="Elsewhere">
-      <ul class="links mono">
-        {
-          links.map((l) => (
-            <li>
-              <a href={l.href} target={l.newTab ? '_blank' : undefined} rel={relFor(l)}>
-                {l.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-      <a class="reading-link mono" href="/bookshelf">
-        My bookshelf <span aria-hidden="true">→</span>
-      </a>
-    </Section>
+
   </div>
 </Base>
 
@@ -207,56 +163,6 @@ const relFor = (l: IndexLink) =>
 
   .now {
     color: color-mix(in srgb, var(--ink) 82%, var(--paper));
-  }
-
-  .links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 1.5rem;
-  }
-
-  .reading-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-top: 1.25rem;
-    padding: 0.65rem 0.85rem;
-    border: 1px solid var(--line);
-    border-radius: 2px;
-    color: var(--accent);
-    transition: border-color var(--dur-fast) var(--ease-out),
-      background var(--dur-fast) var(--ease-out);
-  }
-
-  .reading-link:hover {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 5%, var(--paper));
-  }
-
-  .links a {
-    color: var(--muted);
-    position: relative;
-    transition: color var(--dur-fast) var(--ease-out);
-  }
-
-  .links a::after {
-    content: '';
-    position: absolute;
-    inset-inline: 0;
-    bottom: -3px;
-    height: 1px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: left center;
-    transition: transform var(--dur-fast) var(--ease-out);
-  }
-
-  .links a:hover {
-    color: var(--accent);
-  }
-
-  .links a:hover::after {
-    transform: scaleX(1);
   }
 
   @media (max-width: 30rem) {

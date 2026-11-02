@@ -1,0 +1,87 @@
+---
+import { existsSync } from 'node:fs'
+import { site } from '../data/site'
+import Section from './Section.astro'
+
+/**
+ * The résumé is a file dropped into public/, not something the repo carries.
+ * Linking it unconditionally shipped a dead link to the 404 for as long as
+ * the file was missing, which is worse than not offering it, so the link
+ * appears only once the PDF is actually there to serve.
+ */
+const hasResume = existsSync(new URL(`../../public${site.resume}`, import.meta.url))
+
+interface ElsewhereLink {
+  href: string
+  label: string
+  /** rel=me, pairing with the identity links in the document head. */
+  me?: boolean
+  /** The résumé is a PDF: opening it in place would drop you out of the site. */
+  newTab?: boolean
+}
+
+const links: ElsewhereLink[] = [
+  { href: site.github, label: 'GitHub', me: true },
+  { href: site.linkedin, label: 'LinkedIn', me: true },
+  { href: `mailto:${site.email}`, label: 'Email' },
+  ...(hasResume ? [{ href: site.resume, label: 'Résumé', newTab: true }] : []),
+]
+
+/** rel is a token list, so it is assembled rather than branched over. */
+const relFor = (l: ElsewhereLink) =>
+  [l.me && 'me', (l.newTab || l.href.startsWith('http')) && 'noopener']
+    .filter(Boolean)
+    .join(' ') || undefined
+---
+
+<Section label="Elsewhere">
+  <ul class="links mono">
+    {links.map((link) => (
+      <li>
+        <a href={link.href} target={link.newTab ? '_blank' : undefined} rel={relFor(link)}>
+          {link.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+  <ul class="links bookshelf-link mono">
+    <li><a href="/bookshelf">My bookshelf</a></li>
+  </ul>
+</Section>
+
+<style>
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+  }
+
+  .bookshelf-link { margin-top: 0.4rem; }
+
+  .links a {
+    color: var(--muted);
+    position: relative;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .links a::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -3px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .links a:hover {
+    color: var(--accent);
+  }
+
+  .links a:hover::after {
+    transform: scaleX(1);
+  }
+
+</style>
