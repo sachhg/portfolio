@@ -18,6 +18,7 @@ import finisher from '../assets/books/the-finisher.jpg'
 import wonder from '../assets/books/wonder.jpg'
 import hatchet from '../assets/books/hatchet.jpg'
 import romeo from '../assets/books/romeo-and-juliet.jpg'
+import creativeAct from '../assets/books/the-creative-act.jpg'
 
 export interface Book {
   title: string
@@ -110,6 +111,7 @@ export const completedBooks: Book[] = [
   { title: 'Atomic Habits', author: 'James Clear', cover: habits },
   { title: 'The Art of Thinking Clearly', author: 'Rolf Dobelli', cover: thinking },
   { title: 'Naked Economics', author: 'Charles Wheelan', cover: economics },
+  { title: 'The Creative Act', author: 'Rick Rubin', cover: creativeAct },
   { title: 'Fahrenheit 451', author: 'Ray Bradbury', cover: fahrenheit, favorite: true },
   { title: 'The Odyssey', author: 'Homer', cover: odyssey },
   { title: 'Oedipus the King', author: 'Sophocles', cover: oedipus },

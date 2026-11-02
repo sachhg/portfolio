@@ -69,3 +69,4 @@ respective publisher or artist.
 | series/clues-9.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060493/primary/renditions/700 |
 | series/clues-10.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060509/primary/renditions/700 |
 | series/kane-3.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9781423140573/primary/renditions/700 |
+| the-creative-act.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9780593652886 |
