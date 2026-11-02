@@ -10,6 +10,7 @@ import { pageGraph, type PageInput } from '../lib/schema'
 
 interface Props {
   title: string
+  wide?: boolean
   description: string
   ogType?: 'website' | 'article' | 'profile'
   /** Breadcrumb trail below the root, root first. */
@@ -25,6 +26,7 @@ interface Props {
 
 const {
   title,
+  wide = false,
   description,
   ogType = 'website',
   trail = [],
@@ -145,7 +147,7 @@ const schema = pageGraph({
     <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
   </head>
 
-  <body>
+  <body style={wide ? '--measure: 64rem' : undefined}>
     <a class="skip" href="#main">Skip to content</a>
     <Topography />
     <SiteHeader />

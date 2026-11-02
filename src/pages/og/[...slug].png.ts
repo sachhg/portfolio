@@ -37,6 +37,14 @@ export async function getStaticPaths() {
         subtitle: 'Patches merged into other people\u2019s projects.',
       },
     },
+    {
+      params: { slug: 'books' },
+      props: {
+        eyebrow: 'Bookshelf',
+        title: 'What I’m reading',
+        subtitle: 'Currently reading, completed books, and a few favorites.',
+      },
+    },
     ...projects.map((p) => ({
       params: { slug: `projects/${p.id}` },
       props: { eyebrow: 'Project', title: p.data.title, subtitle: p.data.summary },

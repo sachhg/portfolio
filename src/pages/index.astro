@@ -150,6 +150,9 @@ const relFor = (l: IndexLink) =>
           ))
         }
       </ul>
+      <a class="reading-link mono" href="/books">
+        What I'm reading <span aria-hidden="true">→</span>
+      </a>
     </Section>
   </div>
 </Base>
@@ -210,6 +213,24 @@ const relFor = (l: IndexLink) =>
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem 1.5rem;
+  }
+
+  .reading-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    color: var(--accent);
+    transition: border-color var(--dur-fast) var(--ease-out),
+      background var(--dur-fast) var(--ease-out);
+  }
+
+  .reading-link:hover {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 5%, var(--paper));
   }
 
   .links a {
