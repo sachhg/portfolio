@@ -4,6 +4,7 @@ import SiteHeader from '../components/SiteHeader.astro'
 import SiteFooter from '../components/SiteFooter.astro'
 import Topography from '../components/Topography.astro'
 import Analytics from '@vercel/analytics/astro'
+import SpeedInsights from '@vercel/speed-insights/astro'
 import { site } from '../data/site'
 import { pageGraph, type PageInput } from '../lib/schema'
 
@@ -153,5 +154,6 @@ const schema = pageGraph({
     </main>
     <SiteFooter />
     <Analytics />
+    <SpeedInsights />
   </body>
 </html>
