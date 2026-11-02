@@ -73,6 +73,7 @@ export const completedSeries: BookSeries[] = [
   makeSeries('The Kane Chronicles', 'Rick Riordan', 'kane', [
     'The Red Pyramid',
     'The Throne of Fire',
+    'The Serpent’s Shadow',
   ]),
   makeSeries('The Hunger Games', 'Suzanne Collins', 'hunger', [
     'The Hunger Games',
@@ -86,10 +87,22 @@ export const completedSeries: BookSeries[] = [
     'The Scorch Trials',
     'The Death Cure',
   ]),
+  makeSeries('The 39 Clues', 'Various authors', 'clues', [
+    'The Maze of Bones',
+    'One False Note',
+    'The Sword Thief',
+    'Beyond the Grave',
+    'The Black Circle',
+    'In Too Deep',
+    'The Viper’s Nest',
+    'The Emperor’s Code',
+    'Storm Warning',
+    'Into the Gauntlet',
+  ]),
 ]
 
 export const currentlyReading: Book[] = [
-  { title: 'Flow', subtitle: 'The Psychology of Optimal Experience', author: 'Mihaly Csikszentmihalyi', cover: flow },
+  { title: 'Flow', author: 'Mihaly Csikszentmihalyi', cover: flow },
 ]
 
 export const completedBooks: Book[] = [

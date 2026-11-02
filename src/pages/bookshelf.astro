@@ -6,14 +6,14 @@ import BookSeries from '../components/BookSeries.astro'
 ---
 
 <Base
-  title="What I’m reading · Sachit Madaan"
+  title="My bookshelf · Sachit Madaan"
   description="What I’m reading, completed books and series, and a few favorites."
-  trail={[{ name: 'Books', path: '/books' }]}
+  trail={[{ name: 'Bookshelf', path: '/bookshelf' }]}
   wide
 >
   <div class="column bookshelf">
     <div class="page-intro">
-      <h1>What I’m reading</h1>
+      <h1>My bookshelf</h1>
     </div>
 
     <section aria-labelledby="currently-reading" class="current-section">
@@ -23,11 +23,11 @@ import BookSeries from '../components/BookSeries.astro'
       {currentlyReading.map((book) => (
         <article class="current-book">
           <div class="current-cover">
-            <Image src={book.cover} alt={`Cover of ${book.title}: ${book.subtitle}`} widths={[240, 480]} sizes="(max-width: 600px) 124px, 180px" width={480} loading="eager" format="webp" />
+            <Image src={book.cover} alt={`Cover of ${book.title}`} widths={[240, 480]} sizes="(max-width: 600px) 124px, 180px" width={480} loading="eager" format="webp" />
           </div>
           <div class="current-details">
             <h3>{book.title}</h3>
-            <p class="subtitle">{book.subtitle}</p>
+            {book.subtitle && <p class="subtitle">{book.subtitle}</p>}
             <p class="author">{book.author}</p>
           </div>
         </article>
@@ -100,7 +100,6 @@ import BookSeries from '../components/BookSeries.astro'
   .favorite-key { display: flex; gap: 0.55rem; align-items: center; color: var(--muted); margin-top: 0.85rem; font-size: 0.65rem; }
   .favorite-key span { color: var(--accent); font-size: 0.8rem; }
   .book-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 2.75rem; row-gap: 2.75rem; margin-top: 2rem; }
-  .series-entry:has(details[open]) { grid-column: 1 / -1; }
   .cover-wrap { position: relative; margin-bottom: 1.1rem; }
   .book h3 { font-size: 1.2rem; line-height: 1.25; text-wrap: pretty; }
   .favorite-ribbon {

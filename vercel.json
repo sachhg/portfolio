@@ -6,6 +6,8 @@
     { "source": "/writing", "destination": "/blog", "permanent": true },
     { "source": "/writing/:path*", "destination": "/blog/:path*", "permanent": true },
     { "source": "/og/writing.png", "destination": "/og/blog.png", "permanent": true },
-    { "source": "/og/writing/:path*", "destination": "/og/blog/:path*", "permanent": true }
+    { "source": "/og/writing/:path*", "destination": "/og/blog/:path*", "permanent": true },
+    { "source": "/books", "destination": "/bookshelf", "permanent": true },
+    { "source": "/og/books.png", "destination": "/og/bookshelf.png", "permanent": true }
   ]
 }

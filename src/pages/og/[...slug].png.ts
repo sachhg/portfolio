@@ -38,10 +38,10 @@ export async function getStaticPaths() {
       },
     },
     {
-      params: { slug: 'books' },
+      params: { slug: 'bookshelf' },
       props: {
         eyebrow: 'Bookshelf',
-        title: 'What I’m reading',
+        title: 'My bookshelf',
         subtitle: 'Currently reading, completed books, and a few favorites.',
       },
     },

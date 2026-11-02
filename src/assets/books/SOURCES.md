@@ -58,3 +58,14 @@ respective publisher or artist.
 | series/maze-1.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9780385737951 |
 | series/maze-2.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9780385738767 |
 | series/maze-3.jpg | https://images.penguinrandomhouse.com/cover/700jpg/9780385738781 |
+| series/clues-1.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060394/primary/renditions/700 |
+| series/clues-2.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060424/primary/renditions/700 |
+| series/clues-3.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060431/primary/renditions/700 |
+| series/clues-4.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060448/primary/renditions/700 |
+| series/clues-5.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060455/primary/renditions/700 |
+| series/clues-6.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060462/primary/renditions/700 |
+| series/clues-7.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060479/primary/renditions/700 |
+| series/clues-8.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060486/primary/renditions/700 |
+| series/clues-9.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060493/primary/renditions/700 |
+| series/clues-10.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9780545060509/primary/renditions/700 |
+| series/kane-3.jpg | https://embed.cdn.pais.scholastic.com/v1/channels/tso/products/identifiers/isbn/9781423140573/primary/renditions/700 |
